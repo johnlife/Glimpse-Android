@@ -29,4 +29,52 @@
         android:visibility="invisible" 
         android:progressDrawable="@drawable/progress"/>
 
+    <odesk.johnlife.glimpse.ui.BlurLayout 
+        android:id="@+id/list_container"
+        android:layout_width="200dp" 
+	    android:layout_height="wrap_content"
+	    android:layout_gravity="right">
+        
+	    <ListView
+	        android:id="@+id/list"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:divider="@drawable/list_divider" 
+        	android:background="@color/background_shade"/>
+    </odesk.johnlife.glimpse.ui.BlurLayout>
+
+    <odesk.johnlife.glimpse.ui.BlurLayout 
+        android:id="@+id/wifi_pane"
+        android:layout_width="300dp" 
+	    android:layout_height="wrap_content"
+	    android:layout_gravity="center">
+        
+	    <LinearLayout
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+        	android:background="@color/background_shade"
+        	android:padding="8dp"
+        	android:divider="@drawable/layout_divider"
+        	android:showDividers="middle"
+        	android:dividerPadding="0dp"
+        	android:orientation="horizontal">
+	        
+	        <EditText 
+	            android:id="@+id/password"
+	            android:layout_width="0dp"
+	            android:layout_height="wrap_content"
+	            android:layout_weight="1"
+	            android:layout_marginRight="8dp" />
+	        
+	        <Button
+	            android:id="@+id/connect" 
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:layout_marginLeft="8dp"
+	            android:background="?android:attr/selectableItemBackground"
+	            android:text="Connect"/>
+	        
+	    </LinearLayout>
+    </odesk.johnlife.glimpse.ui.BlurLayout>
+    
 </FrameLayout>
