@@ -19,7 +19,8 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" 
-        android:name="odesk.johnlife.glimpse.app.GlimpseApp">
+        android:name="odesk.johnlife.glimpse.app.GlimpseApp"
+        android:largeHeap="true">
         
         <activity
             android:name="odesk.johnlife.glimpse.activity.PhotoActivity"
