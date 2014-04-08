@@ -4,5 +4,7 @@
     <string name="app_name">Glimpse Frame</string>
     <string name="action_wifi">Wi-Fi</string>
     
+	<string name="button_connect">Connect</string>
 
+	<string name="hint_password">password</string>
 </resources>

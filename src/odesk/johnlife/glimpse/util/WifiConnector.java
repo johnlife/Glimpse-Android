@@ -95,7 +95,7 @@ public class WifiConnector {
 				connector = new WpaConnector(net, password);
 				break;
 			} else if (cap.startsWith("[WEP")) {
-				connector = new WpaConnector(net, password);
+				connector = new WepConnector(net, password);
 				break;
 			} 
 		}
