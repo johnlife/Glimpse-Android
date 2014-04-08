@@ -30,17 +30,6 @@ public class WifiConnector {
 			config.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
 			config.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.SHARED);
 			
-			config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
-			config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
-			
-			config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
-
-			config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
-			config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
-			
-			config.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
-			config.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
-
 			int res = wifi.addNetwork(config);
 			Log.d("wifi", "Network added");
 			wifi.disconnect();
@@ -62,6 +51,7 @@ public class WifiConnector {
 			config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP40); 
 			config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP104);
 			config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+			config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
 			return config;
 		}
 	}
@@ -74,6 +64,29 @@ public class WifiConnector {
 		@Override
 		public WifiConfiguration configure(WifiConfiguration config) {
 			config.preSharedKey = addQuotes(password);
+			config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
+			config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+			config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
+			config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+			
+			config.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
+			config.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
+			
+			config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+			
+			return config;
+		}
+	}
+
+	
+	private class OpenConnector extends Connector {
+		public OpenConnector(ScanResult net, String password) {
+			super(net, password);
+		}
+
+		@Override
+		public WifiConfiguration configure(WifiConfiguration config) {
+			config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
 			return config;
 		}
 	}
@@ -99,9 +112,10 @@ public class WifiConnector {
 				break;
 			} 
 		}
-		if (null != connector) {
-			connector.connect();
+		if (null == connector) {
+			connector = new OpenConnector(net, password);
 		}
+		connector.connect();
 	}
 
 	private static final String addQuotes(String password) {
