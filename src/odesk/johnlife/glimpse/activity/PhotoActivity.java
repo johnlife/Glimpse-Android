@@ -29,12 +29,15 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -61,7 +64,7 @@ public class PhotoActivity extends Activity {
 	private WifiManager wifi;
 	private WifiConnectionHandler wifiConnectionHandler = new WifiConnectionHandler();
 	private Context context;
-	private List<PictureData> pictures = new ArrayList<>();
+	private List<PictureData> pictures = new ArrayList<PictureData>();
 
 	
 	private class WifiConnectionHandler {
@@ -84,7 +87,7 @@ public class PhotoActivity extends Activity {
 			public void onReceive(Context c, Intent intent) {
 				String action = intent.getAction();
 				if (action == WifiManager.SCAN_RESULTS_AVAILABLE_ACTION) {
-					if (isWifiConnected()) return;
+					if (isConnectedOrConnecting()) return;
 					List<ScanResult> scanResults = wifi.getScanResults();
 					Collections.sort(scanResults, new Comparator<ScanResult>() {
 						@Override
@@ -105,12 +108,17 @@ public class PhotoActivity extends Activity {
 						@Override
 						public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 							activeNetwork = adapter.getItem(position);
-							wifiDialog.setVisibility(View.VISIBLE);
-							password.setText("");
-							password.post(focusRunnable);
-							networkName.setText(activeNetwork.SSID);
+							if (activeNetwork.capabilities.startsWith("[ESS")) {
+								new WifiConnector(PhotoActivity.this).connectTo(activeNetwork);
+							} else {
+								wifiDialog.setVisibility(View.VISIBLE);
+								password.setText("");
+								password.post(focusRunnable);
+								networkName.setText(activeNetwork.SSID);
+							}
 						}
 					});
+					if (isConnectedOrConnecting()) return;
 					listPane.setVisibility(View.VISIBLE);
 					listPane.setAlpha(0);
 					listPane.setTranslationX(listPane.getWidth());
@@ -118,6 +126,7 @@ public class PhotoActivity extends Activity {
 				} else if (WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(action)) {
 					NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
 					boolean connected = info.getState() == NetworkInfo.State.CONNECTED;
+					boolean connecting = info.getState() == NetworkInfo.State.CONNECTING;
 					boolean visible = listPane.getVisibility() == View.VISIBLE;
 					if (visible && connected) {
 						listPane.animate().translationX(listPane.getWidth()).alpha(0).setListener(new AnimatorListenerAdapter() {
@@ -130,7 +139,7 @@ public class PhotoActivity extends Activity {
 							}
 						}).start();
 					}
-					if (!visible && !connected) {
+					if (!visible && !connected && !connecting) {
 						scanWifi();
 					}
 				}
@@ -143,14 +152,21 @@ public class PhotoActivity extends Activity {
 			wifiDialog = findViewById(R.id.wifi_pane);
 			wifiDialog.setVisibility(View.INVISIBLE);
 			password = (TextView) wifiDialog.findViewById(R.id.password);
+			password.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+				@Override
+				public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+					if (actionId == EditorInfo.IME_ACTION_DONE) { 
+						connectNetwork();
+						return true;
+					}
+					return false;
+				}
+			});
 			networkName = (TextView) wifiDialog.findViewById(R.id.title);
 			wifiDialog.findViewById(R.id.connect).setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					wifiDialog.setVisibility(View.INVISIBLE);
-					if (activeNetwork != null) {
-						new WifiConnector(PhotoActivity.this).connectTo(activeNetwork, password.getText().toString());
-					}				
+					connectNetwork();				
 				}
 			});
 			if (null == savedInstanceState) {
@@ -160,12 +176,21 @@ public class PhotoActivity extends Activity {
 					scanWifi();
 				} 
 			} 
-			if (isWifiConnected()) {
+			if (isConnectedOrConnecting()) {
 				listPane.setVisibility(View.INVISIBLE);
 			} else {
 				scanWifi();
 			}
 			registerReceiver(wifiScanReceiver, new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
+		}
+		
+		public void connectNetwork() {
+			wifiDialog.setVisibility(View.INVISIBLE);
+			InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+			imm.hideSoftInputFromWindow(password.getWindowToken(), 0);
+			if (activeNetwork != null) {
+				new WifiConnector(PhotoActivity.this).connectTo(activeNetwork, password.getText().toString());
+			}
 		}
 		
 		public void scanWifi() {
@@ -245,7 +270,6 @@ public class PhotoActivity extends Activity {
 		}
 	};
 
-
 	OnTouchListener touchListener = new OnTouchListener() {
 		@Override
 		public boolean onTouch(View v, MotionEvent event) {
@@ -274,8 +298,6 @@ public class PhotoActivity extends Activity {
 			return true;
 		}
 	};
-
-
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -320,11 +342,11 @@ public class PhotoActivity extends Activity {
 			}
 		}
 	}
-
-	private boolean isWifiConnected() {
+	
+	private boolean isConnectedOrConnecting() {
 		ConnectivityManager connectionManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo wifiConnection = connectionManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-		return wifiConnection.isConnected();
+		return wifiConnection.isConnectedOrConnecting();
 	}
 
 	private void swipeImage() {
@@ -357,6 +379,5 @@ public class PhotoActivity extends Activity {
 			super.onBackPressed();
 		}
 	}
-
 
 }

@@ -117,6 +117,10 @@ public class WifiConnector {
 		}
 		connector.connect();
 	}
+	
+	public void connectTo(ScanResult net) {
+		new OpenConnector(net, "").connect();
+	}
 
 	private static final String addQuotes(String password) {
 		return String.format("\"%s\"", password);
