@@ -26,78 +26,93 @@
         android:indeterminate="false"
         android:max="50"
         android:progress="0"
-        android:visibility="invisible" 
-        android:progressDrawable="@drawable/progress"/>
+        android:progressDrawable="@drawable/progress"
+        android:visibility="invisible" />
 
-    <odesk.johnlife.glimpse.ui.BlurLayout 
+    <odesk.johnlife.glimpse.ui.BlurLayout
         android:id="@+id/list_container"
-        android:layout_width="200dp" 
-	    android:layout_height="wrap_content"
-	    android:layout_gravity="right">
-        
-	    <ListView
-	        android:id="@+id/list"
-	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content"
-	        android:divider="@drawable/list_divider" 
-        	android:background="@color/background_shade"/>
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right" >
+
+        <ListView
+            android:id="@+id/list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/background_shade"
+            android:divider="@drawable/list_divider" />
     </odesk.johnlife.glimpse.ui.BlurLayout>
 
-    <odesk.johnlife.glimpse.ui.BlurLayout 
+    <odesk.johnlife.glimpse.ui.BlurLayout
         android:id="@+id/wifi_pane"
-        android:layout_width="300dp" 
-	    android:layout_height="wrap_content"
-	    android:layout_gravity="center">
-        
-	    <LinearLayout
-	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content"
-        	android:background="@color/background_shade"
-        	android:divider="@drawable/layout_divider"
-        	android:showDividers="middle"
-        	android:dividerPadding="0dp"
-        	android:orientation="vertical">
-        	
-	        <TextView 
-	            android:layout_width="match_parent"
-	            android:layout_height="wrap_content"
-	            android:id="@+id/title"
-	            android:gravity="center"
-	        	android:padding="4dp"
-	            android:fontFamily="sans-serif-thin"
-	            android:textColor="#fff"
-	            android:textSize="30sp"/>
-	        
-	        <LinearLayout
-		        android:layout_width="match_parent"
-		        android:layout_height="wrap_content"
-	            android:orientation="horizontal"
-	        	android:padding="4dp"
-	            android:divider="@drawable/layout_divider"
-	        	android:showDividers="middle"
-	        	android:dividerPadding="0dp">
-	        
-		        <EditText 
-		            android:id="@+id/password"
-		            android:layout_width="0dp"
-		            android:layout_height="wrap_content"
-		            android:layout_weight="1"
-		            android:layout_marginRight="8dp"
-		            android:hint="@string/hint_password"
-		            android:inputType="textPassword" />
-		        
-		        <Button
-		            android:id="@+id/connect" 
-		            android:layout_width="wrap_content"
-		            android:layout_height="wrap_content"
-		            android:layout_marginLeft="8dp"
-		            android:background="?android:attr/selectableItemBackground"
-		            android:text="@string/button_connect"/>
-	            	            
-	        </LinearLayout>
-	        
-	    </LinearLayout>
-	    
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/background_shade"
+            android:divider="@drawable/layout_divider"
+            android:dividerPadding="0dp"
+            android:orientation="vertical"
+            android:showDividers="middle" >
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-thin"
+                android:gravity="center"
+                android:padding="4dp"
+                android:textColor="#fff"
+                android:textSize="30sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:divider="@drawable/layout_divider"
+                android:dividerPadding="0dp"
+                android:orientation="horizontal"
+                android:padding="4dp"
+                android:showDividers="middle" >
+
+                <EditText
+                    android:id="@+id/password"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="8dp"
+                    android:layout_weight="1"
+                    android:hint="@string/hint_password"
+                    android:inputType="textPassword" />
+
+                <Button
+                    android:id="@+id/connect"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:text="@string/button_connect" />
+            </LinearLayout>
+        </LinearLayout>
     </odesk.johnlife.glimpse.ui.BlurLayout>
-    
+
+    <odesk.johnlife.glimpse.ui.BlurLayout
+        android:id="@+id/error_pane"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone" >
+
+        <TextView
+            android:id="@+id/error_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-thin"
+            android:gravity="center"
+            android:padding="4dp"
+            android:textColor="#fff"
+            android:textSize="20sp" />
+    </odesk.johnlife.glimpse.ui.BlurLayout>
+
 </FrameLayout>

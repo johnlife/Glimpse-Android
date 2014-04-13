@@ -1,6 +1,10 @@
 package odesk.johnlife.glimpse.activity;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -61,15 +65,19 @@ public class PhotoActivity extends Activity {
 	private ImageView base;
 	private View contentView;
 	private ProgressBar progress;
+	private View listPane;
+	private View errorPane;
 	private WifiManager wifi;
 	private WifiConnectionHandler wifiConnectionHandler = new WifiConnectionHandler();
 	private Context context;
 	private List<PictureData> pictures = new ArrayList<PictureData>();
 
-	
+	public interface ConnectedListener {
+		public void onConnected();
+	}
+
 	private class WifiConnectionHandler {
 		private ListView list;
-		private View listPane;
 		private View wifiDialog;
 		private TextView password; 
 		private TextView networkName;
@@ -81,7 +89,7 @@ public class PhotoActivity extends Activity {
 				password.requestFocus();
 			}
 		};
-		
+
 		private final BroadcastReceiver wifiScanReceiver = new BroadcastReceiver() {
 			@Override
 			public void onReceive(Context c, Intent intent) {
@@ -119,6 +127,7 @@ public class PhotoActivity extends Activity {
 						}
 					});
 					if (isConnectedOrConnecting()) return;
+					errorPane.setVisibility(View.INVISIBLE);
 					listPane.setVisibility(View.VISIBLE);
 					listPane.setAlpha(0);
 					listPane.setTranslationX(listPane.getWidth());
@@ -138,6 +147,7 @@ public class PhotoActivity extends Activity {
 								listPane.animate().setListener(null).start();
 							}
 						}).start();
+						connectedListener.onConnected();
 					}
 					if (!visible && !connected && !connecting) {
 						scanWifi();
@@ -183,7 +193,7 @@ public class PhotoActivity extends Activity {
 			}
 			registerReceiver(wifiScanReceiver, new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
 		}
-		
+
 		public void connectNetwork() {
 			wifiDialog.setVisibility(View.INVISIBLE);
 			InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -192,7 +202,7 @@ public class PhotoActivity extends Activity {
 				new WifiConnector(PhotoActivity.this).connectTo(activeNetwork, password.getText().toString());
 			}
 		}
-		
+
 		public void scanWifi() {
 			wifi.startScan();
 			registerReceiver(wifiScanReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
@@ -205,13 +215,13 @@ public class PhotoActivity extends Activity {
 		public boolean isConnectionDialogVisible() {
 			return wifiDialog.getVisibility() == View.VISIBLE;
 		}
-		
+
 		public void hideConnectionDialog() {
 			wifiDialog.setVisibility(View.INVISIBLE); 
 		}
 
 	}
-	
+
 	private Runnable hiderAction = new Runnable() {
 		@Override
 		public void run() {
@@ -239,7 +249,7 @@ public class PhotoActivity extends Activity {
 	private Runnable swipeRunnable = new Runnable() {
 		@Override
 		public void run() {
-			View[] swipeBlockers = {progress, wifiConnectionHandler.getView()}; 
+			View[] swipeBlockers = {progress, wifiConnectionHandler.getView(), errorPane}; 
 			boolean blocked = false;
 			for (View blocker : swipeBlockers) {
 				blocked |= blocker.getVisibility() == View.VISIBLE;
@@ -307,6 +317,7 @@ public class PhotoActivity extends Activity {
 		contentView = findViewById(android.R.id.content);
 		top = (ImageView) findViewById(R.id.top);
 		base = (ImageView) findViewById(R.id.base);
+		errorPane = findViewById(R.id.error_pane);
 		wifiConnectionHandler.createUi(savedInstanceState);
 		progress = (ProgressBar) findViewById(R.id.progress);
 		progress.setRotation(-90);
@@ -318,31 +329,95 @@ public class PhotoActivity extends Activity {
 		contentView.setOnTouchListener(touchListener);
 		initPictures();
 		swipeImage();
-		Timer mailTimer = new Timer();
-		mailTimer.scheduleAtFixedRate(new TimerTask() {
-			@Override
-			public void run() {
-				MailConnector mailer = new MailConnector("admin@glimpseframe.com", "temppass", context);
-				mailer.connect();
-				initPictures();
+		final String user = getUser();
+		if (user == null) {
+			showErrorPane(R.string.error_no_user_data);
+		} else {
+			Timer mailTimer = new Timer();
+			mailTimer.scheduleAtFixedRate(new TimerTask() {
+				@Override
+				public void run() {
+					MailConnector mailer = new MailConnector(user, "temppass", context);
+					mailer.connect();
+					initPictures();
+				}
+			}, 0, 200000);
+		}
+
+	}
+
+	private String getUser() {
+		String user = null;
+		try {
+			File dataFile = getExternalFilesDir(context.getString(R.string.data_file));
+			BufferedReader br = new BufferedReader(new FileReader(dataFile));
+			String line = br.readLine();
+			if (line != null) {
+				user = line;
 			}
-		}, 0, 200000);
+			br.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			return user;
+		}
 	}
 
 	private void initPictures() {
 		synchronized (pictures) {
 			File folder = GlimpseApp.getPicturesDir();
-			for (File picFile : folder.listFiles()) {
-				pictures.add(PictureData.createPicture(picFile));
-			}
-			if (pictures.size() < 5) {
-				for (int sample : samples) {
-					pictures.add(PictureData.createPicture(sample, context));
+			if (folder.listFiles().length != 0) {
+				errorPane.setVisibility(View.INVISIBLE);
+				pictures.clear();
+				for (File picFile : folder.listFiles()) {
+					pictures.add(PictureData.createPicture(picFile));
+				}
+			} else {
+				if (pictures.size() == 0) {
+					showErrorPane(R.string.error_no_foto);
+					for (int sample : samples) {
+						pictures.add(PictureData.createPicture(sample, context));
+					}
 				}
 			}
 		}
 	}
-	
+
+	private void showErrorPane(int message) {
+		((TextView) errorPane.findViewById(R.id.error_text)).setText(message);
+		showErrorPane();
+	}
+
+	private void showErrorPane() {
+		if (isConnected()) {
+			errorPane.setVisibility(View.VISIBLE);
+			errorPane.postDelayed(dismissErrorPane, 10000);
+		}
+	}
+	private Runnable dismissErrorPane = new Runnable() {
+		@Override
+		public void run() {
+			errorPane.setVisibility(View.INVISIBLE);
+		}
+	};
+
+	public ConnectedListener connectedListener = new ConnectedListener() {
+		@Override
+		public void onConnected() {
+			if (((TextView) errorPane.findViewById(R.id.error_text)).getText() != null) {
+				showErrorPane();
+			}
+		}
+	};
+
+	private boolean isConnected() {
+		ConnectivityManager connectionManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo wifiConnection = connectionManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+		return wifiConnection.isConnected();
+	}
+
 	private boolean isConnectedOrConnecting() {
 		ConnectivityManager connectionManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo wifiConnection = connectionManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);

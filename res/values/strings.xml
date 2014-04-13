@@ -7,4 +7,8 @@
 	<string name="button_connect">Connect</string>
 
 	<string name="hint_password">password</string>
+	
+	<string name="error_no_user_data">User data not found. Please, contact technical support.</string>
+	<string name="error_no_foto">Please, send photo to your email.</string>
+	
 </resources>

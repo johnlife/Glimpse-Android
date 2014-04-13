@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <string name="email_server">pop.zoho.com</string>
+
+    <!-- PATH TO FILE:  /mnt/sdcard/Android/data/odesk.johnlife.glimpse/files/user_data.txt -->
+    <!-- file must contain email address (default: admin@glimpseframe.com) -->
+    <string name="data_file">user_data.txt</string>
+
 </resources>
