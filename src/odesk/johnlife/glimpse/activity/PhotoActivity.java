@@ -6,7 +6,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Timer;
@@ -96,7 +95,7 @@ public class PhotoActivity extends Activity {
 			public void onReceive(Context c, Intent intent) {
 				String action = intent.getAction();
 				if (action == WifiManager.SCAN_RESULTS_AVAILABLE_ACTION) {
-					if (isConnectedOrConnecting()) return;
+					if (isConnectedOrConnecting() || errorPane.getVisibility() == View.VISIBLE) return;
 					TreeSet<ScanResult> sortedResults = new TreeSet<ScanResult>(new Comparator<ScanResult>() {
 						@Override
 						public int compare(ScanResult lhs, ScanResult rhs) {
@@ -111,8 +110,7 @@ public class PhotoActivity extends Activity {
 							scanResults.add(net);	
 						}
 					}
-					
-					final ArrayAdapter<ScanResult> adapter = new ArrayAdapter<ScanResult>(context, android.R.layout.simple_list_item_1,scanResults) {
+					final ArrayAdapter<ScanResult> adapter = new ArrayAdapter<ScanResult>(context, android.R.layout.simple_list_item_1, scanResults) {
 						@Override
 						public View getView(int position, View convertView, ViewGroup parent) {
 							TextView view = (TextView) super.getView(position, convertView, parent);
@@ -136,7 +134,6 @@ public class PhotoActivity extends Activity {
 						}
 					});
 					if (isConnectedOrConnecting()) return;
-					errorPane.setVisibility(View.INVISIBLE);
 					listPane.setVisibility(View.VISIBLE);
 					listPane.setAlpha(0);
 					listPane.setTranslationX(listPane.getWidth());
@@ -146,17 +143,19 @@ public class PhotoActivity extends Activity {
 					boolean connected = info.getState() == NetworkInfo.State.CONNECTED;
 					boolean connecting = info.getState() == NetworkInfo.State.CONNECTING;
 					boolean visible = listPane.getVisibility() == View.VISIBLE;
-					if (visible && connected) {
-						listPane.animate().translationX(listPane.getWidth()).alpha(0).setListener(new AnimatorListenerAdapter() {
-							@Override
-							public void onAnimationEnd(Animator animation) {
-								listPane.setVisibility(View.INVISIBLE);
-								listPane.setTranslationX(0);
-								listPane.setAlpha(1);
-								listPane.animate().setListener(null).start();
-							}
-						}).start();
+					if (connected) {
 						connectedListener.onConnected();
+						if (visible) {
+							listPane.animate().translationX(listPane.getWidth()).alpha(0).setListener(new AnimatorListenerAdapter() {
+								@Override
+								public void onAnimationEnd(Animator animation) {
+									listPane.setVisibility(View.INVISIBLE);
+									listPane.setTranslationX(0);
+									listPane.setAlpha(1);
+									listPane.animate().setListener(null).start();
+								}
+							}).start();
+						}						
 					}
 					if (!visible && !connected && !connecting) {
 						scanWifi();
@@ -228,7 +227,6 @@ public class PhotoActivity extends Activity {
 		public void hideConnectionDialog() {
 			wifiDialog.setVisibility(View.INVISIBLE); 
 		}
-
 	}
 
 	private Runnable hiderAction = new Runnable() {
@@ -327,7 +325,12 @@ public class PhotoActivity extends Activity {
 		top = (ImageView) findViewById(R.id.top);
 		base = (ImageView) findViewById(R.id.base);
 		errorPane = findViewById(R.id.error_pane);
-		wifiConnectionHandler.createUi(savedInstanceState);
+		final String user = getUser();
+		if (user == null) {
+			((TextView) errorPane.findViewById(R.id.error_text)).setText(R.string.error_no_user_data);
+			errorPane.setVisibility(View.VISIBLE);
+		}
+		wifiConnectionHandler.createUi(savedInstanceState);		
 		progress = (ProgressBar) findViewById(R.id.progress);
 		progress.setRotation(-90);
 		final ActionBar actionBar = getActionBar();
@@ -338,10 +341,7 @@ public class PhotoActivity extends Activity {
 		contentView.setOnTouchListener(touchListener);
 		initPictures();
 		swipeImage();
-		final String user = getUser();
-		if (user == null) {
-			showErrorPane(R.string.error_no_user_data);
-		} else {
+		if (user != null) {
 			Timer mailTimer = new Timer();
 			mailTimer.scheduleAtFixedRate(new TimerTask() {
 				@Override
@@ -352,7 +352,6 @@ public class PhotoActivity extends Activity {
 				}
 			}, 0, 200000);
 		}
-
 	}
 
 	private String getUser() {
@@ -378,14 +377,13 @@ public class PhotoActivity extends Activity {
 		synchronized (pictures) {
 			File folder = GlimpseApp.getPicturesDir();
 			if (folder.listFiles().length != 0) {
-				errorPane.setVisibility(View.INVISIBLE);
+				runOnUiThread(hideErrorPane);
 				pictures.clear();
 				for (File picFile : folder.listFiles()) {
 					pictures.add(PictureData.createPicture(picFile));
 				}
 			} else {
 				if (pictures.size() == 0) {
-					showErrorPane(R.string.error_no_foto);
 					for (int sample : samples) {
 						pictures.add(PictureData.createPicture(sample, context));
 					}
@@ -394,18 +392,7 @@ public class PhotoActivity extends Activity {
 		}
 	}
 
-	private void showErrorPane(int message) {
-		((TextView) errorPane.findViewById(R.id.error_text)).setText(message);
-		showErrorPane();
-	}
-
-	private void showErrorPane() {
-		if (isConnected()) {
-			errorPane.setVisibility(View.VISIBLE);
-			errorPane.postDelayed(dismissErrorPane, 10000);
-		}
-	}
-	private Runnable dismissErrorPane = new Runnable() {
+	private Runnable hideErrorPane = new Runnable() {
 		@Override
 		public void run() {
 			errorPane.setVisibility(View.INVISIBLE);
@@ -415,17 +402,14 @@ public class PhotoActivity extends Activity {
 	public ConnectedListener connectedListener = new ConnectedListener() {
 		@Override
 		public void onConnected() {
-			if (((TextView) errorPane.findViewById(R.id.error_text)).getText() != null) {
-				showErrorPane();
+			File folder = GlimpseApp.getPicturesDir();
+			if (folder.listFiles().length == 0 && getUser()!= null) {
+				String message = getString(R.string.error_no_foto, getUser());
+				((TextView) errorPane.findViewById(R.id.error_text)).setText(message);
+				errorPane.setVisibility(View.VISIBLE);
 			}
 		}
 	};
-
-	private boolean isConnected() {
-		ConnectivityManager connectionManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-		NetworkInfo wifiConnection = connectionManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-		return wifiConnection.isConnected();
-	}
 
 	private boolean isConnectedOrConnecting() {
 		ConnectivityManager connectionManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);

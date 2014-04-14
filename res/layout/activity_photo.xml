@@ -99,14 +99,14 @@
 
     <odesk.johnlife.glimpse.ui.BlurLayout
         android:id="@+id/error_pane"
-        android:layout_width="300dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:visibility="gone" >
 
         <TextView
             android:id="@+id/error_text"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-thin"
             android:gravity="center"
