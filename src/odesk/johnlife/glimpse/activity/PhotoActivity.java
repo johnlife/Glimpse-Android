@@ -11,6 +11,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.TreeSet;
 
 import odesk.johnlife.glimpse.R;
 import odesk.johnlife.glimpse.app.GlimpseApp;
@@ -96,14 +97,22 @@ public class PhotoActivity extends Activity {
 				String action = intent.getAction();
 				if (action == WifiManager.SCAN_RESULTS_AVAILABLE_ACTION) {
 					if (isConnectedOrConnecting()) return;
-					List<ScanResult> scanResults = wifi.getScanResults();
-					Collections.sort(scanResults, new Comparator<ScanResult>() {
+					TreeSet<ScanResult> sortedResults = new TreeSet<ScanResult>(new Comparator<ScanResult>() {
 						@Override
 						public int compare(ScanResult lhs, ScanResult rhs) {
-							return -WifiManager.compareSignalLevel(lhs.level, rhs.level);
+								return -WifiManager.compareSignalLevel(lhs.level, rhs.level);
 						}
-					});
-					final ArrayAdapter<ScanResult> adapter = new ArrayAdapter<ScanResult>(context, android.R.layout.simple_list_item_1, scanResults) {
+					});			
+					sortedResults.addAll(wifi.getScanResults());
+					ArrayList<ScanResult> scanResults = new ArrayList<ScanResult>(sortedResults.size());
+					TreeSet<String> nameLans = new TreeSet<String>();
+					for (ScanResult net : sortedResults) {
+						if (!net.SSID.trim().isEmpty() && nameLans.add(net.SSID)) {
+							scanResults.add(net);	
+						}
+					}
+					
+					final ArrayAdapter<ScanResult> adapter = new ArrayAdapter<ScanResult>(context, android.R.layout.simple_list_item_1,scanResults) {
 						@Override
 						public View getView(int position, View convertView, ViewGroup parent) {
 							TextView view = (TextView) super.getView(position, convertView, parent);
