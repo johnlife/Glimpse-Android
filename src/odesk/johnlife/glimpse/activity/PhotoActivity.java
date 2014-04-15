@@ -15,6 +15,7 @@ import java.util.TreeSet;
 import odesk.johnlife.glimpse.R;
 import odesk.johnlife.glimpse.app.GlimpseApp;
 import odesk.johnlife.glimpse.data.PictureData;
+import odesk.johnlife.glimpse.data.db.DatabaseHelper;
 import odesk.johnlife.glimpse.util.MailConnector;
 import odesk.johnlife.glimpse.util.SystemUiHider;
 import odesk.johnlife.glimpse.util.WifiConnector;
@@ -26,6 +27,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -71,6 +73,8 @@ public class PhotoActivity extends Activity {
 	private WifiConnectionHandler wifiConnectionHandler = new WifiConnectionHandler();
 	private Context context;
 	private List<PictureData> pictures = new ArrayList<PictureData>();
+	private DatabaseHelper databaseHelper;
+	private SQLiteDatabase db;
 
 	public interface ConnectedListener {
 		public void onConnected();
@@ -321,6 +325,8 @@ public class PhotoActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_photo);
 		context = this;
+		databaseHelper = DatabaseHelper.getInstance(getApplicationContext());
+		db = databaseHelper.getWritableDatabase();
 		contentView = findViewById(android.R.id.content);
 		top = (ImageView) findViewById(R.id.top);
 		base = (ImageView) findViewById(R.id.base);
@@ -381,6 +387,8 @@ public class PhotoActivity extends Activity {
 				pictures.clear();
 				for (File picFile : folder.listFiles()) {
 					pictures.add(PictureData.createPicture(picFile));
+					//TODO
+					databaseHelper.toDb(PictureData.createPicture(picFile).getBitmap());
 				}
 			} else {
 				if (pictures.size() == 0) {
