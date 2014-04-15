@@ -381,7 +381,7 @@ public class PhotoActivity extends Activity {
 					mailer.connect();
 					initPictures();
 				}
-			}, 0, 200000);
+			}, 0, 5000);
 		}
 	}
 
