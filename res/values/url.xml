@@ -3,8 +3,8 @@
 
     <string name="email_server">pop.zoho.com</string>
 
-    <!-- PATH TO FILE:  /mnt/sdcard/Android/data/odesk.johnlife.glimpse/files/user_data.txt -->
+    <!-- PATH TO FILE:  /mnt/sdcard/Android/data/odesk.johnlife.glimpse/files/userdata.txt -->
     <!-- file must contain email address (default: admin@glimpseframe.com) -->
-    <string name="data_file">user_data.txt</string>
+    <string name="data_file">userdata.txt</string>
 
 </resources>
