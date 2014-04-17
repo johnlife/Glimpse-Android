@@ -7,7 +7,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeSet;
@@ -59,10 +58,8 @@ import android.widget.TextView;
  * @see SystemUiHider
  */
 public class PhotoActivity extends Activity {
-	private static final int[] samples = {R.drawable.wp1, R.drawable.wp2, R.drawable.wp3, R.drawable.wp4, R.drawable.wp5, R.drawable.wp6};
 
 	private Bitmap activeImage = null;
-	private int activeIndex = -1;
 	private ImageView top;
 	private ImageView base;
 	private View contentView;
@@ -72,9 +69,7 @@ public class PhotoActivity extends Activity {
 	private WifiManager wifi;
 	private WifiConnectionHandler wifiConnectionHandler = new WifiConnectionHandler();
 	private Context context;
-	private List<PictureData> pictures = new ArrayList<PictureData>();
 	private DatabaseHelper databaseHelper;
-	private SQLiteDatabase db;
 
 	public interface ConnectedListener {
 		public void onConnected();
@@ -172,7 +167,6 @@ public class PhotoActivity extends Activity {
 			list = (ListView) findViewById(R.id.list);
 			listPane = findViewById(R.id.list_container);
 			wifiDialog = findViewById(R.id.wifi_pane);
-			wifiDialog.setVisibility(View.INVISIBLE);
 			password = (TextView) wifiDialog.findViewById(R.id.password);
 			password.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 				@Override
@@ -225,7 +219,11 @@ public class PhotoActivity extends Activity {
 		}
 
 		public boolean isConnectionDialogVisible() {
-			return wifiDialog.getVisibility() == View.VISIBLE;
+			if (wifiDialog == null) {
+				return false;
+			} else {
+				return wifiDialog.getVisibility() == View.VISIBLE;
+			}
 		}
 
 		public void hideConnectionDialog() {
@@ -326,15 +324,16 @@ public class PhotoActivity extends Activity {
 		setContentView(R.layout.activity_photo);
 		context = this;
 		databaseHelper = DatabaseHelper.getInstance(getApplicationContext());
-		db = databaseHelper.getWritableDatabase();
 		contentView = findViewById(android.R.id.content);
 		top = (ImageView) findViewById(R.id.top);
 		base = (ImageView) findViewById(R.id.base);
 		errorPane = findViewById(R.id.error_pane);
+		showPicture();
 		final String user = getUser();
 		if (user == null) {
 			((TextView) errorPane.findViewById(R.id.error_text)).setText(R.string.error_no_user_data);
 			errorPane.setVisibility(View.VISIBLE);
+			return;
 		}
 		wifiConnectionHandler.createUi(savedInstanceState);		
 		progress = (ProgressBar) findViewById(R.id.progress);
@@ -345,19 +344,16 @@ public class PhotoActivity extends Activity {
 		actionBar.hide();
 		//		contentView.post(hiderAction);
 		contentView.setOnTouchListener(touchListener);
-		initPictures();
 		swipeImage();
-		if (user != null) {
-			Timer mailTimer = new Timer();
-			mailTimer.scheduleAtFixedRate(new TimerTask() {
-				@Override
-				public void run() {
-					MailConnector mailer = new MailConnector(user, "temppass", context);
-					mailer.connect();
-					initPictures();
-				}
-			}, 0, 200000);
-		}
+		Timer mailTimer = new Timer();
+		mailTimer.scheduleAtFixedRate(new TimerTask() {
+			@Override
+			public void run() {
+				MailConnector mailer = new MailConnector(user, "temppass", context);
+				mailer.connect(databaseHelper);
+				showPicture();
+			}
+		}, 0, 200000);
 	}
 
 	private String getUser() {
@@ -378,28 +374,19 @@ public class PhotoActivity extends Activity {
 			return user;
 		}
 	}
-
-	private void initPictures() {
-		synchronized (pictures) {
-			File folder = GlimpseApp.getPicturesDir();
-			if (folder.listFiles().length != 0) {
+	
+	private void showPicture() {
+		File folder = GlimpseApp.getPicturesDir();
+		if (folder.listFiles().length == 0) {
+			activeImage = PictureData.createPicture(R.drawable.wp1, context).getBitmap();
+		} else {
+			if (getUser() != null){
 				runOnUiThread(hideErrorPane);
-				pictures.clear();
-				for (File picFile : folder.listFiles()) {
-					pictures.add(PictureData.createPicture(picFile));
-					//TODO
-					databaseHelper.toDb(PictureData.createPicture(picFile).getBitmap());
-				}
-			} else {
-				if (pictures.size() == 0) {
-					for (int sample : samples) {
-						pictures.add(PictureData.createPicture(sample, context));
-					}
-				}
 			}
+			activeImage = databaseHelper.fromDb();
 		}
 	}
-
+	
 	private Runnable hideErrorPane = new Runnable() {
 		@Override
 		public void run() {
@@ -424,20 +411,18 @@ public class PhotoActivity extends Activity {
 		NetworkInfo wifiConnection = connectionManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 		return wifiConnection.isConnectedOrConnecting();
 	}
-
+	
 	private void swipeImage() {
 		if (null != activeImage) {
 			top.setImageBitmap(activeImage);
 			top.setAlpha(1f);
 			top.animate().alpha(0f).setDuration(600).start();
 		}
-		Bitmap newBitmap;
-		synchronized (pictures) {
-			if (++activeIndex >= pictures.size()) activeIndex = 0;
-			newBitmap = pictures.get(activeIndex).getBitmap();
+		Bitmap newBitmap = databaseHelper.fromDb();
+		if (newBitmap != null) {
+			base.setImageBitmap(newBitmap);
+			activeImage = newBitmap;
 		}
-		base.setImageBitmap(newBitmap);
-		activeImage = newBitmap;
 		base.postDelayed(swipeRunnable, 5000);
 	}
 

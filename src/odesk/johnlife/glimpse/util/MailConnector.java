@@ -20,6 +20,7 @@ import javax.mail.URLName;
 
 import odesk.johnlife.glimpse.R;
 import odesk.johnlife.glimpse.app.GlimpseApp;
+import odesk.johnlife.glimpse.data.db.DatabaseHelper;
 import android.content.Context;
 
 import com.sun.mail.pop3.POP3SSLStore;
@@ -47,7 +48,7 @@ public class MailConnector {
 		this.server = context.getString(R.string.email_server);
 	}
 
-	public void connect() {
+	public void connect(DatabaseHelper databaseHelper) {
 		URLName url = new URLName(POP3, server, POP_PORT, "", user, pass);
 		Session session = Session.getInstance(pop3Props, null);
 		Store store = new POP3SSLStore(session, url);
@@ -62,14 +63,14 @@ public class MailConnector {
 					List<File> attachments = getAttachments((Multipart) msg.getContent());
 					for (File file : attachments) {
 						System.out.println(file.getCanonicalPath());
+						//TODO убрать повторное добавление
+						databaseHelper.toDb(file.getCanonicalPath());
 					}
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
 		} catch (MessagingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
