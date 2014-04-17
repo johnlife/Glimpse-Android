@@ -377,7 +377,7 @@ public class PhotoActivity extends Activity {
 				mailer.connect(databaseHelper);
 				showPicture();
 			}
-		}, 0, 200000);
+		}, 0, 5000);
 	}
 
 	private String getUser() {

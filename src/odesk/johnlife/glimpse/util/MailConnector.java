@@ -68,6 +68,9 @@ public class MailConnector {
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
+				} catch (IllegalStateException e) {
+					//TODO
+					e.printStackTrace();
 				}
 			}
 		} catch (MessagingException e) {

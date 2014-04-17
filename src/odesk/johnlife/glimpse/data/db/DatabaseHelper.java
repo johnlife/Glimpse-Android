@@ -42,8 +42,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		db.execSQL("CREATE TABLE " + TABLE_NAME +
-				" (COLUMN_ID integer PRIMARY KEY AUTOINCREMENT, " +
+		db.execSQL("CREATE TABLE " + TABLE_NAME + " (" + 
+				COLUMN_ID + " integer PRIMARY KEY AUTOINCREMENT, " +
 				COLUMN_PICTURES + " text, " +
 				COLUMN_COUNT + " integer, " +
 				COLUMN_LAST_TIME + " integer);"); 
@@ -87,7 +87,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 			c.moveToPosition(i);
 			count2 = c.getLong(c.getColumnIndex(COLUMN_COUNT));
 			lastTime2 = c.getLong(c.getColumnIndex(COLUMN_LAST_TIME));
-			if (count2 < count) {
+			if (lastTime2 < lastTime) {
 				count = count2;
 				lastTime = lastTime2;
 				pos = i;
@@ -97,7 +97,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	}
 	
 	private void updateData(Cursor c) {
-		getWritableDatabase().update(TABLE_NAME, createUpdatedValues(c), null, null);		
+		String where = COLUMN_ID + "=" + (c.getPosition()+1);
+		getWritableDatabase().update(TABLE_NAME, createUpdatedValues(c), where, null);		
 	}
 	
 	private ContentValues createUpdatedValues(Cursor c) {
