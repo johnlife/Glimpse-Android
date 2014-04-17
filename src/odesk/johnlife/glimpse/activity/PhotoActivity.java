@@ -2,9 +2,7 @@ package odesk.johnlife.glimpse.activity;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Timer;
@@ -26,7 +24,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -34,6 +31,8 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MotionEvent;
@@ -60,10 +59,12 @@ import android.widget.TextView;
 public class PhotoActivity extends Activity {
 
 	private Bitmap activeImage = null;
+
+	private int myProgress = 0;
 	private ImageView top;
 	private ImageView base;
 	private View contentView;
-	private ProgressBar progress;
+	private ProgressBar progress , progressBar;
 	private View listPane;
 	private View errorPane;
 	private WifiManager wifi;
@@ -123,16 +124,18 @@ public class PhotoActivity extends Activity {
 						public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 							activeNetwork = adapter.getItem(position);
 							if (activeNetwork.capabilities.startsWith("[ESS")) {
+								progressBar.setVisibility(View.VISIBLE);
 								new WifiConnector(PhotoActivity.this).connectTo(activeNetwork);
 							} else {
 								wifiDialog.setVisibility(View.VISIBLE);
 								password.setText("");
 								password.post(focusRunnable);
-								networkName.setText(activeNetwork.SSID);
+								networkName.setText(activeNetwork.SSID);								
 							}
 						}
 					});
 					if (isConnectedOrConnecting()) return;
+					progressBar.setVisibility(View.INVISIBLE);					
 					listPane.setVisibility(View.VISIBLE);
 					listPane.setAlpha(0);
 					listPane.setTranslationX(listPane.getWidth());
@@ -148,6 +151,7 @@ public class PhotoActivity extends Activity {
 							listPane.animate().translationX(listPane.getWidth()).alpha(0).setListener(new AnimatorListenerAdapter() {
 								@Override
 								public void onAnimationEnd(Animator animation) {
+									progressBar.setVisibility(View.INVISIBLE);
 									listPane.setVisibility(View.INVISIBLE);
 									listPane.setTranslationX(0);
 									listPane.setAlpha(1);
@@ -172,7 +176,7 @@ public class PhotoActivity extends Activity {
 				@Override
 				public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 					if (actionId == EditorInfo.IME_ACTION_DONE) { 
-						connectNetwork();
+						connectNetwork();						
 						return true;
 					}
 					return false;
@@ -205,6 +209,7 @@ public class PhotoActivity extends Activity {
 			InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
 			imm.hideSoftInputFromWindow(password.getWindowToken(), 0);
 			if (activeNetwork != null) {
+				progressBar.setVisibility(View.VISIBLE);
 				new WifiConnector(PhotoActivity.this).connectTo(activeNetwork, password.getText().toString());
 			}
 		}
@@ -289,6 +294,22 @@ public class PhotoActivity extends Activity {
 		}
 	};
 
+	private Runnable myThread = new Runnable() {
+		@Override
+		public void run() {
+			// TODO Auto-generated method stub
+			
+			while (myProgress < 1000) {
+				try {
+					myProgress++;
+					progressBar.setProgress(myProgress);
+				} catch (Throwable t) {
+				}
+			}
+		}
+	};
+	
+	
 	OnTouchListener touchListener = new OnTouchListener() {
 		@Override
 		public boolean onTouch(View v, MotionEvent event) {
@@ -337,11 +358,14 @@ public class PhotoActivity extends Activity {
 		}
 		wifiConnectionHandler.createUi(savedInstanceState);		
 		progress = (ProgressBar) findViewById(R.id.progress);
+		progressBar = (ProgressBar) findViewById(R.id.progressLoading);	
+		new Thread(myThread).start();
 		progress.setRotation(-90);
 		final ActionBar actionBar = getActionBar();
 		actionBar.setDisplayShowTitleEnabled(false);
 		actionBar.setDisplayShowHomeEnabled(false);
 		actionBar.hide();
+		
 		//		contentView.post(hiderAction);
 		contentView.setOnTouchListener(touchListener);
 		swipeImage();
@@ -359,17 +383,16 @@ public class PhotoActivity extends Activity {
 	private String getUser() {
 		String user = null;
 		try {
-			File dataFile = getExternalFilesDir(context.getString(R.string.data_file));
+			File dataFile = new File(Environment.getExternalStorageDirectory(), context.getString(R.string.data_file));
+			if (!dataFile.exists()) return null;
 			BufferedReader br = new BufferedReader(new FileReader(dataFile));
 			String line = br.readLine();
 			if (line != null) {
 				user = line;
 			}
 			br.close();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			Log.e("UserInfo", e.getMessage(), e);
 		} finally {
 			return user;
 		}
