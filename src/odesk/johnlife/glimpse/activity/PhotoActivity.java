@@ -95,7 +95,7 @@ public class PhotoActivity extends Activity {
 			public void onReceive(Context c, Intent intent) {
 				String action = intent.getAction();
 				if (action == WifiManager.SCAN_RESULTS_AVAILABLE_ACTION) {
-					if (isConnectedOrConnecting() || errorPane.getVisibility() == View.VISIBLE) return;
+					if (isConnectedOrConnecting()) return;
 					TreeSet<ScanResult> sortedResults = new TreeSet<ScanResult>(new Comparator<ScanResult>() {
 						@Override
 						public int compare(ScanResult lhs, ScanResult rhs) {
@@ -135,7 +135,8 @@ public class PhotoActivity extends Activity {
 						}
 					});
 					if (isConnectedOrConnecting()) return;
-					progressBar.setVisibility(View.INVISIBLE);					
+					progressBar.setVisibility(View.INVISIBLE);	
+					errorPane.setVisibility(View.INVISIBLE);
 					listPane.setVisibility(View.VISIBLE);
 					listPane.setAlpha(0);
 					listPane.setTranslationX(listPane.getWidth());
@@ -205,7 +206,7 @@ public class PhotoActivity extends Activity {
 		}
 
 		public void connectNetwork() {
-			wifiDialog.setVisibility(View.INVISIBLE);
+			hideConnectionDialog();
 			InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
 			imm.hideSoftInputFromWindow(password.getWindowToken(), 0);
 			if (activeNetwork != null) {
@@ -365,7 +366,6 @@ public class PhotoActivity extends Activity {
 		actionBar.setDisplayShowTitleEnabled(false);
 		actionBar.setDisplayShowHomeEnabled(false);
 		actionBar.hide();
-		
 		//		contentView.post(hiderAction);
 		contentView.setOnTouchListener(touchListener);
 		swipeImage();
@@ -373,11 +373,13 @@ public class PhotoActivity extends Activity {
 		mailTimer.scheduleAtFixedRate(new TimerTask() {
 			@Override
 			public void run() {
-				MailConnector mailer = new MailConnector(user, "temppass", context);
-				mailer.connect(databaseHelper);
-				showPicture();
+				if (isConnected()) {
+					MailConnector mailer = new MailConnector(user, "temppass", context);
+					mailer.connect(databaseHelper);
+					hideErrorPane();
+				}
 			}
-		}, 0, 5000);
+		}, 0, 60000);
 	}
 
 	private String getUser() {
@@ -399,42 +401,28 @@ public class PhotoActivity extends Activity {
 	}
 	
 	private void showPicture() {
-		File folder = GlimpseApp.getPicturesDir();
-		if (folder.listFiles().length == 0) {
+		if (isPicturesFolderEmpty()) {
 			activeImage = PictureData.createPicture(R.drawable.wp1, context).getBitmap();
 		} else {
-			if (getUser() != null){
-				runOnUiThread(hideErrorPane);
-			}
 			activeImage = databaseHelper.fromDb();
 		}
 	}
 	
-	private Runnable hideErrorPane = new Runnable() {
-		@Override
-		public void run() {
-			errorPane.setVisibility(View.INVISIBLE);
-		}
-	};
-
-	public ConnectedListener connectedListener = new ConnectedListener() {
-		@Override
-		public void onConnected() {
-			File folder = GlimpseApp.getPicturesDir();
-			if (folder.listFiles().length == 0 && getUser()!= null) {
-				String message = getString(R.string.error_no_foto, getUser());
-				((TextView) errorPane.findViewById(R.id.error_text)).setText(message);
-				errorPane.setVisibility(View.VISIBLE);
-			}
-		}
-	};
-
-	private boolean isConnectedOrConnecting() {
-		ConnectivityManager connectionManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-		NetworkInfo wifiConnection = connectionManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-		return wifiConnection.isConnectedOrConnecting();
+	private boolean isPicturesFolderEmpty() {
+		return GlimpseApp.getPicturesDir().listFiles().length == 0;
 	}
 	
+	private void hideErrorPane() {
+		if (errorPane.getVisibility() == View.VISIBLE && !isPicturesFolderEmpty()){
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					errorPane.setVisibility(View.INVISIBLE);
+				}
+			});
+		}
+	}
+
 	private void swipeImage() {
 		if (null != activeImage) {
 			top.setImageBitmap(activeImage);
@@ -447,6 +435,30 @@ public class PhotoActivity extends Activity {
 			activeImage = newBitmap;
 		}
 		base.postDelayed(swipeRunnable, 5000);
+	}
+	
+	public ConnectedListener connectedListener = new ConnectedListener() {
+		@Override
+		public void onConnected() {
+			if (isPicturesFolderEmpty() && getUser()!= null) {
+				String message = getString(R.string.error_no_foto, getUser());
+				((TextView) errorPane.findViewById(R.id.error_text)).setText(message);
+				errorPane.setVisibility(View.VISIBLE);
+			}
+		}
+	};
+
+	private boolean isConnectedOrConnecting() {
+		return getNetworkInfo().isConnectedOrConnecting();
+	}
+	
+	private boolean isConnected() {
+		return getNetworkInfo().isConnected();
+	}
+	
+	private NetworkInfo getNetworkInfo() {
+		ConnectivityManager connectionManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+	    return connectionManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 	}
 
 	@Override

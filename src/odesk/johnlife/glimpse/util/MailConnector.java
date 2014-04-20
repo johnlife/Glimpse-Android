@@ -62,8 +62,6 @@ public class MailConnector {
 				try {
 					List<File> attachments = getAttachments((Multipart) msg.getContent());
 					for (File file : attachments) {
-						System.out.println(file.getCanonicalPath());
-						//TODO убрать повторное добавление
 						databaseHelper.toDb(file.getCanonicalPath());
 					}
 				} catch (IOException e) {

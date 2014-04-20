@@ -15,13 +15,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 	private static final String DB_NAME = "Glimpse.db";
 	private static final String TABLE_NAME = "table_photo";
-	private static final String COLUMN_ID = "id";
+	private static final String COLUMN_ID = "_id";
 	private static final String COLUMN_PICTURES = "pictures";
 	private static final String COLUMN_COUNT = "count";
 	private static final String COLUMN_LAST_TIME = "last_time";
 	private static final int SCHEMA_VERSION = 1;
 	private static DatabaseHelper instance = null;
-	
+
 	private DatabaseHelper(Context context) {
 		super(context, DB_NAME, null, SCHEMA_VERSION);
 	}
@@ -43,27 +43,39 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	@Override
 	public void onCreate(SQLiteDatabase db) {
 		db.execSQL("CREATE TABLE " + TABLE_NAME + " (" + 
-				COLUMN_ID + " integer PRIMARY KEY AUTOINCREMENT, " +
-				COLUMN_PICTURES + " text, " +
-				COLUMN_COUNT + " integer, " +
-				COLUMN_LAST_TIME + " integer);"); 
+				COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+				COLUMN_PICTURES + " TEXT, " +
+				COLUMN_COUNT + " INTEGER, " +
+				COLUMN_LAST_TIME + " INTEGER);"); 
 	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {}
 
 	public void toDb(String picturePath) {
-		getWritableDatabase().insert(TABLE_NAME, null, createFirstValues(picturePath));	
+		if (!existsInDatabase(picturePath)) {
+			getWritableDatabase().insert(TABLE_NAME, null, createFirstValues(picturePath));	
+		}
 	}
-	 
+
+	private boolean existsInDatabase(String picturePath) {
+		Cursor c = getWritableDatabase().rawQuery(
+				"SELECT * FROM " + TABLE_NAME + " WHERE " + COLUMN_PICTURES + " = '" + picturePath + "'", null);
+		if (c.getCount() != 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	private ContentValues createFirstValues(String picturePath) {
-	    ContentValues firstValues = new ContentValues();
-	    firstValues.put(COLUMN_PICTURES, picturePath);
-	    firstValues.put(COLUMN_COUNT, 0);
-	    firstValues.put(COLUMN_LAST_TIME, Calendar.getInstance().getTimeInMillis());
-	    return firstValues;
+		ContentValues firstValues = new ContentValues();
+		firstValues.put(COLUMN_PICTURES, picturePath);
+		firstValues.put(COLUMN_COUNT, 0);
+		firstValues.put(COLUMN_LAST_TIME, Calendar.getInstance().getTimeInMillis());
+		return firstValues;
 	}
-	
+
 	public Bitmap fromDb() {
 		Cursor c = getWritableDatabase().rawQuery("SELECT * FROM " + TABLE_NAME, null);
 		if (c.getCount() == 0) return null;
@@ -71,42 +83,42 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		c.moveToPosition(position);
 		File picFile = new File(c.getString(c.getColumnIndex(COLUMN_PICTURES)));
 		Bitmap bitmap = PictureData.createPicture(picFile).getBitmap();
-		updateData(c);
+		updateData(position, c.getLong(c.getColumnIndex(COLUMN_COUNT)));
 		c.close();
 		return bitmap;		
 	}
 
 	private int getImagePosition(Cursor c) {
-		//TODO Вернуть картинку с меньшими COUNT и LAST_TIME
-		int pos = 0;
+		int position = 0;
 		c.moveToFirst();
-		long count = c.getLong(c.getColumnIndex(COLUMN_COUNT));
-		long lastTime = c.getLong(c.getColumnIndex(COLUMN_LAST_TIME));
-		long count2, lastTime2;
+		long minCount = c.getLong(c.getColumnIndex(COLUMN_COUNT));
+		long minLastTime = c.getLong(c.getColumnIndex(COLUMN_LAST_TIME));
+		long currentCount, currentLastTime;
 		for (int i=1; i<c.getCount(); i++) {
 			c.moveToPosition(i);
-			count2 = c.getLong(c.getColumnIndex(COLUMN_COUNT));
-			lastTime2 = c.getLong(c.getColumnIndex(COLUMN_LAST_TIME));
-			if (lastTime2 < lastTime) {
-				count = count2;
-				lastTime = lastTime2;
-				pos = i;
+			currentCount = c.getLong(c.getColumnIndex(COLUMN_COUNT));
+			currentLastTime = c.getLong(c.getColumnIndex(COLUMN_LAST_TIME));
+			if (currentCount < 10 && currentCount < minCount) {
+				minCount = currentCount;
+				position = i;
+			} else if (currentLastTime < minLastTime) {
+				minLastTime = currentLastTime;
+				position = i;
 			}
 		}
-		return pos;
+		return position;
 	}
-	
-	private void updateData(Cursor c) {
-		String where = COLUMN_ID + "=" + (c.getPosition()+1);
-		getWritableDatabase().update(TABLE_NAME, createUpdatedValues(c), where, null);		
+
+	private void updateData(int position, long count) {
+		String where = COLUMN_ID + "=" + (position+1);
+		getWritableDatabase().update(TABLE_NAME, createUpdatedValues(count), where, null);		
 	}
-	
-	private ContentValues createUpdatedValues(Cursor c) {
-	    ContentValues updatedValues = new ContentValues();
-	    long count = c.getLong(c.getColumnIndex(COLUMN_COUNT));
-	    updatedValues.put(COLUMN_COUNT, count++);
-	    updatedValues.put(COLUMN_LAST_TIME, Calendar.getInstance().getTimeInMillis());
-	    return updatedValues;
+
+	private ContentValues createUpdatedValues(long count) {
+		ContentValues updatedValues = new ContentValues();
+		updatedValues.put(COLUMN_COUNT, ++count);
+		updatedValues.put(COLUMN_LAST_TIME, Calendar.getInstance().getTimeInMillis());
+		return updatedValues;
 	}
-	
+
 }

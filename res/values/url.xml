@@ -2,9 +2,10 @@
 <resources>
 
     <string name="email_server">pop.zoho.com</string>
+    <!-- <string name="email_server">pop.mail.ru</string> -->
 
     <!-- PATH TO FILE:  /mnt/sdcard/userdata.txt -->
-    <!-- file must contain email address (default: admin@glimpseframe.com) -->
+    <!-- file must contain email address (examples: admin@glimpseframe.com, devtestt@mail.ru) -->
     <string name="data_file">userdata.txt</string>
 
 </resources>
