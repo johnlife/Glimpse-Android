@@ -18,6 +18,14 @@
         android:layout_height="match_parent"
         android:scaleType="centerCrop" />
 
+    <ImageView
+        android:id="@+id/new_pane"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_gravity="top|right"
+        android:visibility="invisible"
+        android:src="@drawable/new_pane"/>
+
     <ProgressBar
         android:id="@+id/progress"
         style="?android:attr/progressBarStyleHorizontal"
@@ -28,12 +36,12 @@
         android:progress="0"
         android:progressDrawable="@drawable/progress"
         android:visibility="invisible" />
-    
+
     <ProgressBar
         android:id="@+id/progressLoading"
         style="?android:attr/progressBarStyleLarge"
         android:layout_width="100dp"
-        android:layout_height="100dp" 
+        android:layout_height="100dp"
         android:layout_gravity="center_horizontal|center_vertical"
         android:visibility="invisible" />
 
@@ -117,10 +125,10 @@
             android:id="@+id/error_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="@color/background_shade"
             android:fontFamily="sans-serif-thin"
             android:gravity="center"
             android:padding="8dp"
-            android:background="@color/background_shade"
             android:textColor="#fff"
             android:textSize="20sp" />
     </odesk.johnlife.glimpse.ui.BlurLayout>

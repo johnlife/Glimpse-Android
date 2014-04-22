@@ -63,6 +63,7 @@ public class PhotoActivity extends Activity {
 	private int myProgress = 0;
 	private ImageView top;
 	private ImageView base;
+	private ImageView newImagePane;
 	private View contentView;
 	private ProgressBar progress , progressBar;
 	private View listPane;
@@ -350,6 +351,7 @@ public class PhotoActivity extends Activity {
 		top = (ImageView) findViewById(R.id.top);
 		base = (ImageView) findViewById(R.id.base);
 		errorPane = findViewById(R.id.error_pane);
+		newImagePane = (ImageView) findViewById(R.id.new_pane);
 		showPicture();
 		final String user = getUser();
 		if (user == null) {
@@ -404,10 +406,10 @@ public class PhotoActivity extends Activity {
 		if (isPicturesFolderEmpty()) {
 			activeImage = PictureData.createPicture(R.drawable.wp1, context).getBitmap();
 		} else {
-			activeImage = databaseHelper.fromDb();
+			activeImage = getImage();
 		}
 	}
-	
+
 	private boolean isPicturesFolderEmpty() {
 		return GlimpseApp.getPicturesDir().listFiles().length == 0;
 	}
@@ -429,7 +431,7 @@ public class PhotoActivity extends Activity {
 			top.setAlpha(1f);
 			top.animate().alpha(0f).setDuration(600).start();
 		}
-		Bitmap newBitmap = databaseHelper.fromDb();
+		Bitmap newBitmap = getImage();
 		if (newBitmap != null) {
 			base.setImageBitmap(newBitmap);
 			activeImage = newBitmap;
@@ -437,6 +439,24 @@ public class PhotoActivity extends Activity {
 		base.postDelayed(swipeRunnable, 5000);
 	}
 	
+	private Bitmap getImage() {
+		File picFile = databaseHelper.fromDb();
+		if (picFile != null) {
+			showNewImagePane(picFile);
+			return PictureData.createPicture(picFile).getBitmap();
+		} else {
+			return null;
+		}
+	}
+	
+	private void showNewImagePane(File picFile) {
+		if (databaseHelper.isImageLoadedToday(picFile)) {
+			newImagePane.setVisibility(View.VISIBLE);
+		} else {
+			newImagePane.setVisibility(View.INVISIBLE);
+		}
+	}
+
 	public ConnectedListener connectedListener = new ConnectedListener() {
 		@Override
 		public void onConnected() {

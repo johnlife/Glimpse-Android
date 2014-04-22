@@ -1,15 +1,14 @@
 package odesk.johnlife.glimpse.data.db;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Calendar;
 
-import odesk.johnlife.glimpse.data.PictureData;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.graphics.Bitmap;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
@@ -18,6 +17,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	private static final String COLUMN_ID = "_id";
 	private static final String COLUMN_PICTURES = "pictures";
 	private static final String COLUMN_COUNT = "count";
+	private static final String COLUMN_LOAD_TIME = "load_time";
 	private static final String COLUMN_LAST_TIME = "last_time";
 	private static final int SCHEMA_VERSION = 1;
 	private static DatabaseHelper instance = null;
@@ -46,6 +46,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 				COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
 				COLUMN_PICTURES + " TEXT, " +
 				COLUMN_COUNT + " INTEGER, " +
+				COLUMN_LOAD_TIME + " INTEGER, " +
 				COLUMN_LAST_TIME + " INTEGER);"); 
 	}
 
@@ -72,20 +73,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		ContentValues firstValues = new ContentValues();
 		firstValues.put(COLUMN_PICTURES, picturePath);
 		firstValues.put(COLUMN_COUNT, 0);
+		firstValues.put(COLUMN_LOAD_TIME, Calendar.getInstance().getTimeInMillis());
 		firstValues.put(COLUMN_LAST_TIME, Calendar.getInstance().getTimeInMillis());
 		return firstValues;
 	}
 
-	public Bitmap fromDb() {
+	public File fromDb() {
 		Cursor c = getWritableDatabase().rawQuery("SELECT * FROM " + TABLE_NAME, null);
 		if (c.getCount() == 0) return null;
 		int position = getImagePosition(c);
 		c.moveToPosition(position);
 		File picFile = new File(c.getString(c.getColumnIndex(COLUMN_PICTURES)));
-		Bitmap bitmap = PictureData.createPicture(picFile).getBitmap();
 		updateData(position, c.getLong(c.getColumnIndex(COLUMN_COUNT)));
 		c.close();
-		return bitmap;		
+		return picFile;		
 	}
 
 	private int getImagePosition(Cursor c) {
@@ -119,6 +120,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		updatedValues.put(COLUMN_COUNT, ++count);
 		updatedValues.put(COLUMN_LAST_TIME, Calendar.getInstance().getTimeInMillis());
 		return updatedValues;
+	}
+
+	public boolean isImageLoadedToday(File picFile) {
+		try {
+			String picturePath = picFile.getCanonicalPath();
+			Cursor c = getWritableDatabase().rawQuery("SELECT " + COLUMN_LOAD_TIME + " FROM " + TABLE_NAME + 
+													" WHERE " + COLUMN_PICTURES + " = '" + picturePath + "'", null);
+			if (c.getCount() != 0) {
+				c.moveToFirst();
+				Calendar loadTime = Calendar.getInstance();
+				loadTime.setTimeInMillis(c.getLong(c.getColumnIndex(COLUMN_LOAD_TIME)));
+				Calendar currentTime = Calendar.getInstance();
+				if (loadTime.get(Calendar.DAY_OF_MONTH) == currentTime.get(Calendar.DAY_OF_MONTH) &&
+						loadTime.get(Calendar.MONTH) == currentTime.get(Calendar.MONTH) &&
+						loadTime.get(Calendar.YEAR) == currentTime.get(Calendar.YEAR)) {
+					return true;
+				}	
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}	
+		return false;
 	}
 
 }
