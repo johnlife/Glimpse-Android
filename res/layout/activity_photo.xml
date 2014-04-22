@@ -12,19 +12,20 @@
         android:scaleType="centerCrop"
         android:src="@drawable/wp1" />
 
+    <!--
     <ImageView
         android:id="@+id/top"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="centerCrop" />
+        android:layout_height="match_parent" />
+    -->
 
     <ImageView
         android:id="@+id/new_pane"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="top|right"
-        android:visibility="invisible"
-        android:src="@drawable/new_pane"/>
+        android:src="@drawable/new_pane"
+        android:visibility="invisible" />
 
     <ProgressBar
         android:id="@+id/progress"

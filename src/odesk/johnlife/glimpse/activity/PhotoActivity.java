@@ -24,6 +24,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -46,6 +47,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -58,10 +60,10 @@ import android.widget.TextView;
  */
 public class PhotoActivity extends Activity {
 
-	private Bitmap activeImage = null;
+//	private Bitmap activeImage = null;
 
 	private int myProgress = 0;
-	private ImageView top;
+//	private ImageView top;
 	private ImageView base;
 	private ImageView newImagePane;
 	private View contentView;
@@ -348,11 +350,11 @@ public class PhotoActivity extends Activity {
 		context = this;
 		databaseHelper = DatabaseHelper.getInstance(getApplicationContext());
 		contentView = findViewById(android.R.id.content);
-		top = (ImageView) findViewById(R.id.top);
+//		top = (ImageView) findViewById(R.id.top);
 		base = (ImageView) findViewById(R.id.base);
 		errorPane = findViewById(R.id.error_pane);
 		newImagePane = (ImageView) findViewById(R.id.new_pane);
-		showPicture();
+//		showPicture();
 		final String user = getUser();
 		if (user == null) {
 			((TextView) errorPane.findViewById(R.id.error_text)).setText(R.string.error_no_user_data);
@@ -402,13 +404,13 @@ public class PhotoActivity extends Activity {
 		}
 	}
 	
-	private void showPicture() {
-		if (isPicturesFolderEmpty()) {
-			activeImage = PictureData.createPicture(R.drawable.wp1, context).getBitmap();
-		} else {
-			activeImage = getImage();
-		}
-	}
+//	private void showPicture() {
+//		if (isPicturesFolderEmpty()) {
+//			activeImage = PictureData.createPicture(R.drawable.wp1, context).getBitmap();
+//		} else {
+//			activeImage = getImageFromDb();
+//		}
+//	}
 
 	private boolean isPicturesFolderEmpty() {
 		return GlimpseApp.getPicturesDir().listFiles().length == 0;
@@ -426,21 +428,35 @@ public class PhotoActivity extends Activity {
 	}
 
 	private void swipeImage() {
-		if (null != activeImage) {
-			top.setImageBitmap(activeImage);
-			top.setAlpha(1f);
-			top.animate().alpha(0f).setDuration(600).start();
-		}
-		Bitmap newBitmap = getImage();
+//		if (null != activeImage) {
+//			top.setImageBitmap(activeImage);
+//			top.setAlpha(1f);
+//			top.animate().alpha(0f).setDuration(600).start();
+//		}
+		Bitmap newBitmap = getImageFromDb();
 		if (newBitmap != null) {
 			base.setImageBitmap(newBitmap);
-			activeImage = newBitmap;
+			setScaleType(base, newBitmap);
+//			activeImage = newBitmap;
 		}
 		base.postDelayed(swipeRunnable, 5000);
 	}
 	
-	private Bitmap getImage() {
+	private void setScaleType(ImageView imageView, Bitmap bitmap) {
+		int height = bitmap.getHeight();
+		int width = bitmap.getWidth();
+		int currentOrientation = getResources().getConfiguration().orientation;
+		if ((height > width && currentOrientation == Configuration.ORIENTATION_PORTRAIT) ||
+				(height < width && currentOrientation == Configuration.ORIENTATION_LANDSCAPE)){
+			imageView.setScaleType(ScaleType.CENTER_CROP);
+		} else {
+			imageView.setScaleType(ScaleType.FIT_CENTER);
+		}
+	}
+
+	private Bitmap getImageFromDb() {
 		File picFile = databaseHelper.fromDb();
+		System.out.println(picFile);
 		if (picFile != null) {
 			showNewImagePane(picFile);
 			return PictureData.createPicture(picFile).getBitmap();
