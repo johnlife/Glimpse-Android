@@ -10,6 +10,7 @@ import java.util.TimerTask;
 import java.util.TreeSet;
 
 import odesk.johnlife.glimpse.R;
+import odesk.johnlife.glimpse.adapter.ImagePagerAdapter;
 import odesk.johnlife.glimpse.app.GlimpseApp;
 import odesk.johnlife.glimpse.data.PictureData;
 import odesk.johnlife.glimpse.data.db.DatabaseHelper;
@@ -33,6 +34,9 @@ import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -60,10 +64,10 @@ import android.widget.TextView;
  */
 public class PhotoActivity extends Activity {
 
-//	private Bitmap activeImage = null;
+	//	private Bitmap activeImage = null;
 
 	private int myProgress = 0;
-//	private ImageView top;
+	//	private ImageView top;
 	private ImageView base;
 	private ImageView newImagePane;
 	private View contentView;
@@ -74,6 +78,8 @@ public class PhotoActivity extends Activity {
 	private WifiConnectionHandler wifiConnectionHandler = new WifiConnectionHandler();
 	private Context context;
 	private DatabaseHelper databaseHelper;
+	private ViewPager pager;
+	private PagerAdapter pagerAdapter;
 
 	public interface ConnectedListener {
 		public void onConnected();
@@ -102,7 +108,7 @@ public class PhotoActivity extends Activity {
 					TreeSet<ScanResult> sortedResults = new TreeSet<ScanResult>(new Comparator<ScanResult>() {
 						@Override
 						public int compare(ScanResult lhs, ScanResult rhs) {
-								return -WifiManager.compareSignalLevel(lhs.level, rhs.level);
+							return -WifiManager.compareSignalLevel(lhs.level, rhs.level);
 						}
 					});			
 					sortedResults.addAll(wifi.getScanResults());
@@ -302,7 +308,7 @@ public class PhotoActivity extends Activity {
 		@Override
 		public void run() {
 			// TODO Auto-generated method stub
-			
+
 			while (myProgress < 1000) {
 				try {
 					myProgress++;
@@ -312,8 +318,8 @@ public class PhotoActivity extends Activity {
 			}
 		}
 	};
-	
-	
+
+
 	OnTouchListener touchListener = new OnTouchListener() {
 		@Override
 		public boolean onTouch(View v, MotionEvent event) {
@@ -350,11 +356,31 @@ public class PhotoActivity extends Activity {
 		context = this;
 		databaseHelper = DatabaseHelper.getInstance(getApplicationContext());
 		contentView = findViewById(android.R.id.content);
-//		top = (ImageView) findViewById(R.id.top);
-		base = (ImageView) findViewById(R.id.base);
-		errorPane = findViewById(R.id.error_pane);
+		//		top = (ImageView) findViewById(R.id.top);
+
+		//TODO
+		pager = (ViewPager) findViewById(R.id.pager);		
+		pagerAdapter = new ImagePagerAdapter(this, databaseHelper);
+		pager.setAdapter(pagerAdapter);
+		pager.setOffscreenPageLimit(1);
+		pager.setOnPageChangeListener(new OnPageChangeListener() {
+
+			@Override
+			public void onPageSelected(int position) {
+				
+			}
+
+			@Override
+			public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
+
+			@Override
+			public void onPageScrollStateChanged(int state) {}
+		});
+
+		//base = (ImageView) findViewById(R.id.base);
 		newImagePane = (ImageView) findViewById(R.id.new_pane);
-//		showPicture();
+		errorPane = findViewById(R.id.error_pane);
+		//		showPicture();
 		final String user = getUser();
 		if (user == null) {
 			((TextView) errorPane.findViewById(R.id.error_text)).setText(R.string.error_no_user_data);
@@ -372,7 +398,7 @@ public class PhotoActivity extends Activity {
 		actionBar.hide();
 		//		contentView.post(hiderAction);
 		contentView.setOnTouchListener(touchListener);
-		swipeImage();
+		//swipeImage();
 		Timer mailTimer = new Timer();
 		mailTimer.scheduleAtFixedRate(new TimerTask() {
 			@Override
@@ -403,19 +429,19 @@ public class PhotoActivity extends Activity {
 			return user;
 		}
 	}
-	
-//	private void showPicture() {
-//		if (isPicturesFolderEmpty()) {
-//			activeImage = PictureData.createPicture(R.drawable.wp1, context).getBitmap();
-//		} else {
-//			activeImage = getImageFromDb();
-//		}
-//	}
+
+	//	private void showPicture() {
+	//		if (isPicturesFolderEmpty()) {
+	//			activeImage = PictureData.createPicture(R.drawable.wp1, context).getBitmap();
+	//		} else {
+	//			activeImage = getImageFromDb();
+	//		}
+	//	}
 
 	private boolean isPicturesFolderEmpty() {
 		return GlimpseApp.getPicturesDir().listFiles().length == 0;
 	}
-	
+
 	private void hideErrorPane() {
 		if (errorPane.getVisibility() == View.VISIBLE && !isPicturesFolderEmpty()){
 			runOnUiThread(new Runnable() {
@@ -428,21 +454,25 @@ public class PhotoActivity extends Activity {
 	}
 
 	private void swipeImage() {
-//		if (null != activeImage) {
-//			top.setImageBitmap(activeImage);
-//			top.setAlpha(1f);
-//			top.animate().alpha(0f).setDuration(600).start();
+		//		if (null != activeImage) {
+		//			top.setImageBitmap(activeImage);
+		//			top.setAlpha(1f);
+		//			top.animate().alpha(0f).setDuration(600).start();
+		//		}
+		
+		
+//		Bitmap newBitmap = getImageFromDb();
+//		if (newBitmap != null) {
+//			base.setImageBitmap(newBitmap);
+//			setScaleType(base, newBitmap);
+//			//			activeImage = newBitmap;
 //		}
-		Bitmap newBitmap = getImageFromDb();
-		if (newBitmap != null) {
-			base.setImageBitmap(newBitmap);
-			setScaleType(base, newBitmap);
-//			activeImage = newBitmap;
-		}
-		base.postDelayed(swipeRunnable, 5000);
+//		base.postDelayed(swipeRunnable, 5000);
+		//pager.setCurrentItem(item);
+		pager.postDelayed(swipeRunnable, 5000);
 	}
-	
-	private void setScaleType(ImageView imageView, Bitmap bitmap) {
+
+	public void setScaleType(ImageView imageView, Bitmap bitmap) {
 		int height = bitmap.getHeight();
 		int width = bitmap.getWidth();
 		int currentOrientation = getResources().getConfiguration().orientation;
@@ -454,9 +484,8 @@ public class PhotoActivity extends Activity {
 		}
 	}
 
-	private Bitmap getImageFromDb() {
+	public Bitmap getImageFromDb() {
 		File picFile = databaseHelper.fromDb();
-		System.out.println(picFile);
 		if (picFile != null) {
 			showNewImagePane(picFile);
 			return PictureData.createPicture(picFile).getBitmap();
@@ -464,7 +493,7 @@ public class PhotoActivity extends Activity {
 			return null;
 		}
 	}
-	
+
 	private void showNewImagePane(File picFile) {
 		if (databaseHelper.isImageLoadedToday(picFile)) {
 			newImagePane.setVisibility(View.VISIBLE);
@@ -487,14 +516,14 @@ public class PhotoActivity extends Activity {
 	private boolean isConnectedOrConnecting() {
 		return getNetworkInfo().isConnectedOrConnecting();
 	}
-	
+
 	private boolean isConnected() {
 		return getNetworkInfo().isConnected();
 	}
-	
+
 	private NetworkInfo getNetworkInfo() {
 		ConnectivityManager connectionManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-	    return connectionManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+		return connectionManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 	}
 
 	@Override

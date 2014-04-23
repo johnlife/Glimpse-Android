@@ -144,4 +144,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		return false;
 	}
 
+	public int getCount() {
+		Cursor c = getWritableDatabase().rawQuery("SELECT * FROM " + TABLE_NAME, null);
+		return c.getCount();
+	}
+
 }
