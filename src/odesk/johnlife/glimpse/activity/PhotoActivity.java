@@ -52,6 +52,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -80,6 +81,7 @@ public class PhotoActivity extends Activity {
 	private PagerAdapter pagerAdapter;
 	private int viewPagerCurrentItem = 0;
 	private int previousState, currentState;
+	private ActionBar actionBar;
 
 	public interface ConnectedListener {
 		public void onConnected();
@@ -302,7 +304,7 @@ public class PhotoActivity extends Activity {
 			for (View blocker : swipeBlockers) {
 				blocked |= blocker.getVisibility() == View.VISIBLE;
 			}
-			if (blocked) {
+			if (blocked || actionBar.isShowing()) {
 				pager.postDelayed(swipeRunnable, 50);
 			} else {
 				pagerAdapter.notifyDataSetChanged();
@@ -328,6 +330,7 @@ public class PhotoActivity extends Activity {
 				int value = progress.getProgress() + 1;
 				if (value >= progress.getMax()) {
 					// TODO: run some action
+					actionBar.show();
 					progress.removeCallbacks(progressRunnable);
 				}
 				progress.setProgress(value);
@@ -396,6 +399,7 @@ public class PhotoActivity extends Activity {
 			@Override
 			public void onPageSelected(int position) {
 				pager.setCurrentItem(position);
+				actionBar.hide();
 			}
 		});
 		errorPane = findViewById(R.id.error_pane);
@@ -411,10 +415,43 @@ public class PhotoActivity extends Activity {
 		progressBar = (ProgressBar) findViewById(R.id.progressLoading);
 		new Thread(myThread).start();
 		progress.setRotation(-90);
-		final ActionBar actionBar = getActionBar();
-		actionBar.setDisplayShowTitleEnabled(false);
-		actionBar.setDisplayShowHomeEnabled(false);
+		
+		//actionbar
+		View customActionBar = getLayoutInflater().inflate(R.layout.custom_bar, new LinearLayout(this), false);
+		actionBar = getActionBar();
 		actionBar.hide();
+		actionBar.setCustomView(customActionBar);
+		
+		View deleteActionView = customActionBar.findViewById(R.id.action_delete);
+		View freezeActionView = customActionBar.findViewById(R.id.action_freeze);
+		View resetActionView = customActionBar.findViewById(R.id.action_reset_wifi); 
+
+		deleteActionView.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Toast.makeText(getApplicationContext(), "Delete image", Toast.LENGTH_SHORT).show();
+				actionBar.hide();
+			}
+		});
+
+		freezeActionView.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Toast.makeText(getApplicationContext(), "Freeze frame", Toast.LENGTH_SHORT).show();
+				actionBar.hide();
+			}
+		});
+
+		resetActionView.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Toast.makeText(getApplicationContext(), "Reset wi-fi", Toast.LENGTH_SHORT).show();
+				actionBar.hide();
+			}
+		});
+		
+//		actionBar.setDisplayShowTitleEnabled(false);
+//		actionBar.setDisplayShowHomeEnabled(false);
 //		 contentView.post(hiderAction);
 //		contentView.setOnTouchListener(touchListener);
 		swipeImage();

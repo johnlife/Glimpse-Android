@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:divider="?android:attr/dividerVertical"
+    android:dividerPadding="12dp"
+    android:orientation="horizontal"
+    android:showDividers="middle">
+
+    <LinearLayout
+        android:id="@+id/action_delete"
+        style="@style/CustomActionButton" >
+
+        <ImageView
+            style="@style/ActionButtonImage"
+            android:src="@android:drawable/ic_menu_delete" />
+
+        <TextView
+            style="@style/ActionButtonText"
+            android:text="DELETE" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/action_freeze"
+        style="@style/CustomActionButton" >
+
+        <ImageView
+            style="@style/ActionButtonImage"
+            android:src="@android:drawable/ic_media_pause" />
+
+        <TextView
+            style="@style/ActionButtonText"
+            android:text="FREEZE FRAME" />
+    </LinearLayout>
+    
+    <LinearLayout
+        android:id="@+id/action_reset_wifi"
+        style="@style/CustomActionButton" >
+
+        <ImageView
+            style="@style/ActionButtonImage"
+            android:src="@drawable/wifi" />
+
+        <TextView
+            style="@style/ActionButtonText"
+            android:text="RESET WI-FI" />
+    </LinearLayout>
+
+</LinearLayout>

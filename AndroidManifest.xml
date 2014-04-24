@@ -18,15 +18,14 @@
     <application
         android:name="odesk.johnlife.glimpse.app.GlimpseApp"
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
+        android:icon="@drawable/ic_launcher"
         android:largeHeap="true"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme.WithActionBar" >
         <activity
             android:name="odesk.johnlife.glimpse.activity.PhotoActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/app_name"
-            android:theme="@style/AppTheme" >
+            android:theme="@style/AppTheme.WithActionBar" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                  <category  android:name = "android.intent.category.HOME"  /> 
