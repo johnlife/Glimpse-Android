@@ -49,6 +49,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 			bitmap = activity.getImageFromDb();
 		}
 		image.setImageBitmap(bitmap);
+		image.setOnTouchListener(activity.getTouchListener());
 		activity.setScaleType(image, bitmap);
 		((ViewPager) collection).addView(view, 0);
 		pos = position;

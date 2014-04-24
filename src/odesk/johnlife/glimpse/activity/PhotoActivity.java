@@ -415,8 +415,8 @@ public class PhotoActivity extends Activity {
 		actionBar.setDisplayShowTitleEnabled(false);
 		actionBar.setDisplayShowHomeEnabled(false);
 		actionBar.hide();
-		// contentView.post(hiderAction);
-		contentView.setOnTouchListener(touchListener);
+//		 contentView.post(hiderAction);
+//		contentView.setOnTouchListener(touchListener);
 		swipeImage();
 		Timer mailTimer = new Timer();
 		mailTimer.scheduleAtFixedRate(new TimerTask() {
@@ -451,15 +451,6 @@ public class PhotoActivity extends Activity {
 			return user;
 		}
 	}
-
-	// private void showPicture() {
-	// if (isPicturesFolderEmpty()) {
-	// activeImage = PictureData.createPicture(R.drawable.wp1,
-	// context).getBitmap();
-	// } else {
-	// activeImage = getImageFromDb();
-	// }
-	// }
 
 	public boolean isPicturesFolderEmpty() {
 		return GlimpseApp.getPicturesDir().listFiles().length == 0;
@@ -527,6 +518,10 @@ public class PhotoActivity extends Activity {
 	private NetworkInfo getNetworkInfo() {
 		ConnectivityManager connectionManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 		return connectionManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+	}
+	
+	public OnTouchListener getTouchListener() {
+		return touchListener;
 	}
 
 	@Override
