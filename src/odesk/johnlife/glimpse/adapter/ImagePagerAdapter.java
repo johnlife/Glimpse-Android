@@ -43,12 +43,11 @@ public class ImagePagerAdapter extends PagerAdapter {
 		View view = inflater.inflate(R.layout.image, collection, false);
 		ImageView image = (ImageView)view.findViewById(R.id.base);
 		Bitmap bitmap;
-		if(activity.isPicturesFolderEmpty()){
+		if (activity.isPicturesFolderEmpty()) {
 			bitmap = PictureData.createPicture(R.drawable.wp1, activity).getBitmap();
-		}else{
+		} else {
 			bitmap = activity.getImageFromDb();
 		}
-		bitmap = activity.getImageFromDb();		
 		image.setImageBitmap(bitmap);
 		activity.setScaleType(image, bitmap);
 		((ViewPager) collection).addView(view, 0);

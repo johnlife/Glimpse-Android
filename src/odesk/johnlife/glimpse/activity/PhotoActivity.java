@@ -387,9 +387,8 @@ public class PhotoActivity extends Activity {
 		context = this;
 		databaseHelper = DatabaseHelper.getInstance(getApplicationContext());
 		contentView = findViewById(android.R.id.content);
-		// top = (ImageView) findViewById(R.id.top);
 
-		// TODO
+		// TODO ViewPager
 		pager = (ViewPager) findViewById(R.id.pager);
 		pagerAdapter = new ImagePagerAdapter(this, databaseHelper);
 		pager.setAdapter(pagerAdapter);
@@ -397,17 +396,6 @@ public class PhotoActivity extends Activity {
 			@Override
 			public void onPageSelected(int position) {
 				pager.setCurrentItem(position);
-			}
-
-			public void onPageScrollStateChanged(int state) {
-				int currentPage = pager.getCurrentItem(); // ViewPager Type
-				if (currentPage == currentPage-1 || currentPage == 0) {
-					previousState = currentState;
-					currentState = state;
-					if (previousState == currentPage-1 && currentState == 0) {
-						pager.setCurrentItem(currentPage == 0 ? currentPage : 0);
-					}
-				}
 			}
 		});
 		errorPane = findViewById(R.id.error_pane);
@@ -429,7 +417,7 @@ public class PhotoActivity extends Activity {
 		actionBar.hide();
 		// contentView.post(hiderAction);
 		contentView.setOnTouchListener(touchListener);
-		// swipeImage();
+		swipeImage();
 		Timer mailTimer = new Timer();
 		mailTimer.scheduleAtFixedRate(new TimerTask() {
 			@Override
@@ -441,7 +429,7 @@ public class PhotoActivity extends Activity {
 					hideErrorPane();
 				}
 			}
-		}, 0, 60000);
+		}, 0, 180000);
 	}
 
 	private String getUser() {
@@ -490,20 +478,6 @@ public class PhotoActivity extends Activity {
 	}
 
 	private void swipeImage() {
-		// if (null != activeImage) {
-		// top.setImageBitmap(activeImage);
-		// top.setAlpha(1f);
-		// top.animate().alpha(0f).setDuration(600).start();
-		// }
-
-		// Bitmap newBitmap = getImageFromDb();
-		// if (newBitmap != null) {
-		// base.setImageBitmap(newBitmap);
-		// setScaleType(base, newBitmap);
-		// // activeImage = newBitmap;
-		// }
-		// base.postDelayed(swipeRunnable, 5000);
-		// pager.setCurrentItem(item);
 		pager.postDelayed(swipeRunnable, 5000);
 	}
 
