@@ -81,7 +81,7 @@ public class PhotoActivity extends Activity {
 	private PagerAdapter pagerAdapter;
 	private int viewPagerCurrentItem = 0;
 	private int previousState, currentState;
-	private ActionBar actionBar;
+	private boolean isFreeze = false;
 
 	public interface ConnectedListener {
 		public void onConnected();
@@ -148,7 +148,7 @@ public class PhotoActivity extends Activity {
 							if (activeNetwork.capabilities.startsWith("[ESS")) {
 								progressBar.setVisibility(View.VISIBLE);
 								new WifiConnector(PhotoActivity.this)
-										.connectTo(activeNetwork);
+								.connectTo(activeNetwork);
 							} else {
 								wifiDialog.setVisibility(View.VISIBLE);
 								password.setText("");
@@ -176,20 +176,20 @@ public class PhotoActivity extends Activity {
 						connectedListener.onConnected();
 						if (visible) {
 							listPane.animate()
-									.translationX(listPane.getWidth()).alpha(0)
-									.setListener(new AnimatorListenerAdapter() {
-										@Override
-										public void onAnimationEnd(
-												Animator animation) {
-											progressBar
-													.setVisibility(View.INVISIBLE);
-											listPane.setVisibility(View.INVISIBLE);
-											listPane.setTranslationX(0);
-											listPane.setAlpha(1);
-											listPane.animate()
-													.setListener(null).start();
-										}
-									}).start();
+							.translationX(listPane.getWidth()).alpha(0)
+							.setListener(new AnimatorListenerAdapter() {
+								@Override
+								public void onAnimationEnd(
+										Animator animation) {
+									progressBar
+									.setVisibility(View.INVISIBLE);
+									listPane.setVisibility(View.INVISIBLE);
+									listPane.setTranslationX(0);
+									listPane.setAlpha(1);
+									listPane.animate()
+									.setListener(null).start();
+								}
+							}).start();
 						}
 					}
 					if (!visible && !connected && !connecting) {
@@ -281,8 +281,8 @@ public class PhotoActivity extends Activity {
 					| View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
 					| View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
 					| View.SYSTEM_UI_FLAG_FULLSCREEN | View.STATUS_BAR_HIDDEN
-			// | View.SYSTEM_UI_FLAG_IMMERSIVE
-			;
+					// | View.SYSTEM_UI_FLAG_IMMERSIVE
+					;
 			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
 				// Pre-Jelly Bean, we must manually hide the action bar
 				// and use the old window flags API.
@@ -304,7 +304,7 @@ public class PhotoActivity extends Activity {
 			for (View blocker : swipeBlockers) {
 				blocked |= blocker.getVisibility() == View.VISIBLE;
 			}
-			if (blocked || actionBar.isShowing()) {
+			if (blocked || getActionBar().isShowing() || isFreeze) {
 				pager.postDelayed(swipeRunnable, 50);
 			} else {
 				pagerAdapter.notifyDataSetChanged();
@@ -330,7 +330,7 @@ public class PhotoActivity extends Activity {
 				int value = progress.getProgress() + 1;
 				if (value >= progress.getMax()) {
 					// TODO: run some action
-					actionBar.show();
+					getActionBar().show();
 					progress.removeCallbacks(progressRunnable);
 				}
 				progress.setProgress(value);
@@ -387,6 +387,7 @@ public class PhotoActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_photo);
+		createActionBar();
 		context = this;
 		databaseHelper = DatabaseHelper.getInstance(getApplicationContext());
 		contentView = findViewById(android.R.id.content);
@@ -399,14 +400,13 @@ public class PhotoActivity extends Activity {
 			@Override
 			public void onPageSelected(int position) {
 				pager.setCurrentItem(position);
-				actionBar.hide();
 			}
 		});
 		errorPane = findViewById(R.id.error_pane);
 		final String user = getUser();
 		if (user == null) {
 			((TextView) errorPane.findViewById(R.id.error_text))
-					.setText(R.string.error_no_user_data);
+			.setText(R.string.error_no_user_data);
 			errorPane.setVisibility(View.VISIBLE);
 			return;
 		}
@@ -415,45 +415,7 @@ public class PhotoActivity extends Activity {
 		progressBar = (ProgressBar) findViewById(R.id.progressLoading);
 		new Thread(myThread).start();
 		progress.setRotation(-90);
-		
-		//actionbar
-		View customActionBar = getLayoutInflater().inflate(R.layout.custom_bar, new LinearLayout(this), false);
-		actionBar = getActionBar();
-		actionBar.hide();
-		actionBar.setCustomView(customActionBar);
-		
-		View deleteActionView = customActionBar.findViewById(R.id.action_delete);
-		View freezeActionView = customActionBar.findViewById(R.id.action_freeze);
-		View resetActionView = customActionBar.findViewById(R.id.action_reset_wifi); 
-
-		deleteActionView.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Toast.makeText(getApplicationContext(), "Delete image", Toast.LENGTH_SHORT).show();
-				actionBar.hide();
-			}
-		});
-
-		freezeActionView.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Toast.makeText(getApplicationContext(), "Freeze frame", Toast.LENGTH_SHORT).show();
-				actionBar.hide();
-			}
-		});
-
-		resetActionView.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Toast.makeText(getApplicationContext(), "Reset wi-fi", Toast.LENGTH_SHORT).show();
-				actionBar.hide();
-			}
-		});
-		
-//		actionBar.setDisplayShowTitleEnabled(false);
-//		actionBar.setDisplayShowHomeEnabled(false);
-//		 contentView.post(hiderAction);
-//		contentView.setOnTouchListener(touchListener);
+		//		 contentView.post(hiderAction);
 		swipeImage();
 		Timer mailTimer = new Timer();
 		mailTimer.scheduleAtFixedRate(new TimerTask() {
@@ -467,6 +429,48 @@ public class PhotoActivity extends Activity {
 				}
 			}
 		}, 0, 180000);
+	}
+	
+	private void createActionBar() {
+		View customActionBar = getLayoutInflater().inflate(R.layout.custom_bar, new LinearLayout(this), false);
+		final ActionBar actionBar = getActionBar();
+		actionBar.hide();
+		actionBar.setCustomView(customActionBar);
+
+		View deleteActionView = customActionBar.findViewById(R.id.action_delete);
+		View freezeActionView = customActionBar.findViewById(R.id.action_freeze);
+		View resetActionView = customActionBar.findViewById(R.id.action_reset_wifi); 
+
+		deleteActionView.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Toast.makeText(getApplicationContext(), "Delete image", Toast.LENGTH_SHORT).show();
+				actionBar.hide();
+			}
+		});
+		freezeActionView.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				actionBar.hide();
+				chageFreezeFrame(isFreeze ? false : true, v);
+				pager.postDelayed(swipeRunnable, 50);
+			}
+		});
+		resetActionView.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Toast.makeText(getApplicationContext(), "Reset wi-fi", Toast.LENGTH_SHORT).show();
+				actionBar.hide();
+			}
+		});
+	}
+	
+	private void chageFreezeFrame(boolean isFreeze, View view) {
+		this.isFreeze = isFreeze;
+		TextView textFreeze = (TextView) view.findViewById(R.id.text_freeze);
+		ImageView imageFreeze = (ImageView) view.findViewById(R.id.image_freeze);
+		textFreeze.setText(isFreeze ? R.string.action_unfreeze : R.string.action_freeze);
+		imageFreeze.setImageResource(isFreeze ? android.R.drawable.ic_media_play : android.R.drawable.ic_media_pause);
 	}
 
 	private String getUser() {
@@ -538,7 +542,7 @@ public class PhotoActivity extends Activity {
 			if (isPicturesFolderEmpty() && getUser() != null) {
 				String message = getString(R.string.error_no_foto, getUser());
 				((TextView) errorPane.findViewById(R.id.error_text))
-						.setText(message);
+				.setText(message);
 				errorPane.setVisibility(View.VISIBLE);
 			}
 		}
@@ -556,7 +560,7 @@ public class PhotoActivity extends Activity {
 		ConnectivityManager connectionManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 		return connectionManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 	}
-	
+
 	public OnTouchListener getTouchListener() {
 		return touchListener;
 	}
@@ -575,5 +579,4 @@ public class PhotoActivity extends Activity {
 			super.onBackPressed();
 		}
 	}
-
 }

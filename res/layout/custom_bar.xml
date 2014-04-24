@@ -17,7 +17,7 @@
 
         <TextView
             style="@style/ActionButtonText"
-            android:text="DELETE" />
+            android:text="@string/action_delete" />
     </LinearLayout>
 
     <LinearLayout
@@ -25,12 +25,14 @@
         style="@style/CustomActionButton" >
 
         <ImageView
+            android:id="@+id/image_freeze"
             style="@style/ActionButtonImage"
-            android:src="@android:drawable/ic_media_pause" />
+            android:src="@android:drawable/ic_media_pause"/>
 
         <TextView
+            android:id="@+id/text_freeze"
             style="@style/ActionButtonText"
-            android:text="FREEZE FRAME" />
+            android:text="@string/action_freeze" />
     </LinearLayout>
     
     <LinearLayout
@@ -43,7 +45,7 @@
 
         <TextView
             style="@style/ActionButtonText"
-            android:text="RESET WI-FI" />
+            android:text="@string/action_wifi" />
     </LinearLayout>
 
 </LinearLayout>

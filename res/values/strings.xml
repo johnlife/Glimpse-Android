@@ -8,6 +8,11 @@
 
 	<string name="hint_password">password</string>
 	
+	<string name="action_delete">DELETE</string>
+	<string name="action_freeze">FREEZE FRAME</string>
+	<string name="action_reset">RESET WI-FI</string>
+	<string name="action_unfreeze">UNFREEZE FRAME</string>
+	
 	<string name="error_no_user_data">User data not found. Please, contact technical support.</string>
 	<string name="error_no_foto">To start, send photos to %1$s.</string>
 	
