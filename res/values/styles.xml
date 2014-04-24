@@ -12,6 +12,7 @@
     <!-- Application theme. -->
     <style name="AppTheme" parent="AppBaseTheme">
         <item name="android:editTextBackground">@drawable/photo_edit_text_holo_light</item>
+    	<item name="android:windowActionBarOverlay">true</item>
     </style>
 
     <!-- ActionBar theme. -->
@@ -23,8 +24,7 @@
 
     <style name="ActionBarStyle" parent="android:style/Widget.Holo.Light.ActionBar.Solid">
         <item name="android:displayOptions">showCustom</item>
-        <item name="android:windowActionBarOverlay">true</item>
-        <item name="android:background">@android:color/transparent</item>
+        <item name="android:background">@color/black_overlay</item>
     </style>
 
     <style name="CustomActionButton" parent="android:style/Widget.Holo.Light.ActionButton">
