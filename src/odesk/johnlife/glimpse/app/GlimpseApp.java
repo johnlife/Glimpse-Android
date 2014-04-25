@@ -5,6 +5,9 @@ import java.io.File;
 import odesk.johnlife.glimpse.util.DeviceScreen;
 import android.app.Application;
 
+import com.ubertesters.sdk.LockingMode;
+import com.ubertesters.sdk.Ubertesters;
+
 public class GlimpseApp extends Application{
 
 	private static File picturesDir;
@@ -13,6 +16,7 @@ public class GlimpseApp extends Application{
 	@Override
 	public void onCreate() {
 		super.onCreate();
+		Ubertesters.initialize(this, LockingMode.LockingModeDisableUbertestersIfBuildNotExist);
 		picturesDir = getExternalFilesDir("pictures");
 		picturesDir.mkdirs();
 		screen = new DeviceScreen(this);
@@ -26,5 +30,4 @@ public class GlimpseApp extends Application{
 		return screen;
 	}
 
-	
 }

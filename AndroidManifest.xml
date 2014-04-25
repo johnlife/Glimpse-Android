@@ -15,11 +15,15 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
+    <!-- Ubertesters -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.GET_TASKS" />
+
     <application
         android:name="odesk.johnlife.glimpse.app.GlimpseApp"
         android:allowBackup="true"
-        android:label="@string/app_name"
         android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
         android:largeHeap="true"
         android:theme="@style/AppTheme.WithActionBar" >
         <activity
@@ -28,10 +32,21 @@
             android:theme="@style/AppTheme.WithActionBar" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                 <category  android:name = "android.intent.category.HOME"  /> 
-                 <category  android:name = "android.intent.category.DEFAULT"  /> 
+
+                <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+
+        <!-- Ubertesters -->
+        <activity
+            android:name="com.ubertesters.sdk.UbertestersScreen"
+            android:configChanges="orientation"
+            android:windowSoftInputMode="adjustResize" />
+
+        <meta-data
+            android:name="ubertesters_project_id"
+            android:value="507a673a-cc28-11e3-985b-22000ac44c54" />
     </application>
 
 </manifest>
