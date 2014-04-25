@@ -11,7 +11,7 @@ public class DeviceScreen {
 	private int heightDpScaled;
 	private float widthIn;
 	private float heightIn;
-	private int widthDp;
+	private int widthDp; 
 	private int heightDp;
 
 	public DeviceScreen(Context context) {
