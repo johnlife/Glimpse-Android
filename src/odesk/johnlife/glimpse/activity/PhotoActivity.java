@@ -98,6 +98,8 @@ public class PhotoActivity extends Activity {
 			@Override
 			public void run() {
 				password.requestFocus();
+				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.showSoftInput(password, InputMethodManager.SHOW_IMPLICIT);
 			}
 		};
 
