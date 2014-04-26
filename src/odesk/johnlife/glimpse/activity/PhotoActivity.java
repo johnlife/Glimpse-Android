@@ -128,7 +128,7 @@ public class PhotoActivity extends Activity {
 						}
 					}
 					final ArrayAdapter<ScanResult> adapter = new ArrayAdapter<ScanResult>(
-							context, android.R.layout.simple_list_item_1,
+							context, R.layout.wifi_list_item,
 							scanResults) {
 						@Override
 						public View getView(int position, View convertView,

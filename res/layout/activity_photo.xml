@@ -35,12 +35,28 @@
         android:layout_height="wrap_content"
         android:layout_gravity="right" >
 
-        <ListView
-            android:id="@+id/list"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/background_shade"
-            android:divider="@drawable/list_divider" />
+            android:divider="@drawable/layout_divider"
+            android:orientation="vertical"
+            android:showDividers="middle" >
+
+            <TextView
+                android:id="@+id/title_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/title_wifi_list"
+                android:textStyle="bold"
+                android:textSize="@dimen/list_wifi" />
+
+            <ListView
+                android:id="@+id/list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:divider="@drawable/list_divider" />
+        </LinearLayout>
     </odesk.johnlife.glimpse.ui.BlurLayout>
 
     <odesk.johnlife.glimpse.ui.BlurLayout
@@ -66,8 +82,8 @@
                 android:fontFamily="sans-serif-thin"
                 android:gravity="center"
                 android:padding="4dp"
-                android:textColor="#fff"
-                android:textSize="30sp" />
+                android:textColor="@color/text"
+                android:textSize="@dimen/title_wifi_pane" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -113,8 +129,8 @@
             android:fontFamily="sans-serif-thin"
             android:gravity="center"
             android:padding="8dp"
-            android:textColor="#fff"
-            android:textSize="20sp" />
+            android:textColor="@color/text"
+            android:textSize="@dimen/error_pane" />
     </odesk.johnlife.glimpse.ui.BlurLayout>
 
 </FrameLayout>
