@@ -14,12 +14,14 @@ import odesk.johnlife.glimpse.adapter.ImagePagerAdapter;
 import odesk.johnlife.glimpse.app.GlimpseApp;
 import odesk.johnlife.glimpse.data.PictureData;
 import odesk.johnlife.glimpse.data.db.DatabaseHelper;
+import odesk.johnlife.glimpse.ui.BlurActionBar;
+import odesk.johnlife.glimpse.ui.BlurActionBar.OnActionClick;
+import odesk.johnlife.glimpse.ui.ImageViewPager;
 import odesk.johnlife.glimpse.util.MailConnector;
 import odesk.johnlife.glimpse.util.SystemUiHider;
 import odesk.johnlife.glimpse.util.WifiConnector;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.app.ActionBar;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -36,7 +38,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -52,11 +53,9 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -77,11 +76,10 @@ public class PhotoActivity extends Activity {
 	private WifiConnectionHandler wifiConnectionHandler = new WifiConnectionHandler();
 	private Context context;
 	private DatabaseHelper databaseHelper;
-	private ViewPager pager;
+	private ImageViewPager pager;
 	private PagerAdapter pagerAdapter;
-	private int viewPagerCurrentItem = 0;
-	private int previousState, currentState;
-	private boolean isFreeze = false;
+	private int viewPagerCurrentPosition = 0;
+	private BlurActionBar actionBar;
 
 	public interface ConnectedListener {
 		public void onConnected();
@@ -306,17 +304,17 @@ public class PhotoActivity extends Activity {
 			for (View blocker : swipeBlockers) {
 				blocked |= blocker.getVisibility() == View.VISIBLE;
 			}
-			if (blocked || getActionBar().isShowing() || isFreeze) {
+			if (blocked || getActionBar().isShowing() || actionBar.isFreeze()) {
 				pager.postDelayed(swipeRunnable, 50);
 			} else {
 				pagerAdapter.notifyDataSetChanged();
-				viewPagerCurrentItem = pager.getCurrentItem();
-				if (viewPagerCurrentItem >= pagerAdapter.getCount()) {
-					viewPagerCurrentItem = 0;
+				viewPagerCurrentPosition = pager.getCurrentItem();
+				if (viewPagerCurrentPosition >= pagerAdapter.getCount()) {
+					viewPagerCurrentPosition = 0;
 				} else {
-					viewPagerCurrentItem = ++viewPagerCurrentItem;
+					viewPagerCurrentPosition = viewPagerCurrentPosition + 1;
 				}
-				pager.setCurrentItem(viewPagerCurrentItem);
+				pager.setCurrentItem(viewPagerCurrentPosition);
 				swipeImage();
 			}
 		}
@@ -395,9 +393,10 @@ public class PhotoActivity extends Activity {
 		contentView = findViewById(android.R.id.content);
 
 		// TODO ViewPager
-		pager = (ViewPager) findViewById(R.id.pager);
+		pager = (ImageViewPager) findViewById(R.id.pager);
 		pagerAdapter = new ImagePagerAdapter(this, databaseHelper);
 		pager.setAdapter(pagerAdapter);
+		pager.setOffscreenPageLimit(3);
 		pager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
 			@Override
 			public void onPageSelected(int position) {
@@ -434,45 +433,20 @@ public class PhotoActivity extends Activity {
 	}
 	
 	private void createActionBar() {
-		View customActionBar = getLayoutInflater().inflate(R.layout.custom_bar, new LinearLayout(this), false);
-		final ActionBar actionBar = getActionBar();
-		actionBar.hide();
-		actionBar.setCustomView(customActionBar);
-
-		View deleteActionView = customActionBar.findViewById(R.id.action_delete);
-		View freezeActionView = customActionBar.findViewById(R.id.action_freeze);
-		View resetActionView = customActionBar.findViewById(R.id.action_reset_wifi); 
-
-		deleteActionView.setOnClickListener(new View.OnClickListener() {
+		actionBar = new BlurActionBar(this);
+		actionBar.setOnActionClickListener(new OnActionClick() {
 			@Override
 			public void onClick(View v) {
-				Toast.makeText(getApplicationContext(), "Delete image", Toast.LENGTH_SHORT).show();
-				actionBar.hide();
+				if (v.getId() == R.id.action_delete) {
+//					File picFile = databaseHelper.getDataFromDb(pager.getCurrentItem());
+//					databaseHelper.deleteRow(picFile, pagerAdapter.getPicturePath(pager.getCurrentItem()));
+				} else if (v.getId() == R.id.action_freeze) {
+					pager.setSwipeable(!actionBar.isFreeze());
+				} else if (v.getId() == R.id.action_reset_wifi) {
+					//TODO reset wi-fi
+				}
 			}
 		});
-		freezeActionView.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				actionBar.hide();
-				chageFreezeFrame(isFreeze ? false : true, v);
-				pager.postDelayed(swipeRunnable, 50);
-			}
-		});
-		resetActionView.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Toast.makeText(getApplicationContext(), "Reset wi-fi", Toast.LENGTH_SHORT).show();
-				actionBar.hide();
-			}
-		});
-	}
-	
-	private void chageFreezeFrame(boolean isFreeze, View view) {
-		this.isFreeze = isFreeze;
-		TextView textFreeze = (TextView) view.findViewById(R.id.text_freeze);
-		ImageView imageFreeze = (ImageView) view.findViewById(R.id.image_freeze);
-		textFreeze.setText(isFreeze ? R.string.action_unfreeze : R.string.action_freeze);
-		imageFreeze.setImageResource(isFreeze ? android.R.drawable.ic_media_play : android.R.drawable.ic_media_pause);
 	}
 
 	private String getUser() {

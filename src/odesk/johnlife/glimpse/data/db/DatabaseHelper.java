@@ -4,11 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
 
+import odesk.johnlife.glimpse.app.GlimpseApp;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
@@ -58,6 +60,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 			getWritableDatabase().insert(TABLE_NAME, null, createFirstValues(picturePath));	
 		}
 	}
+	
+	public void deleteRow(File deleteFile, String picturePath) {
+//		try {
+			getWritableDatabase().delete(TABLE_NAME, COLUMN_PICTURES + " = " + picturePath, null);
+			deleteFile.delete();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+	}
 
 	private boolean existsInDatabase(String picturePath) {
 		Cursor c = getWritableDatabase().rawQuery(
@@ -105,9 +116,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 			} else if (currentLastTime < minLastTime) {
 				minLastTime = currentLastTime;
 				position = i;
-			}
+			} 
 		}
 		return position;
+	}
+	
+	public File getDataFromDb(int position) {
+		Cursor c = getWritableDatabase().rawQuery("SELECT * FROM " + TABLE_NAME, null);
+		c.moveToPosition(position);
+		File picFile = new File(c.getString(c.getColumnIndex(COLUMN_PICTURES)));
+		c.close();
+		return picFile;
 	}
 
 	private void updateData(int position, long count) {
