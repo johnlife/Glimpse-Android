@@ -5,8 +5,10 @@ import java.io.IOException;
 
 import odesk.johnlife.glimpse.R;
 import odesk.johnlife.glimpse.activity.PhotoActivity;
+import odesk.johnlife.glimpse.app.GlimpseApp;
 import odesk.johnlife.glimpse.data.PictureData;
 import odesk.johnlife.glimpse.data.db.DatabaseHelper;
+import odesk.johnlife.glimpse.util.FileHandler;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -107,7 +109,8 @@ public class ImagePagerAdapter extends PagerAdapter {
 	
 	public void deleteCurrentItem(int position) {
 		String picturePath = picturePathes.get(position);
-		databaseHelper.deleteRow(picturePath);
+		FileHandler fileHandler = GlimpseApp.getFileHandler();
+		fileHandler.delete(new File(picturePath));
 		picturePathes.remove(position);
 		notifyDataSetChanged();
 	}

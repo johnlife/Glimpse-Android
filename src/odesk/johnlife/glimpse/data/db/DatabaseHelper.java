@@ -62,11 +62,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		}
 	}
 	
-	public void deleteRow(String picturePath) {
-		File deleteFile = new File(picturePath);
-		int deleted = getWritableDatabase().delete(TABLE_NAME, COLUMN_PICTURES + "=?", new String[] { picturePath });
-		System.out.println("DELETED "+deleted+" ROWS"); 
-		deleteFile.delete();
+	public void deleteRow(File file) {
+		try {
+			int deleted = getWritableDatabase().delete(TABLE_NAME, COLUMN_PICTURES + "=?", new String[] { file.getCanonicalPath() });
+			System.out.println("DELETED "+deleted+" ROWS"+ file.getCanonicalPath());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		file.delete();
 	}
 
 	private boolean existsInDatabase(String picturePath) {

@@ -273,28 +273,6 @@ public class PhotoActivity extends Activity {
 		}
 	}
 
-	private Runnable hiderAction = new Runnable() {
-		@Override
-		public void run() {
-			final int hideFlags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-					// | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-					| View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-					| View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-					| View.SYSTEM_UI_FLAG_FULLSCREEN | View.STATUS_BAR_HIDDEN
-					// | View.SYSTEM_UI_FLAG_IMMERSIVE
-					;
-			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-				// Pre-Jelly Bean, we must manually hide the action bar
-				// and use the old window flags API.
-				getWindow().setFlags(
-						WindowManager.LayoutParams.FLAG_FULLSCREEN,
-						WindowManager.LayoutParams.FLAG_FULLSCREEN);
-			}
-			contentView.setSystemUiVisibility(hideFlags);
-			contentView.postDelayed(hiderAction, 30000);
-		}
-	};
-
 	private Runnable swipeRunnable = new Runnable() {
 		@Override
 		public void run() {
@@ -339,8 +317,6 @@ public class PhotoActivity extends Activity {
 	private Runnable myThread = new Runnable() {
 		@Override
 		public void run() {
-			// TODO Auto-generated method stub
-
 			while (myProgress < 1000) {
 				try {
 					myProgress++;
@@ -414,7 +390,6 @@ public class PhotoActivity extends Activity {
 		progressBar = (ProgressBar) findViewById(R.id.progressLoading);
 		new Thread(myThread).start();
 		progress.setRotation(-90);
-		//		 contentView.post(hiderAction);
 		swipeImage();
 		Timer mailTimer = new Timer();
 		mailTimer.scheduleAtFixedRate(new TimerTask() {
