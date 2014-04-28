@@ -77,7 +77,7 @@ public class PhotoActivity extends Activity {
 	private Context context;
 	private DatabaseHelper databaseHelper;
 	private ImageViewPager pager;
-	private PagerAdapter pagerAdapter;
+	private ImagePagerAdapter pagerAdapter;
 	private int viewPagerCurrentPosition = 0;
 	private BlurActionBar actionBar;
 
@@ -309,11 +309,8 @@ public class PhotoActivity extends Activity {
 			} else {
 				pagerAdapter.notifyDataSetChanged();
 				viewPagerCurrentPosition = pager.getCurrentItem();
-				if (viewPagerCurrentPosition >= pagerAdapter.getCount()) {
-					viewPagerCurrentPosition = 0;
-				} else {
-					viewPagerCurrentPosition = viewPagerCurrentPosition + 1;
-				}
+				viewPagerCurrentPosition = viewPagerCurrentPosition == pagerAdapter.getCount() - 1 ? 0 : viewPagerCurrentPosition + 1;
+				Log.e("viewPagerCurrentPosition", "viewPagerCurrentPosition = " + viewPagerCurrentPosition);
 				pager.setCurrentItem(viewPagerCurrentPosition);
 				swipeImage();
 			}
@@ -400,6 +397,7 @@ public class PhotoActivity extends Activity {
 		pager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
 			@Override
 			public void onPageSelected(int position) {
+				position = position == pagerAdapter.getCount() - 1 ? 0 : position;
 				pager.setCurrentItem(position);
 			}
 		});
@@ -438,8 +436,8 @@ public class PhotoActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				if (v.getId() == R.id.action_delete) {
-//					File picFile = databaseHelper.getDataFromDb(pager.getCurrentItem());
-//					databaseHelper.deleteRow(picFile, pagerAdapter.getPicturePath(pager.getCurrentItem()));
+					pagerAdapter.deleteCurrentItem(pager.getCurrentItem());
+					pagerAdapter.notifyDataSetChanged();
 				} else if (v.getId() == R.id.action_freeze) {
 					pager.setSwipeable(!actionBar.isFreeze());
 				} else if (v.getId() == R.id.action_reset_wifi) {
@@ -528,7 +526,7 @@ public class PhotoActivity extends Activity {
 		return getNetworkInfo().isConnectedOrConnecting();
 	}
 
-	private boolean isConnected() {
+	public boolean isConnected() {
 		return getNetworkInfo().isConnected();
 	}
 

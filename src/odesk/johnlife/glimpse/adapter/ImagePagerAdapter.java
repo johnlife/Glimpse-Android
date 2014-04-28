@@ -70,6 +70,12 @@ public class ImagePagerAdapter extends PagerAdapter {
 	public boolean isViewFromObject(View view, Object object) {
 		return view == ((View) object);
 	}
+	
+	 @Override
+	    public int getItemPosition(Object object){
+	        return PagerAdapter.POSITION_NONE;
+	    }
+
 
   	private Bitmap getImageFromDb(int position) {
 		File picFile = databaseHelper.fromDb();
@@ -82,7 +88,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 	}
 
 	public String getPicturePath(int position) {
-		return picturePathes.get(position);
+		return picturePathes.get(position); 
 	}
 
 	private void setScaleType(ImageView imageView, Bitmap bitmap) {
@@ -97,5 +103,12 @@ public class ImagePagerAdapter extends PagerAdapter {
 				imageView.setScaleType(ScaleType.FIT_CENTER);
 			}
 		}
+	}
+	
+	public void deleteCurrentItem(int position) {
+		String picturePath = picturePathes.get(position);
+		databaseHelper.deleteRow(picturePath);
+		picturePathes.remove(position);
+		notifyDataSetChanged();
 	}
 }

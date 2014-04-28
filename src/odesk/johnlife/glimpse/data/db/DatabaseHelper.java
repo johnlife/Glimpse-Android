@@ -11,6 +11,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+import android.widget.Toast;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
@@ -61,13 +62,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		}
 	}
 	
-	public void deleteRow(File deleteFile, String picturePath) {
-//		try {
-			getWritableDatabase().delete(TABLE_NAME, COLUMN_PICTURES + " = " + picturePath, null);
-			deleteFile.delete();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
+	public void deleteRow(String picturePath) {
+		File deleteFile = new File(picturePath);
+		int deleted = getWritableDatabase().delete(TABLE_NAME, COLUMN_PICTURES + "=?", new String[] { picturePath });
+		System.out.println("DELETED "+deleted+" ROWS"); 
+		deleteFile.delete();
 	}
 
 	private boolean existsInDatabase(String picturePath) {
@@ -121,14 +120,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		return position;
 	}
 	
-	public File getDataFromDb(int position) {
-		Cursor c = getWritableDatabase().rawQuery("SELECT * FROM " + TABLE_NAME, null);
-		c.moveToPosition(position);
-		File picFile = new File(c.getString(c.getColumnIndex(COLUMN_PICTURES)));
-		c.close();
-		return picFile;
-	}
-
 	private void updateData(int position, long count) {
 		String where = COLUMN_ID + "=" + (position+1);
 		getWritableDatabase().update(TABLE_NAME, createUpdatedValues(count), where, null);		
