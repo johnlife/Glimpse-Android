@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Properties;
 
 import javax.mail.BodyPart;
+import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -17,6 +18,7 @@ import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.URLName;
+import javax.mail.search.FlagTerm;
 
 import odesk.johnlife.glimpse.R;
 import odesk.johnlife.glimpse.app.GlimpseApp;
@@ -41,6 +43,7 @@ public class MailConnector {
 	private String user;
 	private String pass;
 	private String server;
+	byte[] buf = new byte[4096];
 	
 	public MailConnector(String user, String pass, Context context) {
 		this.user = user;
@@ -56,19 +59,19 @@ public class MailConnector {
 			store.connect();
 			Folder folder = null;
 			folder = store.getDefaultFolder().getFolder("INBOX");
-			folder.open(Folder.READ_ONLY);
-			Message[] messages = folder.getMessages();
+			folder.open(Folder.READ_WRITE);
+			Message[] messages = folder.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
+			FileHandler fileHandler = GlimpseApp.getFileHandler();
 			for(Message msg : messages) {
-				try {
-					List<File> attachments = getAttachments((Multipart) msg.getContent());
-					for (File file : attachments) {
-						databaseHelper.toDb(file.getCanonicalPath());
+				if (!msg.isSet(Flags.Flag.SEEN)) {
+					try {
+						List<File> attachments = getAttachments((Multipart) msg.getContent());
+						for (File file : attachments) {
+							fileHandler.add(file);
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
-				} catch (IOException e) {
-					e.printStackTrace();
-				} catch (IllegalStateException e) {
-					//TODO
-					e.printStackTrace();
 				}
 			}
 		} catch (MessagingException e) {
@@ -94,7 +97,6 @@ public class MailConnector {
 				InputStream is = bodyPart.getInputStream();
 				File f = new File(GlimpseApp.getPicturesDir(), bodyPart.getFileName());
 				FileOutputStream fos = new FileOutputStream(f);
-				byte[] buf = new byte[4096];
 				int bytesRead;
 				while ((bytesRead=is.read(buf)) != -1) {
 					fos.write(buf, 0, bytesRead);
@@ -109,45 +111,45 @@ public class MailConnector {
 		return attachments;
 	}
 	
-	/**
-     * Return the primary text content of the message.
-     */
-    private String getText(Part p) throws MessagingException, IOException {
-        if (p.isMimeType("text/*")) {
-            String s = (String)p.getContent();
-//            textIsHtml = p.isMimeType("text/html");
-            return s;
-        }
-
-        if (p.isMimeType("multipart/alternative")) {
-            // prefer html text over plain text
-            Multipart mp = (Multipart)p.getContent();
-            String text = null;
-            for (int i = 0; i < mp.getCount(); i++) {
-                Part bp = mp.getBodyPart(i);
-                if (bp.isMimeType("text/plain")) {
-                    if (text == null)
-                        text = getText(bp);
-                    continue;
-                } else if (bp.isMimeType("text/html")) {
-                    String s = getText(bp);
-                    if (s != null)
-                        return s;
-                } else {
-                    return getText(bp);
-                }
-            }
-            return text;
-        } else if (p.isMimeType("multipart/*")) {
-            Multipart mp = (Multipart)p.getContent();
-            for (int i = 0; i < mp.getCount(); i++) {
-                String s = getText(mp.getBodyPart(i));
-                if (s != null)
-                    return s;
-            }
-        }
-
-        return null;
-    }
+//	/**
+//     * Return the primary text content of the message.
+//     */
+//    private String getText(Part p) throws MessagingException, IOException {
+//        if (p.isMimeType("text/*")) {
+//            String s = (String)p.getContent();
+////            textIsHtml = p.isMimeType("text/html");
+//            return s;
+//        }
+//
+//        if (p.isMimeType("multipart/alternative")) {
+//            // prefer html text over plain text
+//            Multipart mp = (Multipart)p.getContent();
+//            String text = null;
+//            for (int i = 0; i < mp.getCount(); i++) {
+//                Part bp = mp.getBodyPart(i);
+//                if (bp.isMimeType("text/plain")) {
+//                    if (text == null)
+//                        text = getText(bp);
+//                    continue;
+//                } else if (bp.isMimeType("text/html")) {
+//                    String s = getText(bp);
+//                    if (s != null)
+//                        return s;
+//                } else {
+//                    return getText(bp);
+//                }
+//            }
+//            return text;
+//        } else if (p.isMimeType("multipart/*")) {
+//            Multipart mp = (Multipart)p.getContent();
+//            for (int i = 0; i < mp.getCount(); i++) {
+//                String s = getText(mp.getBodyPart(i));
+//                if (s != null)
+//                    return s;
+//            }
+//        }
+//
+//        return null;
+//    }
 
 }
