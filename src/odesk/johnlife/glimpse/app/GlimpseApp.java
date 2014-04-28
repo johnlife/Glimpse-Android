@@ -3,12 +3,14 @@ package odesk.johnlife.glimpse.app;
 import java.io.File;
 
 import odesk.johnlife.glimpse.util.DeviceScreen;
+import odesk.johnlife.glimpse.util.FileHandler;
 import android.app.Application;
 
 public class GlimpseApp extends Application{
 
 	private static File picturesDir;
 	private static DeviceScreen screen;
+	private static FileHandler fileHandler;
 
 	@Override
 	public void onCreate() {
@@ -16,6 +18,7 @@ public class GlimpseApp extends Application{
 		picturesDir = getExternalFilesDir("pictures");
 		picturesDir.mkdirs();
 		screen = new DeviceScreen(this);
+		fileHandler = new FileHandler();
 	}
 
 	public static File getPicturesDir() {
@@ -26,5 +29,7 @@ public class GlimpseApp extends Application{
 		return screen;
 	}
 
-	
+	public static FileHandler getFileHandler() {
+		return fileHandler;
+	}
 }
