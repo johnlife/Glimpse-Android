@@ -30,10 +30,10 @@ public class WifiConnector {
 			config.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
 			config.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.SHARED);
 			
-			int res = wifi.addNetwork(config);
+			connectionResult = wifi.addNetwork(config);
 			Log.d("wifi", "Network added");
 			wifi.disconnect();
-			wifi.enableNetwork(res, false);
+			wifi.enableNetwork(connectionResult, false);
 			wifi.reconnect();
 			Log.d("wifi", "Connecting..");
 		}
@@ -95,6 +95,7 @@ public class WifiConnector {
 	private static final Pattern CAPABILITIES_SPLITTER = Pattern.compile("(?<=[\\]])");
 
 	private WifiManager wifi;
+	private int connectionResult;
 
 	public WifiConnector(Context context) {
 		wifi = (WifiManager)context.getSystemService(Context.WIFI_SERVICE);
@@ -125,4 +126,9 @@ public class WifiConnector {
 	private static final String addQuotes(String password) {
 		return String.format("\"%s\"", password);
 	}
+	
+	public int getConnectionResult() {
+		return connectionResult;
+	}
+
 }

@@ -71,11 +71,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	private boolean existsInDatabase(String picturePath) {
 		Cursor c = getWritableDatabase().rawQuery(
 				"SELECT COUNT(*) FROM " + TABLE_NAME + " WHERE " + COLUMN_PICTURES + " = '" + picturePath + "'", null);
-		if (c.getInt(0) > 0) {
-			return true;
-		} else {
-			return false;
-		}
+		
+		boolean value = (c.getInt(0) > 0);
+		c.close();
+		return value;
 	}
 
 	public File fromDb() {
@@ -128,6 +127,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 				Calendar loadTime = Calendar.getInstance();
 				loadTime.setTimeInMillis(c.getLong(c.getColumnIndex(COLUMN_LOAD_TIME)));
 				Calendar currentTime = Calendar.getInstance();
+				c.close();
 				if (loadTime.get(Calendar.DAY_OF_MONTH) == currentTime.get(Calendar.DAY_OF_MONTH) &&
 						loadTime.get(Calendar.MONTH) == currentTime.get(Calendar.MONTH) &&
 						loadTime.get(Calendar.YEAR) == currentTime.get(Calendar.YEAR)) {
@@ -138,6 +138,5 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 			e.printStackTrace();
 		}	
 		return false;
-	}
 
 }
