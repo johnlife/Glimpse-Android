@@ -12,7 +12,6 @@ import java.util.TreeSet;
 import odesk.johnlife.glimpse.R;
 import odesk.johnlife.glimpse.adapter.ImagePagerAdapter;
 import odesk.johnlife.glimpse.app.GlimpseApp;
-import odesk.johnlife.glimpse.data.PictureData;
 import odesk.johnlife.glimpse.data.db.DatabaseHelper;
 import odesk.johnlife.glimpse.ui.BlurActionBar;
 import odesk.johnlife.glimpse.ui.BlurActionBar.OnActionClick;
@@ -33,10 +32,8 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -45,7 +42,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -473,15 +469,6 @@ public class PhotoActivity extends Activity {
 			} else {
 				imageView.setScaleType(ScaleType.FIT_CENTER);
 			}
-		}
-	}
-
-	public Bitmap getImageFromDb() {
-		File picFile = databaseHelper.fromDb();
-		if (picFile != null) {
-			return PictureData.createPicture(picFile).getBitmap();
-		} else {
-			return null;
 		}
 	}
 

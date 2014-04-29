@@ -4,14 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
 
-import odesk.johnlife.glimpse.app.GlimpseApp;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
-import android.widget.Toast;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
@@ -36,13 +33,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		return instance;
 	}
 
-	public static DatabaseHelper getInstance() {
-		if (instance == null) {
-			throw new IllegalStateException("Instance is not created yet. Call getInstance(Context).");
-		}
-		return instance;
-	}
-
 	@Override
 	public void onCreate(SQLiteDatabase db) {
 		db.execSQL("CREATE TABLE " + TABLE_NAME + " (" + 
@@ -56,39 +46,36 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {}
 
-	public void toDb(String picturePath) {
+	public void add(String picturePath) {
 		if (!existsInDatabase(picturePath)) {
-			getWritableDatabase().insert(TABLE_NAME, null, createFirstValues(picturePath));	
+			ContentValues firstValues = new ContentValues();
+			firstValues.put(COLUMN_PICTURES, picturePath);
+			firstValues.put(COLUMN_COUNT, 0);
+			firstValues.put(COLUMN_LOAD_TIME, Calendar.getInstance().getTimeInMillis());
+			firstValues.put(COLUMN_LAST_TIME, Calendar.getInstance().getTimeInMillis());
+			getWritableDatabase().insert(TABLE_NAME, null, firstValues);	
 		}
 	}
 	
-	public void deleteRow(File file) {
-		try {
-			int deleted = getWritableDatabase().delete(TABLE_NAME, COLUMN_PICTURES + "=?", new String[] { file.getCanonicalPath() });
-			System.out.println("DELETED "+deleted+" ROWS"+ file.getCanonicalPath());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		file.delete();
+	public void delete(String picturePath) {
+		int deleted = getWritableDatabase().delete(TABLE_NAME, COLUMN_PICTURES + "=?", new String[] { picturePath });
+		System.out.println("DELETED "+deleted+" ROWS"+ picturePath);
+	}
+
+	
+	public int getCount() {
+		Cursor c = getWritableDatabase().rawQuery("SELECT * FROM " + TABLE_NAME, null);
+		return c.getCount();
 	}
 
 	private boolean existsInDatabase(String picturePath) {
 		Cursor c = getWritableDatabase().rawQuery(
-				"SELECT * FROM " + TABLE_NAME + " WHERE " + COLUMN_PICTURES + " = '" + picturePath + "'", null);
-		if (c.getCount() != 0) {
+				"SELECT COUNT(*) FROM " + TABLE_NAME + " WHERE " + COLUMN_PICTURES + " = '" + picturePath + "'", null);
+		if (c.getInt(0) > 0) {
 			return true;
 		} else {
 			return false;
 		}
-	}
-
-	private ContentValues createFirstValues(String picturePath) {
-		ContentValues firstValues = new ContentValues();
-		firstValues.put(COLUMN_PICTURES, picturePath);
-		firstValues.put(COLUMN_COUNT, 0);
-		firstValues.put(COLUMN_LOAD_TIME, Calendar.getInstance().getTimeInMillis());
-		firstValues.put(COLUMN_LAST_TIME, Calendar.getInstance().getTimeInMillis());
-		return firstValues;
 	}
 
 	public File fromDb() {
@@ -125,14 +112,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	
 	private void updateData(int position, long count) {
 		String where = COLUMN_ID + "=" + (position+1);
-		getWritableDatabase().update(TABLE_NAME, createUpdatedValues(count), where, null);		
-	}
-
-	private ContentValues createUpdatedValues(long count) {
 		ContentValues updatedValues = new ContentValues();
 		updatedValues.put(COLUMN_COUNT, ++count);
 		updatedValues.put(COLUMN_LAST_TIME, Calendar.getInstance().getTimeInMillis());
-		return updatedValues;
+		getWritableDatabase().update(TABLE_NAME, updatedValues, where, null);		
 	}
 
 	public boolean isImageLoadedToday(File picFile) {
@@ -155,11 +138,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 			e.printStackTrace();
 		}	
 		return false;
-	}
-
-	public int getCount() {
-		Cursor c = getWritableDatabase().rawQuery("SELECT * FROM " + TABLE_NAME, null);
-		return c.getCount();
 	}
 
 }

@@ -18,7 +18,7 @@ public class GlimpseApp extends Application{
 		picturesDir = getExternalFilesDir("pictures");
 		picturesDir.mkdirs();
 		screen = new DeviceScreen(this);
-		fileHandler = new FileHandler();
+		fileHandler = new FileHandler(this);
 	}
 
 	public static File getPicturesDir() {
