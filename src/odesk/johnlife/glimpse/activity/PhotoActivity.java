@@ -12,12 +12,11 @@ import java.util.TreeSet;
 import odesk.johnlife.glimpse.R;
 import odesk.johnlife.glimpse.adapter.ImagePagerAdapter;
 import odesk.johnlife.glimpse.app.GlimpseApp;
-import odesk.johnlife.glimpse.data.db.DatabaseHelper;
+import odesk.johnlife.glimpse.data.DatabaseHelper;
 import odesk.johnlife.glimpse.ui.BlurActionBar;
 import odesk.johnlife.glimpse.ui.BlurActionBar.OnActionClick;
 import odesk.johnlife.glimpse.ui.ImageViewPager;
 import odesk.johnlife.glimpse.util.MailConnector;
-import odesk.johnlife.glimpse.util.SystemUiHider;
 import odesk.johnlife.glimpse.util.WifiConnector;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -40,6 +39,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -273,13 +273,17 @@ public class PhotoActivity extends Activity {
 	private Runnable swipeRunnable = new Runnable() {
 		@Override
 		public void run() {
-			View[] swipeBlockers = { progress, wifiConnectionHandler.getView(),
-					errorPane, progressBar };
-			boolean blocked = false;
+			View[] swipeBlockers = { 
+				progress, 
+				wifiConnectionHandler.getView(),
+				errorPane, 
+				progressBar 
+			};
+			boolean blocked = getActionBar().isShowing() || actionBar.isFreeze()|| !isConnectedOrConnecting();
 			for (View blocker : swipeBlockers) {
 				blocked |= blocker.getVisibility() == View.VISIBLE;
 			}
-			if (blocked || getActionBar().isShowing() || actionBar.isFreeze()|| !isConnectedOrConnecting()) {
+			if (blocked) {
 				pager.postDelayed(swipeRunnable, 50);
 			} else {
 				pagerAdapter.notifyDataSetChanged();
@@ -295,13 +299,11 @@ public class PhotoActivity extends Activity {
 	private Runnable progressRunnable = new Runnable() {
 		@Override
 		public void run() {
-			System.out.println("tick");
 			if (progress.getVisibility() != View.VISIBLE) {
 				progress.removeCallbacks(progressRunnable);
 			} else {
 				int value = progress.getProgress() + 1;
 				if (value >= progress.getMax()) {
-					// TODO: run some action
 					getActionBar().show();
 					progress.removeCallbacks(progressRunnable);
 				}
@@ -324,7 +326,7 @@ public class PhotoActivity extends Activity {
 		}
 	};
 
-	OnTouchListener touchListener = new OnTouchListener() {
+	private OnTouchListener touchListener = new OnTouchListener() {
 		@Override
 		public boolean onTouch(View v, MotionEvent event) {
 			int action = event.getActionMasked();
@@ -361,12 +363,14 @@ public class PhotoActivity extends Activity {
 		context = this;
 		databaseHelper = DatabaseHelper.getInstance(getApplicationContext());
 		contentView = findViewById(android.R.id.content);
-
-		// TODO ViewPager
 		pager = (ImageViewPager) findViewById(R.id.pager);
-		pagerAdapter = new ImagePagerAdapter(this, databaseHelper);
+		pagerAdapter = new ImagePagerAdapter(this, databaseHelper, new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				getActionBar().show();
+			}
+		});
 		pager.setAdapter(pagerAdapter);
-		pager.setOffscreenPageLimit(3);
 		pager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
 			@Override
 			public void onPageSelected(int position) {
@@ -393,14 +397,14 @@ public class PhotoActivity extends Activity {
 			@Override
 			public void run() {
 				if (isConnected()) {
-					MailConnector mailer = new MailConnector(user, "temppass", context);
+					MailConnector mailer = new MailConnector(user, "HPgqL2658P", context);
 					mailer.connect(databaseHelper);
 					if (!isPicturesFolderEmpty()) {
 						hideErrorPane();
 					}
 				}
 			}
-		}, 0, 180000);
+		}, 0, 240000);
 	}
 	
 	private void createActionBar() {
@@ -409,7 +413,7 @@ public class PhotoActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				if (v.getId() == R.id.action_delete) {
-					pagerAdapter.deleteCurrentItem(pager.getCurrentItem());
+					pagerAdapter.deleteCurrentItem(pager);
 					pagerAdapter.notifyDataSetChanged();
 				} else if (v.getId() == R.id.action_freeze) {
 					pager.setSwipeable(!actionBar.isFreeze());
@@ -423,10 +427,11 @@ public class PhotoActivity extends Activity {
 	private String getUser() {
 		String user = null;
 		try {
-			File dataFile = new File(Environment.getExternalStorageDirectory(),
-					context.getString(R.string.data_file));
-			if (!dataFile.exists())
-				return null;
+			File dataFile = new File(
+				Environment.getExternalStorageDirectory(),
+				context.getString(R.string.data_file)
+			);
+			if (!dataFile.exists()) return null;
 			BufferedReader br = new BufferedReader(new FileReader(dataFile));
 			String line = br.readLine();
 			if (line != null) {
@@ -435,9 +440,8 @@ public class PhotoActivity extends Activity {
 			br.close();
 		} catch (Exception e) {
 			Log.e("UserInfo", e.getMessage(), e);
-		} finally {
-			return user;
 		}
+		return user;
 	}
 
 	public boolean isPicturesFolderEmpty() {
@@ -503,10 +507,6 @@ public class PhotoActivity extends Activity {
 	private NetworkInfo getNetworkInfo() {
 		ConnectivityManager connectionManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 		return connectionManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-	}
-
-	public OnTouchListener getTouchListener() {
-		return touchListener;
 	}
 
 	@Override

@@ -22,7 +22,8 @@ import javax.mail.search.FlagTerm;
 
 import odesk.johnlife.glimpse.R;
 import odesk.johnlife.glimpse.app.GlimpseApp;
-import odesk.johnlife.glimpse.data.db.DatabaseHelper;
+import odesk.johnlife.glimpse.data.DatabaseHelper;
+import odesk.johnlife.glimpse.data.FileHandler;
 import android.content.Context;
 
 import com.sun.mail.pop3.POP3SSLStore;
@@ -30,7 +31,8 @@ import com.sun.mail.pop3.POP3SSLStore;
 public class MailConnector {
 	private static final int POP_PORT = 995;
 	private static final String POP3 = "pop3";
-	private static final String SSL_FACTORY = "javax.net.ssl.SSLSocketFactory";
+//	private static final String SSL_FACTORY = "javax.net.ssl.SSLSocketFactory";
+	private static final String SSL_FACTORY = "odesk.johnlife.glimpse.util.AlwaysTrustSSLContextFactory";
 	private static final Properties pop3Props = new Properties();
 
 	static {
@@ -54,6 +56,7 @@ public class MailConnector {
 	public void connect(DatabaseHelper databaseHelper) {
 		URLName url = new URLName(POP3, server, POP_PORT, "", user, pass);
 		Session session = Session.getInstance(pop3Props, null);
+		session.setDebug(true);
 		Store store = new POP3SSLStore(session, url);
 		try {
 			store.connect();
@@ -74,6 +77,9 @@ public class MailConnector {
 					}
 				}
 			}
+			folder.setFlags(messages, new Flags(Flags.Flag.SEEN), true);
+			folder.close(true);
+			store.close();
 		} catch (MessagingException e) {
 			e.printStackTrace();
 		}
@@ -95,7 +101,7 @@ public class MailConnector {
 					continue; // dealing with attachments only
 				} 
 				InputStream is = bodyPart.getInputStream();
-				File f = new File(GlimpseApp.getPicturesDir(), bodyPart.getFileName());
+				File f = new File(GlimpseApp.getTempDir(), bodyPart.getFileName());
 				FileOutputStream fos = new FileOutputStream(f);
 				int bytesRead;
 				while ((bytesRead=is.read(buf)) != -1) {

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="email_server">pop.zoho.com</string>
+    <string name="email_server">mx.glimpseframe.com</string>
 <!--     <string name="email_server">pop.mail.ru</string> -->
 
     <!-- PATH TO FILE:  /mnt/sdcard/userdata.txt -->
