@@ -75,7 +75,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	private boolean existsInDatabase(String picturePath) {
 		Cursor c = getWritableDatabase().rawQuery(
 				"SELECT * FROM " + TABLE_NAME + " WHERE " + COLUMN_PICTURES + " = '" + picturePath + "'", null);
-		if (c.getCount() != 0) {
+		int count = c.getCount();
+		c.close();
+		if (count != 0) {
 			return true;
 		} else {
 			return false;
@@ -145,6 +147,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 				Calendar loadTime = Calendar.getInstance();
 				loadTime.setTimeInMillis(c.getLong(c.getColumnIndex(COLUMN_LOAD_TIME)));
 				Calendar currentTime = Calendar.getInstance();
+				c.close();
 				if (loadTime.get(Calendar.DAY_OF_MONTH) == currentTime.get(Calendar.DAY_OF_MONTH) &&
 						loadTime.get(Calendar.MONTH) == currentTime.get(Calendar.MONTH) &&
 						loadTime.get(Calendar.YEAR) == currentTime.get(Calendar.YEAR)) {
@@ -159,7 +162,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 	public int getCount() {
 		Cursor c = getWritableDatabase().rawQuery("SELECT * FROM " + TABLE_NAME, null);
-		return c.getCount();
+		int count = c.getCount();
+		c.close();
+		return count;
 	}
 
 }

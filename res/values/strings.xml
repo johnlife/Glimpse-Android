@@ -15,6 +15,7 @@
 	
 	<string name="error_no_user_data">User data not found. Please, contact technical support.</string>
 	<string name="error_no_foto">To start, send photos to %1$s.</string>
+	<string name="error_not_connected">Network is not connected.</string>
 	
 	<string name="title_wifi_list">Select your wi-fi network below</string>
 	

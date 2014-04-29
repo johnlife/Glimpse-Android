@@ -33,10 +33,8 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -45,7 +43,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -72,6 +69,7 @@ public class PhotoActivity extends Activity {
 	private ProgressBar progress, progressBar;
 	private View listPane;
 	private View errorPane;
+	private TextView errorText;
 	private WifiManager wifi;
 	private WifiConnectionHandler wifiConnectionHandler = new WifiConnectionHandler();
 	private Context context;
@@ -80,6 +78,7 @@ public class PhotoActivity extends Activity {
 	private ImagePagerAdapter pagerAdapter;
 	private int viewPagerCurrentPosition = 0;
 	private BlurActionBar actionBar;
+	private boolean isConnectErrorVisible = false;
 
 	public interface ConnectedListener {
 		public void onConnected();
@@ -106,8 +105,7 @@ public class PhotoActivity extends Activity {
 			public void onReceive(Context c, Intent intent) {
 				String action = intent.getAction();
 				if (action == WifiManager.SCAN_RESULTS_AVAILABLE_ACTION) {
-					if (isConnectedOrConnecting())
-						return;
+					if (isConnectedOrConnecting() || isConnectErrorVisible == true) return;
 					TreeSet<ScanResult> sortedResults = new TreeSet<ScanResult>(
 							new Comparator<ScanResult>() {
 								@Override
@@ -142,13 +140,12 @@ public class PhotoActivity extends Activity {
 					list.setAdapter(adapter);
 					list.setOnItemClickListener(new OnItemClickListener() {
 						@Override
-						public void onItemClick(AdapterView<?> parent,
-								View view, int position, long id) {
+						public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 							activeNetwork = adapter.getItem(position);
 							if (activeNetwork.capabilities.startsWith("[ESS")) {
+								hideListPane();
 								progressBar.setVisibility(View.VISIBLE);
-								new WifiConnector(PhotoActivity.this)
-								.connectTo(activeNetwork);
+								new WifiConnector(PhotoActivity.this).connectTo(activeNetwork);
 							} else {
 								wifiDialog.setVisibility(View.VISIBLE);
 								password.setText("");
@@ -157,40 +154,20 @@ public class PhotoActivity extends Activity {
 							}
 						}
 					});
-					if (isConnectedOrConnecting())
-						return;
+					if (isConnectedOrConnecting()) return;
 					progressBar.setVisibility(View.INVISIBLE);
 					errorPane.setVisibility(View.INVISIBLE);
 					listPane.setVisibility(View.VISIBLE);
 					listPane.setAlpha(0);
 					listPane.setTranslationX(listPane.getWidth());
 					listPane.animate().translationX(0).alpha(1).start();
-				} else if (WifiManager.NETWORK_STATE_CHANGED_ACTION
-						.equals(action)) {
-					NetworkInfo info = intent
-							.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+				} else if (WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(action)) {
+					NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
 					boolean connected = info.getState() == NetworkInfo.State.CONNECTED;
 					boolean connecting = info.getState() == NetworkInfo.State.CONNECTING;
 					boolean visible = listPane.getVisibility() == View.VISIBLE;
 					if (connected) {
 						connectedListener.onConnected();
-						if (visible) {
-							listPane.animate()
-							.translationX(listPane.getWidth()).alpha(0)
-							.setListener(new AnimatorListenerAdapter() {
-								@Override
-								public void onAnimationEnd(
-										Animator animation) {
-									progressBar
-									.setVisibility(View.INVISIBLE);
-									listPane.setVisibility(View.INVISIBLE);
-									listPane.setTranslationX(0);
-									listPane.setAlpha(1);
-									listPane.animate()
-									.setListener(null).start();
-								}
-							}).start();
-						}
 					}
 					if (!visible && !connected && !connecting) {
 						scanWifi();
@@ -199,6 +176,20 @@ public class PhotoActivity extends Activity {
 			}
 		};
 
+		private void hideListPane() {
+			listPane.animate()
+			.translationX(listPane.getWidth()).alpha(0)
+			.setListener(new AnimatorListenerAdapter() {
+				@Override
+				public void onAnimationEnd(Animator animation) {
+					listPane.setVisibility(View.INVISIBLE);
+					listPane.setTranslationX(0);
+					listPane.setAlpha(1);
+					listPane.animate().setListener(null).start();
+				}
+			}).start();
+		}
+		
 		public void createUi(Bundle savedInstanceState) {
 			list = (ListView) findViewById(R.id.list);
 			listPane = findViewById(R.id.list_container);
@@ -206,10 +197,9 @@ public class PhotoActivity extends Activity {
 			password = (TextView) wifiDialog.findViewById(R.id.password);
 			password.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 				@Override
-				public boolean onEditorAction(TextView v, int actionId,
-						KeyEvent event) {
+				public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 					if (actionId == EditorInfo.IME_ACTION_DONE) {
-						connectNetwork();
+						connectToNetwork();
 						return true;
 					}
 					return false;
@@ -217,12 +207,12 @@ public class PhotoActivity extends Activity {
 			});
 			networkName = (TextView) wifiDialog.findViewById(R.id.title);
 			wifiDialog.findViewById(R.id.connect).setOnClickListener(
-					new View.OnClickListener() {
-						@Override
-						public void onClick(View v) {
-							connectNetwork();
-						}
-					});
+				new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						connectToNetwork();
+					}
+				});
 			if (null == savedInstanceState) {
 				wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
 				if (!wifi.isWifiEnabled()) {
@@ -239,14 +229,22 @@ public class PhotoActivity extends Activity {
 					WifiManager.NETWORK_STATE_CHANGED_ACTION));
 		}
 
-		public void connectNetwork() {
+		public void connectToNetwork() {
 			hideConnectionDialog();
 			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 			imm.hideSoftInputFromWindow(password.getWindowToken(), 0);
 			if (activeNetwork != null) {
+				hideListPane();
 				progressBar.setVisibility(View.VISIBLE);
-				new WifiConnector(PhotoActivity.this).connectTo(activeNetwork,
-						password.getText().toString());
+				WifiConnector wifiConnector = new WifiConnector(PhotoActivity.this);
+				wifiConnector.connectTo(activeNetwork, password.getText().toString());
+				if (wifiConnector.getConnectionResult() == -1) {
+					progressBar.setVisibility(View.INVISIBLE);
+					errorText.setText(R.string.error_not_connected);
+					errorPane.setVisibility(View.VISIBLE);
+					isConnectErrorVisible = true;
+					errorPane.postDelayed(hideErrorPane, 5000);
+				}
 			}
 		}
 
@@ -277,12 +275,12 @@ public class PhotoActivity extends Activity {
 		@Override
 		public void run() {
 			View[] swipeBlockers = { progress, wifiConnectionHandler.getView(),
-					errorPane };
+					errorPane, progressBar };
 			boolean blocked = false;
 			for (View blocker : swipeBlockers) {
 				blocked |= blocker.getVisibility() == View.VISIBLE;
 			}
-			if (blocked || getActionBar().isShowing() || actionBar.isFreeze()) {
+			if (blocked || getActionBar().isShowing() || actionBar.isFreeze()|| !isConnectedOrConnecting()) {
 				pager.postDelayed(swipeRunnable, 50);
 			} else {
 				pagerAdapter.notifyDataSetChanged();
@@ -378,10 +376,10 @@ public class PhotoActivity extends Activity {
 			}
 		});
 		errorPane = findViewById(R.id.error_pane);
+		errorText = ((TextView) errorPane.findViewById(R.id.error_text));
 		final String user = getUser();
 		if (user == null) {
-			((TextView) errorPane.findViewById(R.id.error_text))
-			.setText(R.string.error_no_user_data);
+			errorText.setText(R.string.error_no_user_data);
 			errorPane.setVisibility(View.VISIBLE);
 			return;
 		}
@@ -396,10 +394,11 @@ public class PhotoActivity extends Activity {
 			@Override
 			public void run() {
 				if (isConnected()) {
-					MailConnector mailer = new MailConnector(user, "temppass",
-							context);
+					MailConnector mailer = new MailConnector(user, "temppass", context);
 					mailer.connect(databaseHelper);
-					hideErrorPane();
+					if (!isPicturesFolderEmpty()) {
+						hideErrorPane();
+					}
 				}
 			}
 		}, 0, 180000);
@@ -447,16 +446,21 @@ public class PhotoActivity extends Activity {
 	}
 
 	private void hideErrorPane() {
-		if (errorPane.getVisibility() == View.VISIBLE
-				&& !isPicturesFolderEmpty()) {
-			runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					errorPane.setVisibility(View.INVISIBLE);
-				}
-			});
+		if (errorPane.getVisibility() == View.VISIBLE) {
+			runOnUiThread(hideErrorPane);
 		}
 	}
+
+	private Runnable hideErrorPane = new Runnable() {
+		@Override
+		public void run() {
+			errorPane.setVisibility(View.INVISIBLE);
+			if (isConnectErrorVisible == true) {
+				isConnectErrorVisible = false;
+				wifiConnectionHandler.scanWifi();
+			}
+		}
+	};
 
 	private void swipeImage() {
 		pager.postDelayed(swipeRunnable, 5000);
@@ -488,10 +492,11 @@ public class PhotoActivity extends Activity {
 	public ConnectedListener connectedListener = new ConnectedListener() {
 		@Override
 		public void onConnected() {
+			progressBar.setVisibility(View.INVISIBLE);
+			wifiConnectionHandler.hideListPane();
 			if (isPicturesFolderEmpty() && getUser() != null) {
 				String message = getString(R.string.error_no_foto, getUser());
-				((TextView) errorPane.findViewById(R.id.error_text))
-				.setText(message);
+				errorText.setText(message);
 				errorPane.setVisibility(View.VISIBLE);
 			}
 		}
