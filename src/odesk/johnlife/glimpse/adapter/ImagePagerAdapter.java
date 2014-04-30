@@ -131,13 +131,17 @@ public class ImagePagerAdapter extends PagerAdapter {
 	public void deleteCurrentItem(ViewPager pager) {
 		if (fileHandler.isEmpty()) return;
 		int position = pager.getCurrentItem();
-		int deleted = fileHandler.delete(getItem(position));
+		PictureData item = getItem(position);
+		if (null == item) return; 
+		int deleted = fileHandler.delete(item);
 		notifyDataSetChanged();
 		pager.setCurrentItem(position-deleted);
 	}
 
 	public void setImageShown(int position) {
-		fileHandler.show(getItem(position));
+		PictureData item = getItem(position);
+		if (null == item) return; 
+		fileHandler.show(item);
 	}
 
 }

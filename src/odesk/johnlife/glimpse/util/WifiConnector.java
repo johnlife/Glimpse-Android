@@ -5,6 +5,7 @@ import java.util.regex.Pattern;
 import android.content.Context;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.util.Log;
 
@@ -131,4 +132,11 @@ public class WifiConnector {
 		return connectionResult;
 	}
 
+	public void forgetCurrent() {
+		WifiInfo connection = wifi.getConnectionInfo();
+		if (null == connection) return; 
+ 		wifi.disconnect();
+		wifi.removeNetwork(connection.getNetworkId());
+		wifi.startScan();
+	}
 }

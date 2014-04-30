@@ -367,7 +367,9 @@ public class PhotoActivity extends Activity {
 				} else if (v.getId() == R.id.action_freeze) {
 //					pager.setSwipeable(!actionBar.isFreeze());
 				} else if (v.getId() == R.id.action_reset_wifi) {
-					//TODO reset wi-fi
+					if (isConnected()) {
+						new WifiConnector(context).forgetCurrent();
+					}
 				}
 			}
 		});
