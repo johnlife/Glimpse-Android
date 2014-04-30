@@ -15,6 +15,7 @@ import odesk.johnlife.glimpse.app.GlimpseApp;
 import odesk.johnlife.glimpse.data.DatabaseHelper;
 import odesk.johnlife.glimpse.ui.BlurActionBar;
 import odesk.johnlife.glimpse.ui.BlurActionBar.OnActionClick;
+import odesk.johnlife.glimpse.ui.FreezeViewPager;
 import odesk.johnlife.glimpse.util.MailConnector;
 import odesk.johnlife.glimpse.util.WifiConnector;
 import android.animation.Animator;
@@ -57,7 +58,6 @@ import android.widget.TextView;
 public class PhotoActivity extends Activity {
 
 	// private Bitmap activeImage = null;
-
 	private ProgressBar progressBar;
 	private View listPane;
 	private View errorPane;
@@ -136,6 +136,7 @@ public class PhotoActivity extends Activity {
 							activeNetwork = adapter.getItem(position);
 							if (activeNetwork.capabilities.startsWith("[ESS")) {
 								hideListPane();
+								wifiDialog.setVisibility(View.GONE);
 								progressBar.setVisibility(View.VISIBLE);
 								new WifiConnector(PhotoActivity.this).connectTo(activeNetwork);
 							} else {
@@ -260,22 +261,14 @@ public class PhotoActivity extends Activity {
 		}
 
 		public void hideConnectionDialog() {
-			wifiDialog.setVisibility(View.INVISIBLE);
+			wifiDialog.setVisibility(View.GONE);
 		}
 	}
 
 	private Runnable swipeRunnable = new Runnable() {
 		@Override
 		public void run() {
-			View[] swipeBlockers = {
-				wifiConnectionHandler.getView(),
-				errorPane, 
-				progressBar 
-			};
-			boolean blocked = getActionBar().isShowing() || actionBar.isFreeze()|| !isConnectedOrConnecting();
-			for (View blocker : swipeBlockers) {
-				blocked |= blocker.getVisibility() == View.VISIBLE;
-			}
+			boolean blocked = isBlocked();
 			if (blocked) {
 				pager.postDelayed(swipeRunnable, 50);
 			} else {
@@ -288,7 +281,21 @@ public class PhotoActivity extends Activity {
 				rescheduleImageSwipe();
 			}
 		}
+
 	};
+	
+	private boolean isBlocked() {
+		View[] swipeBlockers = {
+			wifiConnectionHandler.getView(),
+			errorPane, 
+			progressBar 
+		};
+		boolean blocked = getActionBar().isShowing() || actionBar.isFreeze()|| !isConnectedOrConnecting();
+		for (View blocker : swipeBlockers) {
+			blocked |= blocker.getVisibility() == View.VISIBLE;
+		}
+		return blocked;
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -301,12 +308,19 @@ public class PhotoActivity extends Activity {
 		pagerAdapter = new ImagePagerAdapter(this, databaseHelper, new OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				if (isBlocked()) return;
 				ActionBar actionBar = getActionBar();
 				if (actionBar.isShowing()) {
 					actionBar.hide();
 				} else {
 					actionBar.show();
 				}
+			}
+		});
+		((FreezeViewPager)pager).setSwipeValidator(new FreezeViewPager.SwipeValidator() {
+			@Override
+			public boolean isSwipeBlocked() {
+				return isBlocked();
 			}
 		});
 		pager.setAdapter(pagerAdapter);
