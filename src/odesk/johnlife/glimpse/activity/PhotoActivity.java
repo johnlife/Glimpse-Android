@@ -35,10 +35,8 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
@@ -60,8 +58,7 @@ public class PhotoActivity extends Activity {
 
 	// private Bitmap activeImage = null;
 
-	private int myProgress = 0;
-	private ProgressBar progress, progressBar;
+	private ProgressBar progressBar;
 	private View listPane;
 	private View errorPane;
 	private TextView errorText;
@@ -144,7 +141,8 @@ public class PhotoActivity extends Activity {
 							} else {
 								wifiDialog.setVisibility(View.VISIBLE);
 								password.setText("");
-								password.post(focusRunnable);
+								password.postDelayed(focusRunnable, 150);
+								password.requestFocus();
 								networkName.setText(activeNetwork.SSID);
 							}
 						}
@@ -269,8 +267,7 @@ public class PhotoActivity extends Activity {
 	private Runnable swipeRunnable = new Runnable() {
 		@Override
 		public void run() {
-			View[] swipeBlockers = { 
-				progress, 
+			View[] swipeBlockers = {
 				wifiConnectionHandler.getView(),
 				errorPane, 
 				progressBar 
@@ -282,7 +279,7 @@ public class PhotoActivity extends Activity {
 			if (blocked) {
 				pager.postDelayed(swipeRunnable, 50);
 			} else {
-				pagerAdapter.notifyDataSetChanged();
+//				pagerAdapter.notifyDataSetChanged();
 				int idx = pager.getCurrentItem()+1;
 				if (idx == pagerAdapter.getCount()) {
 					idx = 0;
@@ -290,52 +287,6 @@ public class PhotoActivity extends Activity {
 				pager.setCurrentItem(idx);
 				rescheduleImageSwipe();
 			}
-		}
-	};
-
-	private Runnable progressRunnable = new Runnable() {
-		@Override
-		public void run() {
-			if (progress.getVisibility() != View.VISIBLE) {
-				progress.removeCallbacks(progressRunnable);
-			} else {
-				int value = progress.getProgress() + 1;
-				if (value >= progress.getMax()) {
-					getActionBar().show();
-					progress.removeCallbacks(progressRunnable);
-				}
-				progress.setProgress(value);
-				progress.postDelayed(progressRunnable, 30);
-			}
-		}
-	};
-
-	private OnTouchListener touchListener = new OnTouchListener() {
-		@Override
-		public boolean onTouch(View v, MotionEvent event) {
-			int action = event.getActionMasked();
-			float x = event.getRawX();
-			float y = event.getRawY();
-			progress.setTranslationX(x - (progress.getWidth() / 2));
-			progress.setTranslationY(y - (progress.getHeight() / 2));
-			switch (action) {
-			case MotionEvent.ACTION_DOWN:
-				progress.setVisibility(View.VISIBLE);
-				progress.setProgress(0);
-				progress.post(progressRunnable);
-				System.out.println("boom");
-				break;
-			case MotionEvent.ACTION_CANCEL:
-			case MotionEvent.ACTION_UP:
-				System.out.println("hide");
-				progress.setVisibility(View.INVISIBLE);
-				progress.setProgress(0);
-				progress.removeCallbacks(progressRunnable);
-				break;
-			default:
-				break;
-			}
-			return true;
 		}
 	};
 
@@ -373,16 +324,14 @@ public class PhotoActivity extends Activity {
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		errorPane = findViewById(R.id.error_pane);
 		errorText = ((TextView) errorPane.findViewById(R.id.error_text));
+		wifiConnectionHandler.createUi(savedInstanceState);
+		progressBar = (ProgressBar) findViewById(R.id.progressLoading);
 		final String user = getUser();
 		if (user == null) {
 			errorText.setText(R.string.error_no_user_data);
 			errorPane.setVisibility(View.VISIBLE);
 			return;
 		}
-		wifiConnectionHandler.createUi(savedInstanceState);
-		progress = (ProgressBar) findViewById(R.id.progress);
-		progress.setRotation(-90);
-		progressBar = (ProgressBar) findViewById(R.id.progressLoading);
 		rescheduleImageSwipe();
 		mailTimer.scheduleAtFixedRate(new TimerTask() {
 			@Override
@@ -390,7 +339,7 @@ public class PhotoActivity extends Activity {
 				if (isConnected()) {
 					MailConnector mailer = new MailConnector(user, "HPgqL2658P", context);
 					mailer.connect();
-					if (!isPicturesFolderEmpty()) {
+					if (!GlimpseApp.getFileHandler().isEmpty()) {
 						hideErrorPane();
 					}
 				}
@@ -415,7 +364,6 @@ public class PhotoActivity extends Activity {
 			public void onClick(View v) {
 				if (v.getId() == R.id.action_delete) {
 					pagerAdapter.deleteCurrentItem(pager);
-					pagerAdapter.notifyDataSetChanged();
 				} else if (v.getId() == R.id.action_freeze) {
 //					pager.setSwipeable(!actionBar.isFreeze());
 				} else if (v.getId() == R.id.action_reset_wifi) {
@@ -445,10 +393,6 @@ public class PhotoActivity extends Activity {
 		return user;
 	}
 
-	public boolean isPicturesFolderEmpty() {
-		return GlimpseApp.getPicturesDir().listFiles().length == 0;
-	}
-
 	private void hideErrorPane() {
 		if (errorPane.getVisibility() == View.VISIBLE) {
 			runOnUiThread(hideErrorPane);
@@ -476,7 +420,7 @@ public class PhotoActivity extends Activity {
 		public void onConnected() {
 			progressBar.setVisibility(View.INVISIBLE);
 			wifiConnectionHandler.hideListPane();
-			if (isPicturesFolderEmpty() && getUser() != null) {
+			if (GlimpseApp.getFileHandler().isEmpty() && getUser() != null) {
 				String message = getString(R.string.error_no_foto, getUser());
 				errorText.setText(message);
 				errorPane.setVisibility(View.VISIBLE);

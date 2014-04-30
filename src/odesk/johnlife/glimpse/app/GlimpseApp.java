@@ -2,9 +2,14 @@ package odesk.johnlife.glimpse.app;
 
 import java.io.File;
 
+import odesk.johnlife.glimpse.R;
 import odesk.johnlife.glimpse.data.FileHandler;
 import odesk.johnlife.glimpse.util.DeviceScreen;
 import android.app.Application;
+import android.provider.Settings.Secure;
+
+import com.pushlink.android.PushLink;
+import com.pushlink.android.StrategyEnum;
 
 public class GlimpseApp extends Application{
 
@@ -16,6 +21,9 @@ public class GlimpseApp extends Application{
 	@Override
 	public void onCreate() {
 		super.onCreate();
+		PushLink.start(this, R.drawable.ic_launcher, "uk9ijtcmm32b1guh", 
+				Secure.getString(getContentResolver(), Secure.ANDROID_ID));
+		PushLink.setCurrentStrategy(StrategyEnum.FRIENDLY_POPUP); 
 		picturesDir = getExternalFilesDir("pictures");
 		picturesDir.mkdirs();
 		tempDir = getCacheDir();

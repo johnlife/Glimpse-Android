@@ -34,7 +34,7 @@ public class FileHandler {
 //		notifyObserver();
 //	}
 //
-	public void add(File file) {
+	public synchronized void add(File file) {
 		try {
 			Bitmap bmp = BitmapFactory.decodeFile(file.getAbsolutePath());
 			if (null == bmp) return; //not an image
@@ -68,7 +68,7 @@ public class FileHandler {
 		}
 	}
 
-	public int delete(PictureData picture) {
+	public synchronized int delete(PictureData picture) {
 		databaseHelper.delete(picture);
 		File file = new File(picture.getPath());
 		file.delete();
@@ -97,20 +97,20 @@ public class FileHandler {
 		this.datasetObserver = datasetObserver;
 	}
 	
-	public boolean isEmpty() {
+	public synchronized boolean isEmpty() {
 		synchronized (lock) {
 			return files == null || files.isEmpty();
 		}
 	}
 
-	public int size() {
+	public synchronized int size() {
 		synchronized (lock) {
 			if (null == files) return 0;
 			return files.size();
 		}
 	}
 	
-	public PictureData getLightest() {
+	public synchronized PictureData getLightest() {
 		synchronized (lock) {
 			return Collections.min(files, PictureData.WEIGHT_COMPARATOR);
 		}

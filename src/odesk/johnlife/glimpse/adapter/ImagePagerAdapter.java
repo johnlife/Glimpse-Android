@@ -58,7 +58,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 
 	@Override
 	public int getCount() {
-		return fileHandler.isEmpty() ? 1 : Integer.MAX_VALUE;
+		return fileHandler.size() < 2 ? 1 : Integer.MAX_VALUE;
 //		return Math.max(1, fileHandler.size());	
 	}
 	
@@ -82,7 +82,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 				frame.addView(image);
 				ImageView poster = new ImageView(context);
 				poster.setImageResource(R.drawable.new_pane);
-				poster.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.BOTTOM|Gravity.RIGHT));
+				poster.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.TOP|Gravity.RIGHT));
 				frame.addView(poster);
 				view = frame;
 			}

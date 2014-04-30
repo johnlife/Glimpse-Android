@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     
-    <dimen name="list_wifi">30sp</dimen>
-    <dimen name="title_wifi_pane">30sp</dimen>
+    <dimen name="title">30sp</dimen>
+    <dimen name="action">20sp</dimen>
     <dimen name="error_pane">20sp</dimen>
     
 </resources>

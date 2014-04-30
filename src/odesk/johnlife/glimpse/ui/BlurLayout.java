@@ -33,6 +33,10 @@ public class BlurLayout extends FrameLayout {
 
 	@Override
 	public void onDraw(Canvas canvas) {
+		if (isInEditMode()) {
+			super.onDraw(canvas);
+			return;
+		}
 		if (null == bmp) {
 			renderBlur();
 		}

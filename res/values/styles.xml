@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<resources xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools" tools:ignore="NewApi">
 
     <!--
         Base application theme, dependent on API level. This theme is replaced
@@ -51,4 +51,19 @@
         <item name="android:padding">4dp</item>
     </style>
 
+    <style name="title" parent="android:Widget.Holo.TextView">
+        <item name="android:fontFamily">sans-serif-thin</item>
+        <item name="android:gravity">center</item>
+        <item name="android:padding">4dp</item>
+        <item name="android:textColor">@color/text</item>
+        <item name="android:textSize">@dimen/title</item>
+    </style>
+    
+    <style name="actionItem" parent="android:Widget.Holo.TextView">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:textColor">@color/text</item>
+        <item name="android:textSize">@dimen/action</item>
+    </style>
+    
 </resources>

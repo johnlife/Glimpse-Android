@@ -5,7 +5,6 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class BlurActionBar {
@@ -20,7 +19,7 @@ public class BlurActionBar {
 	
 	public BlurActionBar(Activity activity) {
 		this.actionBar = activity.getActionBar();
-		customActionBar = activity.getLayoutInflater().inflate(R.layout.custom_bar, new LinearLayout(activity), false);
+		customActionBar = activity.getLayoutInflater().inflate(R.layout.custom_bar, null);
 		actionBar.hide();
 		actionBar.setCustomView(customActionBar);
 		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);

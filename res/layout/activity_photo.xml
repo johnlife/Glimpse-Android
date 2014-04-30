@@ -30,7 +30,7 @@
 
     <odesk.johnlife.glimpse.ui.BlurLayout
         android:id="@+id/list_container"
-        android:layout_width="200dp"
+        android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:layout_gravity="right" >
 
@@ -40,15 +40,14 @@
             android:background="@color/background_shade"
             android:divider="@drawable/layout_divider"
             android:orientation="vertical"
+            android:padding="8dp"
             android:showDividers="middle" >
 
-            <TextView
+            <TextView style="@style/title"
                 android:id="@+id/title_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/title_wifi_list"
-                android:textStyle="bold"
-                android:textSize="@dimen/list_wifi" />
+                android:text="@string/title_wifi_list" />
 
             <ListView
                 android:id="@+id/list"
@@ -76,13 +75,9 @@
 
             <TextView
                 android:id="@+id/title"
+                style="@style/title"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-thin"
-                android:gravity="center"
-                android:padding="4dp"
-                android:textColor="@color/text"
-                android:textSize="@dimen/title_wifi_pane" />
+                android:layout_height="wrap_content" />
 
             <LinearLayout
                 android:layout_width="match_parent"
