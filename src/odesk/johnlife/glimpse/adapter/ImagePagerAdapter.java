@@ -1,7 +1,5 @@
 package odesk.johnlife.glimpse.adapter;
 
-import java.util.List;
-
 import odesk.johnlife.glimpse.R;
 import odesk.johnlife.glimpse.app.GlimpseApp;
 import odesk.johnlife.glimpse.data.DatabaseHelper;
@@ -9,15 +7,20 @@ import odesk.johnlife.glimpse.data.FileHandler;
 import odesk.johnlife.glimpse.data.PictureData;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.SparseArray;
+import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.FrameLayout.LayoutParams;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 
@@ -25,7 +28,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 
 	private Context context;
 	private FileHandler fileHandler;
-	private List<PictureData> files;
+	private SparseArray<PictureData> pictures;
 	private OnClickListener onClickListener;
 	
 	public ImagePagerAdapter(final Activity activity, DatabaseHelper databaseHelper, OnClickListener onClickListener) {
@@ -33,48 +36,69 @@ public class ImagePagerAdapter extends PagerAdapter {
 		this.context = activity;
 		this.onClickListener = onClickListener;
 		this.fileHandler = GlimpseApp.getFileHandler();
+		final boolean wasEmpty = fileHandler.isEmpty();
 		fileHandler.setObserver(new DataSetObserver() {
 			@Override
 			public void onChanged() {
-				activity.runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						notifyDataSetChanged();
-					}
-				});
+				if (wasEmpty) {
+					activity.startActivity(new Intent(activity, activity.getClass()));
+					activity.finish();
+				} else {
+					activity.runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							notifyDataSetChanged();
+						}
+					});
+				}
 			}
 		});
-		this.files = fileHandler.getFiles();
+		this.pictures = new SparseArray<PictureData>(fileHandler.size());
 	}
 
 	@Override
 	public int getCount() {
-		return Math.max(1, files.size());	
+		return fileHandler.isEmpty() ? 1 : Integer.MAX_VALUE;
+//		return Math.max(1, fileHandler.size());	
 	}
 	
-	public PictureData getItem(int position) {
-		return files.get(position);
+	private PictureData getItem(int position) {
+		return pictures.get(position);
 	}
 
 	@Override
 	public Object instantiateItem(ViewGroup pager, int position){
 		ImageView image = new ImageView(context);
+		View view = image;
 		Bitmap bitmap;
-		if (files.isEmpty()) {
+		if (fileHandler.isEmpty()) {
 			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wp1);
 		} else {
-			bitmap = BitmapFactory.decodeFile(files.get(position).getPath());
+			PictureData pictureData = fileHandler.getLightest();
+			pictureData.viewCreated();
+			pictures.put(position, pictureData);
+			if (pictureData.createdToday()) {
+				FrameLayout frame = new FrameLayout(context);
+				frame.addView(image);
+				ImageView poster = new ImageView(context);
+				poster.setImageResource(R.drawable.new_pane);
+				poster.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.BOTTOM|Gravity.RIGHT));
+				frame.addView(poster);
+				view = frame;
+			}
+			bitmap = BitmapFactory.decodeFile(pictureData.getPath());
 		}
 		image.setImageBitmap(bitmap);
 		image.setOnClickListener(onClickListener);
 		setScaleType(image, bitmap);
-		pager.addView(image);
-		return image;		
+		pager.addView(view);
+		return view;		
 	}
 
 	@Override
 	public void destroyItem(View collection, int position, Object view) {
 		((ViewPager) collection).removeView((View) view);
+		pictures.remove(position);
 	}
 
 	@Override
@@ -105,10 +129,15 @@ public class ImagePagerAdapter extends PagerAdapter {
 	}
 	
 	public void deleteCurrentItem(ViewPager pager) {
-		if (files.isEmpty()) return;
+		if (fileHandler.isEmpty()) return;
 		int position = pager.getCurrentItem();
 		int deleted = fileHandler.delete(getItem(position));
 		notifyDataSetChanged();
 		pager.setCurrentItem(position-deleted);
 	}
+
+	public void setImageShown(int position) {
+		fileHandler.show(getItem(position));
+	}
+
 }

@@ -17,30 +17,17 @@ import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.Store;
-import javax.mail.URLName;
 import javax.mail.search.FlagTerm;
 
 import odesk.johnlife.glimpse.R;
 import odesk.johnlife.glimpse.app.GlimpseApp;
-import odesk.johnlife.glimpse.data.DatabaseHelper;
 import odesk.johnlife.glimpse.data.FileHandler;
 import android.content.Context;
-
-import com.sun.mail.pop3.POP3SSLStore;
+import android.util.Log;
 
 public class MailConnector {
-	private static final int POP_PORT = 995;
-	private static final String POP3 = "pop3";
 //	private static final String SSL_FACTORY = "javax.net.ssl.SSLSocketFactory";
 	private static final String SSL_FACTORY = "odesk.johnlife.glimpse.util.AlwaysTrustSSLContextFactory";
-	private static final Properties pop3Props = new Properties();
-
-	static {
-		pop3Props.setProperty("mail.pop3.socketFactory.class", SSL_FACTORY);
-		pop3Props.setProperty("mail.pop3.socketFactory.fallback", "false");
-		pop3Props.setProperty("mail.pop3.port", String.valueOf(POP_PORT));
-		pop3Props.setProperty("mail.pop3.socketFactory.port", String.valueOf(POP_PORT));
-	}
 	
 	private String user;
 	private String pass;
@@ -53,28 +40,31 @@ public class MailConnector {
 		this.server = context.getString(R.string.email_server);
 	}
 
-	public void connect(DatabaseHelper databaseHelper) {
-		URLName url = new URLName(POP3, server, POP_PORT, "", user, pass);
-		Session session = Session.getInstance(pop3Props, null);
-		session.setDebug(true);
-		Store store = new POP3SSLStore(session, url);
+	public void connect() {
+	    Properties properties = System.getProperties();
+	    properties.setProperty("mail.store.protocol", "imaps");
+	    properties.setProperty("mail.imaps.socketFactory.class", SSL_FACTORY);
 		try {
-			store.connect();
+	        Session session = Session.getDefaultInstance(properties, null);
+	        Store store = session.getStore("imaps");
+		    store.connect(server, user, pass);
 			Folder folder = null;
 			folder = store.getDefaultFolder().getFolder("INBOX");
 			folder.open(Folder.READ_WRITE);
-			Message[] messages = folder.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
 			FileHandler fileHandler = GlimpseApp.getFileHandler();
+			Message[] messages = fileHandler.isEmpty() ?
+				folder.getMessages() : 
+				folder.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
+			Log.d(getClass().getSimpleName(), "Got "+messages.length+(fileHandler.isEmpty() ? " total" : " new")+" messages.");
 			for(Message msg : messages) {
-				if (!msg.isSet(Flags.Flag.SEEN)) {
-					try {
-						List<File> attachments = getAttachments((Multipart) msg.getContent());
-						for (File file : attachments) {
-							fileHandler.add(file);
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
+				try {
+					List<File> attachments = getAttachments((Multipart) msg.getContent());
+					Log.d(getClass().getSimpleName(), "Found "+attachments.size()+" attachments.");
+					for (File file : attachments) {
+						fileHandler.add(file);
 					}
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
 			folder.setFlags(messages, new Flags(Flags.Flag.SEEN), true);

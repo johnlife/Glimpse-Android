@@ -15,18 +15,16 @@ import odesk.johnlife.glimpse.app.GlimpseApp;
 import odesk.johnlife.glimpse.data.DatabaseHelper;
 import odesk.johnlife.glimpse.ui.BlurActionBar;
 import odesk.johnlife.glimpse.ui.BlurActionBar.OnActionClick;
-import odesk.johnlife.glimpse.ui.ImageViewPager;
 import odesk.johnlife.glimpse.util.MailConnector;
 import odesk.johnlife.glimpse.util.WifiConnector;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Configuration;
-import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
@@ -42,13 +40,12 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.ImageView.ScaleType;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -64,7 +61,6 @@ public class PhotoActivity extends Activity {
 	// private Bitmap activeImage = null;
 
 	private int myProgress = 0;
-	private View contentView;
 	private ProgressBar progress, progressBar;
 	private View listPane;
 	private View errorPane;
@@ -73,11 +69,11 @@ public class PhotoActivity extends Activity {
 	private WifiConnectionHandler wifiConnectionHandler = new WifiConnectionHandler();
 	private Context context;
 	private DatabaseHelper databaseHelper;
-	private ImageViewPager pager;
+	private ViewPager pager;
 	private ImagePagerAdapter pagerAdapter;
-	private int viewPagerCurrentPosition = 0;
 	private BlurActionBar actionBar;
 	private boolean isConnectErrorVisible = false;
+	private Timer mailTimer = new Timer();
 
 	public interface ConnectedListener {
 		public void onConnected();
@@ -287,11 +283,12 @@ public class PhotoActivity extends Activity {
 				pager.postDelayed(swipeRunnable, 50);
 			} else {
 				pagerAdapter.notifyDataSetChanged();
-				viewPagerCurrentPosition = pager.getCurrentItem();
-				viewPagerCurrentPosition = viewPagerCurrentPosition == pagerAdapter.getCount() - 1 ? 0 : viewPagerCurrentPosition + 1;
-				Log.e("viewPagerCurrentPosition", "viewPagerCurrentPosition = " + viewPagerCurrentPosition);
-				pager.setCurrentItem(viewPagerCurrentPosition);
-				swipeImage();
+				int idx = pager.getCurrentItem()+1;
+				if (idx == pagerAdapter.getCount()) {
+					idx = 0;
+				}
+				pager.setCurrentItem(idx);
+				rescheduleImageSwipe();
 			}
 		}
 	};
@@ -309,19 +306,6 @@ public class PhotoActivity extends Activity {
 				}
 				progress.setProgress(value);
 				progress.postDelayed(progressRunnable, 30);
-			}
-		}
-	};
-
-	private Runnable myThread = new Runnable() {
-		@Override
-		public void run() {
-			while (myProgress < 1000) {
-				try {
-					myProgress++;
-					progressBar.setProgress(myProgress);
-				} catch (Throwable t) {
-				}
 			}
 		}
 	};
@@ -362,22 +346,31 @@ public class PhotoActivity extends Activity {
 		createActionBar();
 		context = this;
 		databaseHelper = DatabaseHelper.getInstance(getApplicationContext());
-		contentView = findViewById(android.R.id.content);
-		pager = (ImageViewPager) findViewById(R.id.pager);
+		pager = (ViewPager) findViewById(R.id.pager);
 		pagerAdapter = new ImagePagerAdapter(this, databaseHelper, new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				getActionBar().show();
+				ActionBar actionBar = getActionBar();
+				if (actionBar.isShowing()) {
+					actionBar.hide();
+				} else {
+					actionBar.show();
+				}
 			}
 		});
 		pager.setAdapter(pagerAdapter);
+		pager.setOffscreenPageLimit(2);
 		pager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
 			@Override
 			public void onPageSelected(int position) {
-				position = position == pagerAdapter.getCount() - 1 ? 0 : position;
-				pager.setCurrentItem(position);
+				rescheduleImageSwipe();
+				pagerAdapter.setImageShown(position);
+				if (actionBar.isFreeze()) {
+					actionBar.unFreeze();
+				}
 			}
 		});
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		errorPane = findViewById(R.id.error_pane);
 		errorText = ((TextView) errorPane.findViewById(R.id.error_text));
 		final String user = getUser();
@@ -388,25 +381,33 @@ public class PhotoActivity extends Activity {
 		}
 		wifiConnectionHandler.createUi(savedInstanceState);
 		progress = (ProgressBar) findViewById(R.id.progress);
-		progressBar = (ProgressBar) findViewById(R.id.progressLoading);
-		new Thread(myThread).start();
 		progress.setRotation(-90);
-		swipeImage();
-		Timer mailTimer = new Timer();
+		progressBar = (ProgressBar) findViewById(R.id.progressLoading);
+		rescheduleImageSwipe();
 		mailTimer.scheduleAtFixedRate(new TimerTask() {
 			@Override
 			public void run() {
 				if (isConnected()) {
 					MailConnector mailer = new MailConnector(user, "HPgqL2658P", context);
-					mailer.connect(databaseHelper);
+					mailer.connect();
 					if (!isPicturesFolderEmpty()) {
 						hideErrorPane();
 					}
 				}
 			}
-		}, 0, 240000);
+		}, 0, 120000);
 	}
 	
+	
+	
+	@Override
+	protected void onDestroy() {
+		mailTimer.cancel();
+		super.onDestroy();
+	}
+
+
+
 	private void createActionBar() {
 		actionBar = new BlurActionBar(this);
 		actionBar.setOnActionClickListener(new OnActionClick() {
@@ -416,7 +417,7 @@ public class PhotoActivity extends Activity {
 					pagerAdapter.deleteCurrentItem(pager);
 					pagerAdapter.notifyDataSetChanged();
 				} else if (v.getId() == R.id.action_freeze) {
-					pager.setSwipeable(!actionBar.isFreeze());
+//					pager.setSwipeable(!actionBar.isFreeze());
 				} else if (v.getId() == R.id.action_reset_wifi) {
 					//TODO reset wi-fi
 				}
@@ -465,22 +466,9 @@ public class PhotoActivity extends Activity {
 		}
 	};
 
-	private void swipeImage() {
-		pager.postDelayed(swipeRunnable, 5000);
-	}
-
-	public void setScaleType(ImageView imageView, Bitmap bitmap) {
-		if (bitmap != null) {
-			int height = bitmap.getHeight();
-			int width = bitmap.getWidth();
-			int currentOrientation = getResources().getConfiguration().orientation;
-			if ((height > width && currentOrientation == Configuration.ORIENTATION_PORTRAIT)
-					|| (height < width && currentOrientation == Configuration.ORIENTATION_LANDSCAPE)) {
-				imageView.setScaleType(ScaleType.CENTER_CROP);
-			} else {
-				imageView.setScaleType(ScaleType.FIT_CENTER);
-			}
-		}
+	private void rescheduleImageSwipe() {
+		pager.removeCallbacks(swipeRunnable);
+		pager.postDelayed(swipeRunnable, 8000);
 	}
 
 	public ConnectedListener connectedListener = new ConnectedListener() {

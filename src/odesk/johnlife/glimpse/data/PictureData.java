@@ -37,7 +37,7 @@ public class PictureData {
 		}
 	};
 	
-	private int id = -1;
+	private long id = -1;
 	private String path;
 	private int count;
 	private long created;
@@ -60,18 +60,19 @@ public class PictureData {
 		lastSeen = c.getLong(4);
 	}
 
-	void toDb(SQLiteDatabase db) {
+	PictureData toDb(SQLiteDatabase db) {
 		ContentValues cv = new ContentValues();
 		cv.put(COLUMN_PICTURES, path);
 		cv.put(COLUMN_COUNT, count);
 		cv.put(COLUMN_LOAD_TIME, created);
 		cv.put(COLUMN_LAST_TIME, lastSeen);
 		if (-1 == id) {
-			db.insert(TABLE_NAME, null, cv);
+			id = db.insert(TABLE_NAME, null, cv);
 		} else {
 			cv.put(COLUMN_ID, id);
 			db.update(TABLE_NAME, cv, COLUMN_ID+"="+id, null);
 		}
+		return this;
 	}
 
 	public void delete(SQLiteDatabase db) {
@@ -79,7 +80,7 @@ public class PictureData {
 		System.out.println("DELETED "+deleted+" ROWS"+ path);
 	}
 
-	public boolean isToday() {
+	public boolean createdToday() {
 		Calendar created = Calendar.getInstance();
 		created.setTimeInMillis(this.created);
 		Calendar now = Calendar.getInstance();
@@ -96,15 +97,30 @@ public class PictureData {
 	}
 
 	private long getWeight() {
-		if (-1 == weight || (System.currentTimeMillis() - weightCalc > 5000)) {
-			weightCalc = System.currentTimeMillis();
-			weight = count*86400000 - (weightCalc-lastSeen);
+		if (-1 == weight || ((System.currentTimeMillis() - weightCalc) > 5000)) {
+			weightCalc = System.currentTimeMillis();   
+			weight = (long) Math.max(1, ((double)count*60000) - (weightCalc-lastSeen));
 		}
 		return weight;
 	}
 
 	public String getPath() {
 		return path;
+	}
+
+	public void shown() {
+		count++;
+		viewCreated();
+	}
+
+	public void viewCreated() {
+		lastSeen = System.currentTimeMillis();
+		weight = -1;
+	}
+
+	@Override
+	public String toString() {
+		return path.substring(path.lastIndexOf('/'));
 	}
 
 }

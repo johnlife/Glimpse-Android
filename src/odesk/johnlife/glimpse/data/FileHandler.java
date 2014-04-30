@@ -16,6 +16,7 @@ import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 public class FileHandler {
+	private final Object lock = new Object();
 	
 	private DatabaseHelper databaseHelper;
 	private List<PictureData> files;
@@ -23,10 +24,16 @@ public class FileHandler {
 	
 	public FileHandler(Context context) {
 		databaseHelper = DatabaseHelper.getInstance(context);
-		files = databaseHelper.getPictures();
-		Collections.sort(files, PictureData.WEIGHT_COMPARATOR);
+		synchronized (lock) {
+			files = databaseHelper.getPictures();
+		}
 	}
 
+//	public final void resort() {
+//		Collections.sort(files, PictureData.WEIGHT_COMPARATOR);
+//		notifyObserver();
+//	}
+//
 	public void add(File file) {
 		try {
 			Bitmap bmp = BitmapFactory.decodeFile(file.getAbsolutePath());
@@ -51,17 +58,13 @@ public class FileHandler {
 			}
 			PictureData picture = new PictureData(path);
 			picture = databaseHelper.addOrUpdate(picture);
-			files.add(picture);
-			notifyObserver();
+			synchronized (lock) {
+				files.add(picture);
+				notifyObserver();
+			}
 			file.delete();
 		} catch (IllegalStateException e) {
 			e.printStackTrace();
-		}
-	}
-
-	private void notifyObserver() {
-		if (null != datasetObserver) {
-			datasetObserver.onChanged();
 		}
 	}
 
@@ -70,20 +73,46 @@ public class FileHandler {
 		File file = new File(picture.getPath());
 		file.delete();
 		int deleted = 0;
-		while (files.remove(picture)) {
-			deleted++;
-		};
-		notifyObserver();
+		synchronized (lock) {
+			while (files.remove(picture)) {
+				deleted++;
+			};
+			notifyObserver();
+		}
 		return deleted;
 	}
+	
+	public void show(PictureData picture) {
+		picture.shown();
+		databaseHelper.addOrUpdate(picture);
+	}
 
-	public List<PictureData> getFiles() {
-		return files;
+	private void notifyObserver() {
+		if (null != datasetObserver) {
+			datasetObserver.onChanged();
+		}
 	}
 
 	public void setObserver(DataSetObserver datasetObserver) {
 		this.datasetObserver = datasetObserver;
 	}
 	
+	public boolean isEmpty() {
+		synchronized (lock) {
+			return files == null || files.isEmpty();
+		}
+	}
+
+	public int size() {
+		synchronized (lock) {
+			if (null == files) return 0;
+			return files.size();
+		}
+	}
 	
+	public PictureData getLightest() {
+		synchronized (lock) {
+			return Collections.min(files, PictureData.WEIGHT_COMPARATOR);
+		}
+	}
 }
