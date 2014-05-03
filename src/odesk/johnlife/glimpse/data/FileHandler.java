@@ -14,6 +14,8 @@ import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.util.Log;
 public class FileHandler {
 	private final Object lock = new Object();
@@ -38,16 +40,7 @@ public class FileHandler {
 		try {
 			Bitmap bmp = BitmapFactory.decodeFile(file.getAbsolutePath());
 			if (null == bmp) return; //not an image
-			//scale 
-			float w = bmp.getWidth();
-			float h = bmp.getHeight();
-			float s = Math.min(w, h);
-			float l = Math.max(w, h);
-			float sw = GlimpseApp.getScreen().getSmallestWidth();
-			float lw = GlimpseApp.getScreen().getLargestWidth();
-			float ratio = Math.min(1f, Math.max(sw/s, lw/l));
-			Bitmap scaled = Bitmap.createScaledBitmap(bmp, (int) (ratio*w), (int) (ratio*h), true);
-			//output
+			Bitmap scaled = scaleAndRotate(bmp, file);
 			String path = new File(GlimpseApp.getPicturesDir(), "pic"+System.currentTimeMillis()+".jpg").getAbsolutePath();
 			try {
 				OutputStream out = new BufferedOutputStream(new FileOutputStream(path)); 
@@ -66,6 +59,38 @@ public class FileHandler {
 		} catch (IllegalStateException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private Bitmap scaleAndRotate(Bitmap bmp, File file) {
+		float w = bmp.getWidth();
+		float h = bmp.getHeight();
+		float s = Math.min(w, h);
+		float l = Math.max(w, h);
+		float sw = GlimpseApp.getScreen().getSmallestWidth();
+		float lw = GlimpseApp.getScreen().getLargestWidth();
+		float ratio = Math.min(1f, Math.max(sw/s, lw/l));
+		Bitmap scaled = Bitmap.createScaledBitmap(bmp, (int) (ratio*w), (int) (ratio*h), true);
+        Bitmap rotated = scaled;
+        try {
+	        ExifInterface ei = new ExifInterface(file.getAbsolutePath());
+	        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+	        Matrix mtx = new Matrix();
+	        int scaledW = scaled.getWidth();
+	        int scaledH = scaled.getHeight();
+	        switch (orientation) {
+		        case ExifInterface.ORIENTATION_ROTATE_90:
+		            //rotate CCW
+		            mtx.preRotate(-90);
+		            rotated = Bitmap.createBitmap(scaled, 0, 0, scaledW, scaledH, mtx, true);
+		            break;
+		        case ExifInterface.ORIENTATION_ROTATE_270:
+		            //rotate CW
+		            mtx.preRotate(90);
+		            rotated = Bitmap.createBitmap(scaled, 0, 0, scaledW, scaledH, mtx, true);
+		            break;
+	        }
+        } catch (IOException e) {}
+		return rotated;
 	}
 
 	public synchronized int delete(PictureData picture) {

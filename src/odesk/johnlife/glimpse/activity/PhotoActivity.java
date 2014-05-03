@@ -134,9 +134,10 @@ public class PhotoActivity extends Activity {
 						@Override
 						public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 							activeNetwork = adapter.getItem(position);
-							if (activeNetwork.capabilities.startsWith("[ESS")) {
+							String cap = activeNetwork.capabilities;
+							if (cap.isEmpty() || cap.startsWith("[ESS")) {
 								hideListPane();
-								wifiDialog.setVisibility(View.GONE);
+								hideConnectionDialog();
 								progressBar.setVisibility(View.VISIBLE);
 								new WifiConnector(PhotoActivity.this).connectTo(activeNetwork);
 							} else {
@@ -262,17 +263,18 @@ public class PhotoActivity extends Activity {
 
 		public void hideConnectionDialog() {
 			wifiDialog.setVisibility(View.GONE);
+			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(password.getWindowToken(), 0);
 		}
 	}
 
 	private Runnable swipeRunnable = new Runnable() {
 		@Override
 		public void run() {
-			boolean blocked = isBlocked();
+			boolean blocked = actionBar.isFreeze() || getActionBar().isShowing() || isBlocked();
 			if (blocked) {
 				pager.postDelayed(swipeRunnable, 50);
 			} else {
-//				pagerAdapter.notifyDataSetChanged();
 				int idx = pager.getCurrentItem()+1;
 				if (idx == pagerAdapter.getCount()) {
 					idx = 0;
@@ -283,14 +285,16 @@ public class PhotoActivity extends Activity {
 		}
 
 	};
+	private View deleteDialog;
 	
 	private boolean isBlocked() {
 		View[] swipeBlockers = {
 			wifiConnectionHandler.getView(),
 			errorPane, 
+			deleteDialog,
 			progressBar 
 		};
-		boolean blocked = getActionBar().isShowing() || actionBar.isFreeze()|| !isConnectedOrConnecting();
+		boolean blocked = !isConnectedOrConnecting();
 		for (View blocker : swipeBlockers) {
 			blocked |= blocker.getVisibility() == View.VISIBLE;
 		}
@@ -340,6 +344,19 @@ public class PhotoActivity extends Activity {
 		errorText = ((TextView) errorPane.findViewById(R.id.error_text));
 		wifiConnectionHandler.createUi(savedInstanceState);
 		progressBar = (ProgressBar) findViewById(R.id.progressLoading);
+		deleteDialog = findViewById(R.id.delete_confirm);
+		deleteDialog.findViewById(R.id.delete).setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				pagerAdapter.deleteCurrentItem(pager);
+			}
+		});
+		deleteDialog.findViewById(R.id.cancel).setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				deleteDialog.setVisibility(View.GONE);
+			}
+		});
 		final String user = getUser();
 		if (user == null) {
 			errorText.setText(R.string.error_no_user_data);
@@ -377,7 +394,7 @@ public class PhotoActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				if (v.getId() == R.id.action_delete) {
-					pagerAdapter.deleteCurrentItem(pager);
+					deleteDialog.setVisibility(View.VISIBLE);
 				} else if (v.getId() == R.id.action_freeze) {
 //					pager.setSwipeable(!actionBar.isFreeze());
 				} else if (v.getId() == R.id.action_reset_wifi) {

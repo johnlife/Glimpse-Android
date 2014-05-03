@@ -81,14 +81,15 @@ public class PictureData {
 	}
 
 	public boolean createdToday() {
-		Calendar created = Calendar.getInstance();
-		created.setTimeInMillis(this.created);
-		Calendar now = Calendar.getInstance();
-		boolean value = true;
-		for (int field : calendarFields) {
-			value &= created.get(field) == now.get(field);
-		}
-		return value;
+//		Calendar created = Calendar.getInstance();
+//		created.setTimeInMillis(this.created);
+//		Calendar now = Calendar.getInstance();
+//		boolean value = true;
+//		for (int field : calendarFields) {
+//			value &= created.get(field) == now.get(field);
+//		}
+//		return value;
+		return (System.currentTimeMillis() - created) <= 86400000;
 	}
 
 	@Override

@@ -4,49 +4,35 @@
     android:layout_height="match_parent"
     android:divider="@drawable/layout_divider"
     android:dividerPadding="4dp"
+    android:gravity="right"
     android:orientation="horizontal"
-    android:showDividers="middle"
-    android:gravity="right">
+    android:showDividers="middle" >
 
-    <LinearLayout
+    <TextView
         android:id="@+id/action_delete"
-        style="@style/CustomActionButton" >
+        style="@style/CustomActionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:drawableLeft="@android:drawable/ic_menu_delete"
+        android:text="@string/action_delete" >
+    </TextView>
 
-        <ImageView
-            style="@style/ActionButtonImage"
-            android:src="@android:drawable/ic_menu_delete" />
-
-        <TextView
-            style="@style/ActionButtonText"
-            android:text="@string/action_delete" />
-    </LinearLayout>
-
-    <LinearLayout
+    <TextView
         android:id="@+id/action_freeze"
-        style="@style/CustomActionButton" >
+        style="@style/CustomActionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:drawableLeft="@android:drawable/ic_media_pause"
+        android:text="@string/action_freeze" >
+    </TextView>
 
-        <ImageView
-            android:id="@+id/image_freeze"
-            style="@style/ActionButtonImage"
-            android:src="@android:drawable/ic_media_pause"/>
-
-        <TextView
-            android:id="@+id/text_freeze"
-            style="@style/ActionButtonText"
-            android:text="@string/action_freeze" />
-    </LinearLayout>
-    
-    <LinearLayout
+    <TextView
         android:id="@+id/action_reset_wifi"
-        style="@style/CustomActionButton" >
-
-        <ImageView
-            style="@style/ActionButtonImage"
-            android:src="@drawable/wifi" />
-
-        <TextView
-            style="@style/ActionButtonText"
-            android:text="@string/action_wifi" />
-    </LinearLayout>
+        style="@style/CustomActionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:drawableLeft="@drawable/wifi"
+        android:text="@string/action_wifi" >
+    </TextView>
 
 </LinearLayout>

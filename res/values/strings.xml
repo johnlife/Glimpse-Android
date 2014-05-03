@@ -5,14 +5,17 @@
     <string name="action_wifi">Wi-Fi</string>
     
 	<string name="button_connect">Connect</string>
-
+	<string name="button_delete">Delete</string>
+	
 	<string name="hint_password">password</string>
 	
 	<string name="action_delete">DELETE</string>
 	<string name="action_freeze">FREEZE FRAME</string>
 	<string name="action_reset">RESET WI-FI</string>
 	<string name="action_unfreeze">UNFREEZE FRAME</string>
-	
+
+	<string name="dialog_delete">Delete current photo forever?</string>
+			
 	<string name="error_no_user_data">User data not found. Please, contact technical support.</string>
 	<string name="error_no_foto">To start, send photos to %1$s.</string>
 	<string name="error_not_connected">Network is not connected.</string>

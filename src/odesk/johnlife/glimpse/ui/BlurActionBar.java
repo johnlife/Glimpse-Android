@@ -4,7 +4,6 @@ import odesk.johnlife.glimpse.R;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 public class BlurActionBar {
@@ -12,6 +11,14 @@ public class BlurActionBar {
 		void onClick(View v);
 	}
 	
+	private class ActionClickListener implements View.OnClickListener {
+		@Override
+		public void onClick(View v) {
+			actionBar.hide();
+			listener.onClick(v);
+		}
+	}
+
 	private ActionBar actionBar;
 	private View customActionBar;
 	private boolean isFreeze = false;
@@ -31,26 +38,14 @@ public class BlurActionBar {
 		View freezeActionView = customActionBar.findViewById(R.id.action_freeze);
 		View resetActionView = customActionBar.findViewById(R.id.action_reset_wifi);
 		
-		deleteActionView.setOnClickListener(new View.OnClickListener() {
+		ActionClickListener simpleClickListener = new ActionClickListener();
+		deleteActionView.setOnClickListener(simpleClickListener);
+		resetActionView.setOnClickListener(simpleClickListener);
+		freezeActionView.setOnClickListener(new ActionClickListener() {
 			@Override
 			public void onClick(View v) {
-				actionBar.hide();
-				listener.onClick(v);
-			}
-		});
-		freezeActionView.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				actionBar.hide();
 				chageFreezeFrame(!isFreeze, v);
-				listener.onClick(v);
-			}
-		});
-		resetActionView.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				actionBar.hide();
-				listener.onClick(v);
+				super.onClick(v);
 			}
 		});
 	}
@@ -61,10 +56,9 @@ public class BlurActionBar {
 	
 	private void chageFreezeFrame(boolean isFreeze, View view) {
 		this.isFreeze = isFreeze;
-		TextView textFreeze = (TextView) view.findViewById(R.id.text_freeze);
-		ImageView imageFreeze = (ImageView) view.findViewById(R.id.image_freeze);
-		textFreeze.setText(isFreeze ? R.string.action_unfreeze : R.string.action_freeze);
-		imageFreeze.setImageResource(isFreeze ? android.R.drawable.ic_media_play : android.R.drawable.ic_media_pause);
+		TextView action = (TextView) view.findViewById(R.id.action_freeze);
+		action.setText(isFreeze ? R.string.action_unfreeze : R.string.action_freeze);
+		action.setCompoundDrawablesWithIntrinsicBounds((isFreeze ? android.R.drawable.ic_media_play : android.R.drawable.ic_media_pause), 0,0,0);
 	}
 	
 	public boolean isFreeze() {
