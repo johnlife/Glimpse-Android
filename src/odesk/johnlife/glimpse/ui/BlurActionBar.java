@@ -37,10 +37,12 @@ public class BlurActionBar {
 		View deleteActionView = customActionBar.findViewById(R.id.action_delete);
 		View freezeActionView = customActionBar.findViewById(R.id.action_freeze);
 		View resetActionView = customActionBar.findViewById(R.id.action_reset_wifi);
+		View emailActionView = customActionBar.findViewById(R.id.action_new_email);
 		
 		ActionClickListener simpleClickListener = new ActionClickListener();
 		deleteActionView.setOnClickListener(simpleClickListener);
 		resetActionView.setOnClickListener(simpleClickListener);
+		emailActionView.setOnClickListener(simpleClickListener);
 		freezeActionView.setOnClickListener(new ActionClickListener() {
 			@Override
 			public void onClick(View v) {

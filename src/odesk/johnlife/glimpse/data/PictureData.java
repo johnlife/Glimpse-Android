@@ -1,6 +1,5 @@
 package odesk.johnlife.glimpse.data;
 
-import java.util.Calendar;
 import java.util.Comparator;
 
 import android.content.ContentValues;
@@ -14,7 +13,7 @@ public class PictureData {
 	private static final String COLUMN_COUNT = "count";
 	private static final String COLUMN_LOAD_TIME = "load_time";
 	private static final String COLUMN_LAST_TIME = "last_time";
-	private static final int[] calendarFields = {Calendar.DAY_OF_MONTH, Calendar.MONTH, Calendar.YEAR};
+//	private static final int[] calendarFields = {Calendar.DAY_OF_MONTH, Calendar.MONTH, Calendar.YEAR};
 
 	static String getCreationSQL() {
 		return "CREATE TABLE " + TABLE_NAME + " (" + 
@@ -34,6 +33,13 @@ public class PictureData {
 		@Override
 		public int compare(PictureData lhs, PictureData rhs) {
 			return (int) Math.signum(lhs.getWeight() - rhs.getWeight());
+		}
+	};
+	public static final Comparator<PictureData> TIME_COMPARATOR = new Comparator<PictureData>() {
+		@Override
+		public int compare(PictureData lhs, PictureData rhs) {
+			long dif = lhs.created - rhs.created;
+			return (int) (dif/Math.abs(dif));
 		}
 	};
 	
@@ -76,19 +82,10 @@ public class PictureData {
 	}
 
 	public void delete(SQLiteDatabase db) {
-		int deleted = db.delete(TABLE_NAME, COLUMN_PICTURES + "=?", new String[] { path });
-		System.out.println("DELETED "+deleted+" ROWS"+ path);
+		db.delete(TABLE_NAME, COLUMN_PICTURES + "=?", new String[] { path });
 	}
 
 	public boolean createdToday() {
-//		Calendar created = Calendar.getInstance();
-//		created.setTimeInMillis(this.created);
-//		Calendar now = Calendar.getInstance();
-//		boolean value = true;
-//		for (int field : calendarFields) {
-//			value &= created.get(field) == now.get(field);
-//		}
-//		return value;
 		return (System.currentTimeMillis() - created) <= 86400000;
 	}
 
@@ -97,10 +94,12 @@ public class PictureData {
 		return o instanceof PictureData && id == ((PictureData)o).id;
 	}
 
-	private long getWeight() {
+	private synchronized long getWeight() {
+		long elapsed = System.currentTimeMillis() - lastSeen;
+		if (elapsed < 25000) return Integer.MAX_VALUE-elapsed;
 		if (-1 == weight || ((System.currentTimeMillis() - weightCalc) > 5000)) {
 			weightCalc = System.currentTimeMillis();   
-			weight = (long) Math.max(1, ((double)count*60000) - (weightCalc-lastSeen));
+			weight = (long) Math.max(1, ((double)count*60000) - (elapsed));
 		}
 		return weight;
 	}
@@ -114,9 +113,9 @@ public class PictureData {
 		viewCreated();
 	}
 
-	public void viewCreated() {
+	public synchronized void viewCreated() {
 		lastSeen = System.currentTimeMillis();
-		weight = -1;
+		weight = Integer.MAX_VALUE;
 	}
 
 	@Override

@@ -2,24 +2,36 @@
 <resources>
 
     <string name="app_name">Glimpse Frame</string>
-    <string name="action_wifi">Wi-Fi</string>
     
 	<string name="button_connect">Connect</string>
 	<string name="button_delete">Delete</string>
-	
+	<string name="button_received">Received Confirmation</string>
+		
 	<string name="hint_password">password</string>
+	<string name="hint_new_email">new_email</string>
 	
-	<string name="action_delete">DELETE</string>
-	<string name="action_freeze">FREEZE FRAME</string>
-	<string name="action_reset">RESET WI-FI</string>
-	<string name="action_unfreeze">UNFREEZE FRAME</string>
-
+	<string name="text_new_email"><b>Step 1:</b> Email us at <a href="whatever">admin@glimpseframe.com</a> with your desired address. We recommend that it include your last name.\n\n
+<b>Step 2:</b> We\'ll respond within 24 hours with its availability confirmation. If it is not available, feel free to propose another one.\n\n
+<b>Step 3:</b> If we confirm that your requested address is available, click "Received Confirmation" below.</string>
+	<string name="text_new_email_step2">Enter your new email below. Only do so if you\'ve received confirmation from our team, otherwise your frame may stop working!</string>
+	<string name="text_at_glimpseframe">\@glimpseframe.com</string>	
+		
+	<string name="action_delete">Delete</string>
+	<string name="action_freeze">Freeze frame</string>
+	<string name="action_unfreeze">Unfreeze frame</string>
+	<string name="action_reset">Reset WiFi</string>
+	<string name="action_new_email">Change email</string>
+	
 	<string name="dialog_delete">Delete current photo forever?</string>
 			
 	<string name="error_no_user_data">User data not found. Please, contact technical support.</string>
 	<string name="error_no_foto">To start, send photos to %1$s.</string>
 	<string name="error_not_connected">Network is not connected.</string>
-	
+	<string name="error_email_empty">Enter new email address.</string>
+	<string name="error_email_invalid">Enter valid and confirmed email address.</string>
+			
 	<string name="title_wifi_list">Select your wi-fi network below</string>
-	
+	<string name="title_email_step1">Request new email address</string>
+	<string name="title_email_step2">New email address confirmed</string>
+			
 </resources>

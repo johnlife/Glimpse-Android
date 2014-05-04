@@ -3,6 +3,8 @@ package odesk.johnlife.glimpse.activity;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Timer;
@@ -49,6 +51,8 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.pushlink.android.PushLink;
+
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
@@ -57,7 +61,6 @@ import android.widget.TextView;
  */
 public class PhotoActivity extends Activity {
 
-	// private Bitmap activeImage = null;
 	private ProgressBar progressBar;
 	private View listPane;
 	private View errorPane;
@@ -71,11 +74,83 @@ public class PhotoActivity extends Activity {
 	private BlurActionBar actionBar;
 	private boolean isConnectErrorVisible = false;
 	private Timer mailTimer = new Timer();
+	private View deleteDialog;
+	private NewEmailWizard newEmail;
 
 	public interface ConnectedListener {
 		public void onConnected();
 	}
 
+	private class NewEmailWizard {
+		View dialog;
+		View step1;
+		View step2;
+		TextView emailView;
+		TextView error;
+		
+		OnClickListener closeListener = new OnClickListener() {			
+			@Override
+			public void onClick(View v) {
+				if (null == dialog) return;
+				dialog.setVisibility(View.GONE);
+				step1.setVisibility(View.VISIBLE);
+				step2.setVisibility(View.GONE);
+			}
+		};
+		
+		public NewEmailWizard() {
+			dialog = findViewById(R.id.new_email_dialog);
+			step1 = dialog.findViewById(R.id.step1);
+			step2 = dialog.findViewById(R.id.step2);
+			emailView = (TextView) step2.findViewById(R.id.email);
+			error = (TextView) step2.findViewById(R.id.error);
+			step1.findViewById(R.id.cancel).setOnClickListener(closeListener);
+			step2.findViewById(R.id.cancel).setOnClickListener(closeListener);
+			step1.findViewById(R.id.received).setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					step1.setVisibility(View.GONE);
+					step2.setVisibility(View.VISIBLE);
+					error.setVisibility(View.GONE);
+				}
+			});
+			step2.findViewById(R.id.ok).setOnClickListener(new View.OnClickListener() {				
+				@Override
+				public void onClick(View v) {
+					String email = emailView.getText().toString();
+					if (email.isEmpty()) {
+						showError(R.string.error_email_empty);
+						return;
+					}
+					String fullEmail = email+"@glimpseframe.com";
+					if (!android.util.Patterns.EMAIL_ADDRESS.matcher(fullEmail).matches()) {
+						showError(R.string.error_email_invalid);
+						return;
+					}
+					try {
+						FileWriter out = new FileWriter(getUserDataFile());
+						out.write(fullEmail);
+						out.close();
+						restart();
+					} catch (IOException e) {
+						PushLink.sendAsyncException(e);
+					}
+				}
+				
+				void showError(int errorId) {
+					error.setText(errorId);
+					error.setVisibility(View.VISIBLE);
+				}
+			});
+		}
+
+		public void show() {
+			dialog.setVisibility(View.VISIBLE);
+			step1.setVisibility(View.VISIBLE);
+			step2.setVisibility(View.GONE);
+		}
+	}
+	
 	private class WifiConnectionHandler {
 		private ListView list;
 		private View wifiDialog;
@@ -285,13 +360,13 @@ public class PhotoActivity extends Activity {
 		}
 
 	};
-	private View deleteDialog;
 	
 	private boolean isBlocked() {
 		View[] swipeBlockers = {
 			wifiConnectionHandler.getView(),
 			errorPane, 
 			deleteDialog,
+			newEmail.dialog,
 			progressBar 
 		};
 		boolean blocked = !isConnectedOrConnecting();
@@ -301,10 +376,30 @@ public class PhotoActivity extends Activity {
 		return blocked;
 	}
 
+	private void restart() {
+		Activity activity = PhotoActivity.this;
+		activity.startActivity(new Intent(activity, activity.getClass()));
+		activity.finish();
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_photo);
+		progressBar = (ProgressBar) findViewById(R.id.progressLoading);
+		if (!GlimpseApp.getPicturesDir().exists()) {
+			progressBar.setVisibility(View.VISIBLE);
+			IntentFilter filter = new IntentFilter (Intent.ACTION_MEDIA_MOUNTED); 
+			filter.addDataScheme("file"); 
+			registerReceiver(new BroadcastReceiver() {
+				@Override
+				public void onReceive(Context context, Intent intent) {
+					restart();
+				}
+
+			}, new IntentFilter(filter));
+			return;
+		}
 		createActionBar();
 		context = this;
 		databaseHelper = DatabaseHelper.getInstance(getApplicationContext());
@@ -343,12 +438,12 @@ public class PhotoActivity extends Activity {
 		errorPane = findViewById(R.id.error_pane);
 		errorText = ((TextView) errorPane.findViewById(R.id.error_text));
 		wifiConnectionHandler.createUi(savedInstanceState);
-		progressBar = (ProgressBar) findViewById(R.id.progressLoading);
 		deleteDialog = findViewById(R.id.delete_confirm);
 		deleteDialog.findViewById(R.id.delete).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				pagerAdapter.deleteCurrentItem(pager);
+				deleteDialog.setVisibility(View.GONE);
 			}
 		});
 		deleteDialog.findViewById(R.id.cancel).setOnClickListener(new View.OnClickListener() {
@@ -363,6 +458,7 @@ public class PhotoActivity extends Activity {
 			errorPane.setVisibility(View.VISIBLE);
 			return;
 		}
+		newEmail = new NewEmailWizard();
 		rescheduleImageSwipe();
 		mailTimer.scheduleAtFixedRate(new TimerTask() {
 			@Override
@@ -395,8 +491,8 @@ public class PhotoActivity extends Activity {
 			public void onClick(View v) {
 				if (v.getId() == R.id.action_delete) {
 					deleteDialog.setVisibility(View.VISIBLE);
-				} else if (v.getId() == R.id.action_freeze) {
-//					pager.setSwipeable(!actionBar.isFreeze());
+				} else if (v.getId() == R.id.action_new_email) {
+					newEmail.show();
 				} else if (v.getId() == R.id.action_reset_wifi) {
 					if (isConnected()) {
 						new WifiConnector(context).forgetCurrent();
@@ -409,10 +505,7 @@ public class PhotoActivity extends Activity {
 	private String getUser() {
 		String user = null;
 		try {
-			File dataFile = new File(
-				Environment.getExternalStorageDirectory(),
-				context.getString(R.string.data_file)
-			);
+			File dataFile = getUserDataFile();
 			if (!dataFile.exists()) return null;
 			BufferedReader br = new BufferedReader(new FileReader(dataFile));
 			String line = br.readLine();
@@ -424,6 +517,14 @@ public class PhotoActivity extends Activity {
 			Log.e("UserInfo", e.getMessage(), e);
 		}
 		return user;
+	}
+
+	private File getUserDataFile() {
+		File dataFile = new File(
+			Environment.getExternalStorageDirectory(),
+			context.getString(R.string.data_file)
+		);
+		return dataFile;
 	}
 
 	private void hideErrorPane() {

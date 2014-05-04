@@ -32,7 +32,16 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:drawableLeft="@drawable/wifi"
-        android:text="@string/action_wifi" >
+        android:text="@string/action_reset" >
     </TextView>
 
+    <TextView
+        android:id="@+id/action_new_email"
+        style="@style/CustomActionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:drawableLeft="@drawable/email"
+        android:text="@string/action_new_email" >
+    </TextView>
+    
 </LinearLayout>

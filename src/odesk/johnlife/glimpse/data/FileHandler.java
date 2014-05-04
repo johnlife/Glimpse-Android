@@ -31,12 +31,8 @@ public class FileHandler {
 		}
 	}
 
-//	public final void resort() {
-//		Collections.sort(files, PictureData.WEIGHT_COMPARATOR);
-//		notifyObserver();
-//	}
-//
 	public synchronized void add(File file) {
+		cleanup();
 		try {
 			Bitmap bmp = BitmapFactory.decodeFile(file.getAbsolutePath());
 			if (null == bmp) return; //not an image
@@ -80,12 +76,17 @@ public class FileHandler {
 	        switch (orientation) {
 		        case ExifInterface.ORIENTATION_ROTATE_90:
 		            //rotate CCW
-		            mtx.preRotate(-90);
+		            mtx.preRotate(90);
+		            rotated = Bitmap.createBitmap(scaled, 0, 0, scaledW, scaledH, mtx, true);
+		            break;
+		        case ExifInterface.ORIENTATION_ROTATE_180:
+		            //rotate CCW
+		            mtx.preRotate(180);
 		            rotated = Bitmap.createBitmap(scaled, 0, 0, scaledW, scaledH, mtx, true);
 		            break;
 		        case ExifInterface.ORIENTATION_ROTATE_270:
 		            //rotate CW
-		            mtx.preRotate(90);
+		            mtx.preRotate(-90);
 		            rotated = Bitmap.createBitmap(scaled, 0, 0, scaledW, scaledH, mtx, true);
 		            break;
 	        }
@@ -138,6 +139,14 @@ public class FileHandler {
 	public synchronized PictureData getLightest() {
 		synchronized (lock) {
 			return Collections.min(files, PictureData.WEIGHT_COMPARATOR);
+		}
+	}
+	
+	public void cleanup() {
+		long space;
+		while ((space = GlimpseApp.getPicturesDir().getUsableSpace()) < 10000000) {
+			PictureData victim = Collections.min(files, PictureData.TIME_COMPARATOR);
+			delete(victim);
 		}
 	}
 }
