@@ -334,5 +334,13 @@
             android:textColor="@color/text"
             android:textSize="@dimen/error_pane" />
     </odesk.johnlife.glimpse.ui.BlurLayout>
+    
+    <!--TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="updated via internet"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textSize="92sp" /-->
 
 </FrameLayout>

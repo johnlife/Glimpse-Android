@@ -14,6 +14,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.View;
@@ -37,6 +38,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 		this.onClickListener = onClickListener;
 		this.fileHandler = GlimpseApp.getFileHandler();
 		final boolean wasEmpty = fileHandler.isEmpty();
+		Log.d("Start - adapter", "Filehadler ready "+(wasEmpty ? "and empty" : ", pics: "+fileHandler.size()));
 		fileHandler.setObserver(new DataSetObserver() {
 			@Override
 			public void onChanged() {
@@ -73,6 +75,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 		Bitmap bitmap;
 		if (fileHandler.isEmpty()) {
 			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wp1);
+			Log.d("Start - adapter", "Created view for startup screen");
 		} else {
 			PictureData pictureData = fileHandler.getLightest();
 			pictureData.viewCreated();
@@ -87,6 +90,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 				view = frame;
 			}
 			bitmap = BitmapFactory.decodeFile(pictureData.getPath());
+			Log.d("Start - adapter", "Created view for "+pictureData.getPath());
 		}
 		image.setImageBitmap(bitmap);
 		image.setOnClickListener(onClickListener);

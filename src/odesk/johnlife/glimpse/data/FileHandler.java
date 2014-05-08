@@ -17,8 +17,11 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.util.Log;
+
+//import com.pushlink.android.PushLink;
+
 public class FileHandler {
-	private final Object lock = new Object();
+	public final Object lock = new Object();
 	
 	private DatabaseHelper databaseHelper;
 	private List<PictureData> files;
@@ -53,7 +56,7 @@ public class FileHandler {
 			}
 			file.delete();
 		} catch (IllegalStateException e) {
-			e.printStackTrace();
+//			PushLink.sendAsyncException(e);
 		}
 	}
 
@@ -143,10 +146,13 @@ public class FileHandler {
 	}
 	
 	public void cleanup() {
-		long space;
-		while ((space = GlimpseApp.getPicturesDir().getUsableSpace()) < 10000000) {
-			PictureData victim = Collections.min(files, PictureData.TIME_COMPARATOR);
-			delete(victim);
+		synchronized (lock) {
+			long space;
+			while ((space = GlimpseApp.getPicturesDir().getUsableSpace()) < 10000000) {
+				PictureData victim = Collections.min(files, PictureData.TIME_COMPARATOR);
+				delete(victim);
+			}
+			notifyObserver();
 		}
 	}
 }

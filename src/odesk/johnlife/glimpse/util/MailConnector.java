@@ -41,6 +41,7 @@ public class MailConnector {
 	}
 
 	public void connect() {
+		Log.d(getClass().getSimpleName(), String.format("Connecting to %s, user=%s, pass=%s", server, user, pass));
 	    Properties properties = System.getProperties();
 	    properties.setProperty("mail.store.protocol", "imaps");
 	    properties.setProperty("mail.imaps.socketFactory.class", SSL_FACTORY);
@@ -48,9 +49,11 @@ public class MailConnector {
 	        Session session = Session.getDefaultInstance(properties, null);
 	        Store store = session.getStore("imaps");
 		    store.connect(server, user, pass);
+			Log.d(getClass().getSimpleName(), "Connected to store");
 			Folder folder = null;
 			folder = store.getDefaultFolder().getFolder("INBOX");
 			folder.open(Folder.READ_WRITE);
+			Log.d(getClass().getSimpleName(), "Opened inbox");
 			FileHandler fileHandler = GlimpseApp.getFileHandler();
 			Message[] messages = fileHandler.isEmpty() ?
 				folder.getMessages() : 
@@ -63,15 +66,17 @@ public class MailConnector {
 					for (File file : attachments) {
 						fileHandler.add(file);
 					}
+					msg.setFlag(Flags.Flag.DELETED, true);
 				} catch (Exception e) {
-					e.printStackTrace();
+//					PushLink.sendAsyncException(e);
 				}
 			}
 			folder.setFlags(messages, new Flags(Flags.Flag.SEEN), true);
 			folder.close(true);
 			store.close();
 		} catch (MessagingException e) {
-			e.printStackTrace();
+			Log.e(getClass().getSimpleName(), "Error: ", e);
+//			PushLink.sendAsyncException(e);
 		}
 	}
 	
@@ -100,8 +105,7 @@ public class MailConnector {
 				fos.close();
 				attachments.add(f);
 			} catch (IOException e) {
-				//TODO handle
-				e.printStackTrace();
+//				PushLink.sendAsyncException(e);
 			}
 		}
 		return attachments;

@@ -51,7 +51,7 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.pushlink.android.PushLink;
+import com.crashlytics.android.Crashlytics;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -133,7 +133,7 @@ public class PhotoActivity extends Activity {
 						out.close();
 						restart();
 					} catch (IOException e) {
-						PushLink.sendAsyncException(e);
+//						PushLink.sendAsyncException(e);
 					}
 				}
 				
@@ -283,20 +283,17 @@ public class PhotoActivity extends Activity {
 						connectToNetwork();
 					}
 				});
-			if (null == savedInstanceState) {
-				wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-				if (!wifi.isWifiEnabled()) {
-					wifi.setWifiEnabled(true);
-					scanWifi();
-				}
+			wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+			if (!wifi.isWifiEnabled()) {
+				wifi.setWifiEnabled(true);
+				scanWifi();
 			}
 			if (isConnectedOrConnecting()) {
 				listPane.setVisibility(View.INVISIBLE);
 			} else {
 				scanWifi();
 			}
-			registerReceiver(wifiScanReceiver, new IntentFilter(
-					WifiManager.NETWORK_STATE_CHANGED_ACTION));
+			registerReceiver(wifiScanReceiver, new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
 		}
 
 		public void connectToNetwork() {
@@ -320,8 +317,7 @@ public class PhotoActivity extends Activity {
 
 		public void scanWifi() {
 			wifi.startScan();
-			registerReceiver(wifiScanReceiver, new IntentFilter(
-					WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+			registerReceiver(wifiScanReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 		}
 
 		public View getView() {
@@ -354,11 +350,31 @@ public class PhotoActivity extends Activity {
 				if (idx == pagerAdapter.getCount()) {
 					idx = 0;
 				}
-				pager.setCurrentItem(idx);
+				synchronized (GlimpseApp.getFileHandler().lock) {
+					pager.setCurrentItem(idx);
+				}
 				rescheduleImageSwipe();
 			}
 		}
 
+	};
+	
+	private TimerTask mailPollTask = new TimerTask() {
+		private final static String tag = "MailPolling";
+		@Override
+		public void run() {
+			Log.w(tag, "Polling mail server");
+			String user = getUser();
+			if (isConnected() && null != user) {
+				MailConnector mailer = new MailConnector(user, "HPgqL2658P", context);
+				mailer.connect();
+				if (!GlimpseApp.getFileHandler().isEmpty()) {
+					hideErrorPane();
+				}
+			} else {
+				Log.w(tag, "Mail server poll canceled - not connected or user is null");
+			}
+		}
 	};
 	
 	private boolean isBlocked() {
@@ -385,22 +401,30 @@ public class PhotoActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Crashlytics.start(this);
 		setContentView(R.layout.activity_photo);
+		final String tag = "StartUp";
+		newEmail = new NewEmailWizard();
 		progressBar = (ProgressBar) findViewById(R.id.progressLoading);
-		if (!GlimpseApp.getPicturesDir().exists()) {
+		boolean sdcardReady = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED) && GlimpseApp.getPicturesDir().canWrite();
+		if (!sdcardReady) {
+			Log.w(tag, "SDcard isn't ready, scheduling restart");
 			progressBar.setVisibility(View.VISIBLE);
-			IntentFilter filter = new IntentFilter (Intent.ACTION_MEDIA_MOUNTED); 
+			IntentFilter filter = new IntentFilter(Intent.ACTION_MEDIA_MOUNTED); 
 			filter.addDataScheme("file"); 
 			registerReceiver(new BroadcastReceiver() {
 				@Override
 				public void onReceive(Context context, Intent intent) {
+					Log.w(tag, "Restarting");
 					restart();
 				}
-
-			}, new IntentFilter(filter));
+			}, filter);
 			return;
+		} else {
+			Log.d(tag, "SDCard is ready");
 		}
 		createActionBar();
+		Log.w(tag, "Actionbar created");
 		context = this;
 		databaseHelper = DatabaseHelper.getInstance(getApplicationContext());
 		pager = (ViewPager) findViewById(R.id.pager);
@@ -434,10 +458,12 @@ public class PhotoActivity extends Activity {
 				}
 			}
 		});
+		Log.w(tag, "Pager created");
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		errorPane = findViewById(R.id.error_pane);
 		errorText = ((TextView) errorPane.findViewById(R.id.error_text));
 		wifiConnectionHandler.createUi(savedInstanceState);
+		Log.w(tag, "Wifi ui created");
 		deleteDialog = findViewById(R.id.delete_confirm);
 		deleteDialog.findViewById(R.id.delete).setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -453,25 +479,14 @@ public class PhotoActivity extends Activity {
 			}
 		});
 		final String user = getUser();
+		mailTimer.scheduleAtFixedRate(mailPollTask, 0, 120000);
+		Log.w(tag, "Got user "+user);
 		if (user == null) {
 			errorText.setText(R.string.error_no_user_data);
 			errorPane.setVisibility(View.VISIBLE);
 			return;
 		}
-		newEmail = new NewEmailWizard();
-		rescheduleImageSwipe();
-		mailTimer.scheduleAtFixedRate(new TimerTask() {
-			@Override
-			public void run() {
-				if (isConnected()) {
-					MailConnector mailer = new MailConnector(user, "HPgqL2658P", context);
-					mailer.connect();
-					if (!GlimpseApp.getFileHandler().isEmpty()) {
-						hideErrorPane();
-					}
-				}
-			}
-		}, 0, 120000);
+		if (pagerAdapter.getCount() >= 2) rescheduleImageSwipe();
 	}
 	
 	
@@ -552,6 +567,7 @@ public class PhotoActivity extends Activity {
 	public ConnectedListener connectedListener = new ConnectedListener() {
 		@Override
 		public void onConnected() {
+			Log.d("ConnectedListener", "Connected");
 			progressBar.setVisibility(View.INVISIBLE);
 			wifiConnectionHandler.hideListPane();
 			if (GlimpseApp.getFileHandler().isEmpty() && getUser() != null) {
