@@ -343,16 +343,14 @@ public class PhotoActivity extends Activity {
 		@Override
 		public void run() {
 			boolean blocked = actionBar.isFreeze() || getActionBar().isShowing() || isBlocked();
-			if (blocked) {
+			if (blocked || GlimpseApp.getFileHandler().isLocked()) {
 				pager.postDelayed(swipeRunnable, 50);
 			} else {
 				int idx = pager.getCurrentItem()+1;
 				if (idx == pagerAdapter.getCount()) {
 					idx = 0;
 				}
-				synchronized (GlimpseApp.getFileHandler().lock) {
-					pager.setCurrentItem(idx);
-				}
+				pager.setCurrentItem(idx);
 				rescheduleImageSwipe();
 			}
 		}

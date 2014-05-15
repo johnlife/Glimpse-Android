@@ -18,20 +18,15 @@ import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.util.Log;
 
-//import com.pushlink.android.PushLink;
-
 public class FileHandler {
-	public final Object lock = new Object();
-	
+	private boolean locked;
 	private DatabaseHelper databaseHelper;
 	private List<PictureData> files;
 	private DataSetObserver datasetObserver;
 	
 	public FileHandler(Context context) {
 		databaseHelper = DatabaseHelper.getInstance(context);
-		synchronized (lock) {
-			files = databaseHelper.getPictures();
-		}
+		files = databaseHelper.getPictures();
 	}
 
 	public synchronized void add(File file) {
@@ -48,13 +43,13 @@ public class FileHandler {
 			} catch (IOException e) {
 				Log.e(getClass().getName(), "Error writing scaled bitmap", e);
 			}
+			locked = true;
 			PictureData picture = new PictureData(path);
 			picture = databaseHelper.addOrUpdate(picture);
-			synchronized (lock) {
-				files.add(picture);
-				notifyObserver();
-			}
+			files.add(picture);
+			notifyObserver();
 			file.delete();
+			locked = false;
 		} catch (IllegalStateException e) {
 //			PushLink.sendAsyncException(e);
 		}
@@ -98,16 +93,16 @@ public class FileHandler {
 	}
 
 	public synchronized int delete(PictureData picture) {
+		locked = true;
 		databaseHelper.delete(picture);
 		File file = new File(picture.getPath());
 		file.delete();
 		int deleted = 0;
-		synchronized (lock) {
-			while (files.remove(picture)) {
-				deleted++;
-			};
-			notifyObserver();
-		}
+		while (files.remove(picture)) {
+			deleted++;
+		};
+		notifyObserver();
+		locked = false;
 		return deleted;
 	}
 	
@@ -127,32 +122,34 @@ public class FileHandler {
 	}
 	
 	public synchronized boolean isEmpty() {
-		synchronized (lock) {
-			return files == null || files.isEmpty();
-		}
+		return files == null || files.isEmpty();
 	}
 
 	public synchronized int size() {
-		synchronized (lock) {
-			if (null == files) return 0;
-			return files.size();
-		}
+		if (null == files) return 0;
+		return files.size();
 	}
 	
 	public synchronized PictureData getLightest() {
-		synchronized (lock) {
-			return Collections.min(files, PictureData.WEIGHT_COMPARATOR);
-		}
+		locked = true;
+		PictureData value = Collections.min(files, PictureData.WEIGHT_COMPARATOR);
+		locked = false;
+		return value;
 	}
 	
-	public void cleanup() {
-		synchronized (lock) {
-			long space;
-			while ((space = GlimpseApp.getPicturesDir().getUsableSpace()) < 10000000) {
-				PictureData victim = Collections.min(files, PictureData.TIME_COMPARATOR);
-				delete(victim);
-			}
-			notifyObserver();
+	public synchronized void cleanup() {
+		locked = true;
+		long space;
+		while ((space = GlimpseApp.getPicturesDir().getUsableSpace()) < 10000000) {
+			PictureData victim = Collections.min(files, PictureData.TIME_COMPARATOR);
+			delete(victim);
 		}
+		notifyObserver();
+		locked = false;
 	}
+
+	public boolean isLocked() {
+		return locked;
+	}
+	
 }
