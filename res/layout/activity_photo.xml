@@ -29,6 +29,7 @@
         android:visibility="invisible" />
 
     <!-- wifi list -->
+
     <odesk.johnlife.glimpse.ui.BlurLayout
         android:id="@+id/list_container"
         android:layout_width="300dp"
@@ -60,6 +61,7 @@
     </odesk.johnlife.glimpse.ui.BlurLayout>
 
     <!-- wifi connection dialog -->
+
     <odesk.johnlife.glimpse.ui.BlurLayout
         android:id="@+id/wifi_pane"
         android:layout_width="300dp"
@@ -98,14 +100,15 @@
                     android:layout_marginRight="8dp"
                     android:layout_weight="1"
                     android:hint="@string/hint_password"
-                    android:inputType="textPassword" />
+                    android:inputType="textPassword"
+                    android:textSize="@dimen/text_size" />
 
                 <Button
                     android:id="@+id/connect"
+                    style="@style/btnStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="8dp"
-                    android:background="?android:attr/selectableItemBackground"
                     android:text="@string/button_connect" />
             </LinearLayout>
         </LinearLayout>
@@ -135,14 +138,15 @@
                 style="@style/title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/title_email_step1" />
+                android:text="@string/title_email_step1"
+                android:textSize="@dimen/text_size" />
 
             <TextView
+                style="@style/txtViewStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="8dp"
-                android:text="@string/text_new_email"
-                android:textColor="@color/text" />
+                android:text="@string/text_new_email" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -155,21 +159,20 @@
 
                 <Button
                     android:id="@+id/received"
+                    style="@style/btnStyle"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="8dp"
                     android:layout_weight="1"
-                    android:background="?android:attr/selectableItemBackground"
                     android:text="@string/button_received" />
 
                 <Button
                     android:id="@+id/cancel"
+                    style="@style/btnStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="8dp"
-                    android:background="?android:attr/selectableItemBackground"
                     android:text="@android:string/cancel" />
-
             </LinearLayout>
         </LinearLayout>
 
@@ -191,11 +194,11 @@
                 android:text="@string/title_email_step2" />
 
             <TextView
+                style="@style/txtViewStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="8dp"
-                android:text="@string/text_new_email_step2"
-                android:textColor="@color/text" />
+                android:text="@string/text_new_email_step2" />
 
             <TextView
                 android:id="@+id/error"
@@ -204,6 +207,7 @@
                 android:padding="8dp"
                 android:text="TextView"
                 android:textColor="#f00"
+                android:textSize="@dimen/text_size"
                 android:visibility="gone" />
 
             <LinearLayout
@@ -218,14 +222,14 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:hint="@string/hint_new_email"
-                    android:inputType="textEmailAddress" />
+                    android:inputType="textEmailAddress"
+                    android:textSize="@dimen/text_size" />
 
                 <TextView
+                    style="@style/txtViewStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/text_at_glimpseframe"
-                    android:textColor="@color/text" />
-
+                    android:text="@string/text_at_glimpseframe" />
             </LinearLayout>
 
             <LinearLayout
@@ -239,27 +243,26 @@
 
                 <Button
                     android:id="@+id/ok"
+                    style="@style/btnStyle"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="8dp"
                     android:layout_weight="1"
-                    android:background="?android:attr/selectableItemBackground"
                     android:text="@android:string/ok" />
 
                 <Button
                     android:id="@+id/cancel"
+                    style="@style/btnStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="8dp"
-                    android:background="?android:attr/selectableItemBackground"
                     android:text="@android:string/cancel" />
-
             </LinearLayout>
         </LinearLayout>
-
     </odesk.johnlife.glimpse.ui.BlurLayout>
 
     <!-- delete confirmation dialog -->
+
     <odesk.johnlife.glimpse.ui.BlurLayout
         android:id="@+id/delete_confirm"
         android:layout_width="300dp"
@@ -294,20 +297,20 @@
 
                 <Button
                     android:id="@+id/cancel"
+                    style="@style/btnStyle"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:background="?android:attr/selectableItemBackground"
                     android:drawableLeft="@android:drawable/ic_menu_revert"
                     android:padding="8dp"
                     android:text="@android:string/cancel" />
 
                 <Button
                     android:id="@+id/delete"
+                    style="@style/btnStyle"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:background="?android:attr/selectableItemBackground"
                     android:drawableLeft="@android:drawable/ic_menu_delete"
                     android:padding="8dp"
                     android:text="@string/button_delete" />
@@ -316,6 +319,7 @@
     </odesk.johnlife.glimpse.ui.BlurLayout>
 
     <!-- error message -->
+
     <odesk.johnlife.glimpse.ui.BlurLayout
         android:id="@+id/error_pane"
         android:layout_width="wrap_content"
@@ -325,22 +329,23 @@
 
         <TextView
             android:id="@+id/error_text"
+            style="@style/txtViewStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@color/background_shade"
             android:fontFamily="sans-serif-thin"
             android:gravity="center"
-            android:padding="8dp"
-            android:textColor="@color/text"
-            android:textSize="@dimen/error_pane" />
+            android:padding="8dp" />
     </odesk.johnlife.glimpse.ui.BlurLayout>
-    
-    <!--TextView
+
+    <!--
+        TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:text="fastupdate. replace me"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textSize="92sp" /-->
+        android:textSize="92sp" /
+    -->
 
 </FrameLayout>
