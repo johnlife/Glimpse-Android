@@ -319,7 +319,6 @@
     </odesk.johnlife.glimpse.ui.BlurLayout>
 
     <!-- error message -->
-
     <odesk.johnlife.glimpse.ui.BlurLayout
         android:id="@+id/error_pane"
         android:layout_width="wrap_content"
@@ -329,15 +328,34 @@
 
         <TextView
             android:id="@+id/error_text"
-            style="@style/txtViewStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@color/background_shade"
             android:fontFamily="sans-serif-thin"
             android:gravity="center"
-            android:padding="8dp" />
+            android:padding="8dp"
+            android:textColor="@color/text"
+            android:textSize="@dimen/error_pane" />
     </odesk.johnlife.glimpse.ui.BlurLayout>
-
+     <odesk.johnlife.glimpse.ui.BlurLayout
+        android:id="@+id/message_pane"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|bottom"
+        
+        android:layout_marginBottom="48dp"
+        android:visibility="gone" >
+        <TextView
+            android:id="@+id/hint_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/background_shade"
+            android:fontFamily="sans-serif-thin"
+            android:gravity="center"
+            android:padding="8dp"
+            android:textColor="@color/text"
+            android:textSize="@dimen/error_pane" />
+    </odesk.johnlife.glimpse.ui.BlurLayout>
     <!--
         TextView
         android:layout_width="wrap_content"

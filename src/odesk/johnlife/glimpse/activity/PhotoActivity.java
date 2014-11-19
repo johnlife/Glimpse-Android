@@ -79,6 +79,9 @@ public class PhotoActivity extends Activity {
 	private Timer mailTimer = new Timer();
 	private View deleteDialog;
 	private NewEmailWizard newEmail;
+	private View messagePane;
+	private TextView hintText;
+	private int hintTime = 2000; //ms 
 
 	public interface ConnectedListener {
 		public void onConnected();
@@ -174,7 +177,7 @@ public class PhotoActivity extends Activity {
 			@Override
 			public void onReceive(Context c, Intent intent) {
 				String action = intent.getAction();
-				if (action == WifiManager.SCAN_RESULTS_AVAILABLE_ACTION) {
+				if (action.equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
 					if (isConnectedOrConnecting() || isConnectErrorVisible == true) return;
 					TreeSet<ScanResult> sortedResults = new TreeSet<ScanResult>(
 							new Comparator<ScanResult>() {
@@ -215,7 +218,6 @@ public class PhotoActivity extends Activity {
 							String cap = activeNetwork.capabilities;
 							if (cap.isEmpty() || cap.startsWith("[ESS")) {
 								hideListPane();
-								hideConnectionDialog();
 								progressBar.setVisibility(View.VISIBLE);
 								new WifiConnector(PhotoActivity.this).connectTo(activeNetwork);
 							} else {
@@ -241,7 +243,10 @@ public class PhotoActivity extends Activity {
 					boolean visible = listPane.getVisibility() == View.VISIBLE;
 					if (connected) {
 						connectedListener.onConnected();
+						hideConnectionDialog();
+						showHint(getResources().getString(R.string.hint_success));
 					}
+					else 
 					if (!visible && !connected && !connecting) {
 						scanWifi();
 					}
@@ -300,7 +305,6 @@ public class PhotoActivity extends Activity {
 		}
 
 		public void connectToNetwork() {
-			hideConnectionDialog();
 			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 			imm.hideSoftInputFromWindow(password.getWindowToken(), 0);
 			if (activeNetwork != null) {
@@ -462,6 +466,8 @@ public class PhotoActivity extends Activity {
 		Log.w(tag, "Pager created");
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		errorPane = findViewById(R.id.error_pane);
+		messagePane = findViewById(R.id.message_pane);
+		hintText = ((TextView) messagePane.findViewById(R.id.hint_text));
 		errorText = ((TextView) errorPane.findViewById(R.id.error_text));
 		wifiConnectionHandler.createUi(savedInstanceState);
 		Log.w(tag, "Wifi ui created");
@@ -534,6 +540,18 @@ public class PhotoActivity extends Activity {
 		});
 	}
 
+
+	protected void showHint(String hint) {
+		hintText.setText(hint);
+		messagePane.setVisibility(View.VISIBLE);
+		messagePane.postDelayed(new Runnable() {
+			
+			@Override
+			public void run() {
+				messagePane.setVisibility(View.GONE);
+			}
+		}, hintTime);
+	}
 	private String getUser() {
 		String user = null;
 		try {
