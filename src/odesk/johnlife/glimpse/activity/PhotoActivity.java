@@ -477,7 +477,7 @@ public class PhotoActivity extends Activity {
 			}
 		});
 		final String user = getUser();
-		mailTimer.scheduleAtFixedRate(mailPollTask, 0, 120000);
+		mailTimer.scheduleAtFixedRate(mailPollTask, 0, 10000);
 		Log.w(tag, "Got user "+user);
 		if (user == null) {
 			errorText.setText(R.string.error_no_user_data);
