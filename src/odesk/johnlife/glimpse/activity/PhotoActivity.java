@@ -11,6 +11,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeSet;
 
+import odesk.johnlife.glimpse.Constants;
 import odesk.johnlife.glimpse.R;
 import odesk.johnlife.glimpse.adapter.ImagePagerAdapter;
 import odesk.johnlife.glimpse.app.GlimpseApp;
@@ -29,12 +30,15 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -62,7 +66,7 @@ import com.crashlytics.android.Crashlytics;
  * 
  * @see SystemUiHider
  */
-public class PhotoActivity extends Activity {
+public class PhotoActivity extends Activity implements Constants {
 
 	private ProgressBar progressBar;
 	private View listPane;
@@ -81,6 +85,7 @@ public class PhotoActivity extends Activity {
 	private NewEmailWizard newEmail;
 	private View messagePane;
 	private TextView hintText;
+	private SharedPreferences preferences;
 	private int hintTime = 2000; //ms 
 
 	public interface ConnectedListener {
@@ -221,11 +226,17 @@ public class PhotoActivity extends Activity {
 								progressBar.setVisibility(View.VISIBLE);
 								new WifiConnector(PhotoActivity.this).connectTo(activeNetwork);
 							} else {
-								wifiDialog.setVisibility(View.VISIBLE);
-								password.setText("");
-								password.postDelayed(focusRunnable, 150);
-								password.requestFocus();
-								networkName.setText(activeNetwork.SSID);
+								String BSSID = preferences.getString(PREF_WIFI_BSSID, "");
+								String pass = preferences.getString(PREF_WIFI_PASSWORD, "");
+								if (activeNetwork.BSSID.equals(BSSID) && !pass.equals("")) {
+									connectToNetwork(pass);
+								} else {
+									wifiDialog.setVisibility(View.VISIBLE);
+									password.setText("");
+									password.postDelayed(focusRunnable, 150);
+									password.requestFocus();
+									networkName.setText(activeNetwork.SSID);
+								}
 							}
 						}
 					});
@@ -284,7 +295,7 @@ public class PhotoActivity extends Activity {
 				@Override
 				public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 					if (actionId == EditorInfo.IME_ACTION_DONE) {
-						connectToNetwork();
+						connectToNetwork(password.getText().toString());
 						return true;
 					}
 					return false;
@@ -295,7 +306,7 @@ public class PhotoActivity extends Activity {
 				new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
-						connectToNetwork();
+						connectToNetwork(password.getText().toString());
 					}
 				});
 			wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
@@ -310,18 +321,28 @@ public class PhotoActivity extends Activity {
 			}
 			registerReceiver(wifiScanReceiver, new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
 		}
+		
+		public void unregisterBroadcast(){
+			unregisterReceiver(wifiScanReceiver);
+		}
 
-		public void connectToNetwork() {
+		public void connectToNetwork(String pass) {
 			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 			imm.hideSoftInputFromWindow(password.getWindowToken(), 0);
 			if (activeNetwork != null) {
 				hideListPane();
 				progressBar.setVisibility(View.VISIBLE);
 				WifiConnector wifiConnector = new WifiConnector(PhotoActivity.this);
-				wifiConnector.connectTo(activeNetwork, password.getText().toString());
-				if (wifiConnector.getConnectionResult() == -1) {
+				wifiConnector.connectTo(activeNetwork, pass); //password.getText().toString()
+				if (wifiConnector.getConnectionResult() != -1){
+					Editor editor = preferences.edit();
+					editor.putString(PREF_WIFI_BSSID, activeNetwork.BSSID);
+					editor.putString(PREF_WIFI_PASSWORD, pass);
+					editor.apply();
+				} else {
 					progressBar.setVisibility(View.INVISIBLE);
-					showPaneError(R.string.error_not_connected);
+					errorText.setText(R.string.error_not_connected);
+					errorPane.setVisibility(View.VISIBLE);
 					isConnectErrorVisible = true;
 					errorPane.postDelayed(hideErrorPane, 5000);
 				}
@@ -414,6 +435,7 @@ public class PhotoActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		Crashlytics.start(this);
 		setContentView(R.layout.activity_photo);
+		preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 		final String tag = "StartUp";
 		newEmail = new NewEmailWizard();
 		progressBar = (ProgressBar) findViewById(R.id.progressLoading);
@@ -508,6 +530,7 @@ public class PhotoActivity extends Activity {
 	
 	@Override
 	protected void onDestroy() {
+		wifiConnectionHandler.unregisterBroadcast();
 		mailTimer.cancel();
 		super.onDestroy();
 	}
