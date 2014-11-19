@@ -321,8 +321,7 @@ public class PhotoActivity extends Activity {
 				wifiConnector.connectTo(activeNetwork, password.getText().toString());
 				if (wifiConnector.getConnectionResult() == -1) {
 					progressBar.setVisibility(View.INVISIBLE);
-					errorText.setText(R.string.error_not_connected);
-					errorPane.setVisibility(View.VISIBLE);
+					showPaneError(R.string.error_not_connected);
 					isConnectErrorVisible = true;
 					errorPane.postDelayed(hideErrorPane, 5000);
 				}
@@ -484,6 +483,9 @@ public class PhotoActivity extends Activity {
 			public void onClick(View v) {
 				pagerAdapter.deleteCurrentItem(pager);
 				deleteDialog.setVisibility(View.GONE);
+				if (GlimpseApp.getFileHandler().isEmpty() && getUser() != null) {
+					showPaneError(getString(R.string.error_no_foto, getUser()));
+				}
 			}
 		});
 		deleteDialog.findViewById(R.id.cancel).setOnClickListener(new View.OnClickListener() {
@@ -496,8 +498,7 @@ public class PhotoActivity extends Activity {
 		mailTimer.scheduleAtFixedRate(mailPollTask, 0, 120000);
 		Log.w(tag, "Got user "+user);
 		if (user == null) {
-			errorText.setText(R.string.error_no_user_data);
-			errorPane.setVisibility(View.VISIBLE);
+			showPaneError(R.string.error_no_user_data);
 			return;
 		}
 		if (pagerAdapter.getCount() >= 2) rescheduleImageSwipe();
@@ -605,7 +606,16 @@ public class PhotoActivity extends Activity {
 		pager.removeCallbacks(swipeRunnable);
 		pager.postDelayed(swipeRunnable, 8000);
 	}
-
+	
+	private void showPaneError(String text) {
+		errorText.setText(text);
+		errorPane.setVisibility(View.VISIBLE);
+	}
+	
+	private void showPaneError(int resId) {
+		showPaneError(context.getString(resId));
+	}
+	
 	public ConnectedListener connectedListener = new ConnectedListener() {
 		@Override
 		public void onConnected() {
@@ -613,9 +623,7 @@ public class PhotoActivity extends Activity {
 			progressBar.setVisibility(View.INVISIBLE);
 			wifiConnectionHandler.hideListPane();
 			if (GlimpseApp.getFileHandler().isEmpty() && getUser() != null) {
-				String message = getString(R.string.error_no_foto, getUser());
-				errorText.setText(message);
-				errorPane.setVisibility(View.VISIBLE);
+				showPaneError(getString(R.string.error_no_foto, getUser()));
 			}
 		}
 	};
