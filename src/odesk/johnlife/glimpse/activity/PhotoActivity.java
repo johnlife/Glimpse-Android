@@ -511,7 +511,7 @@ public class PhotoActivity extends Activity {
 					newEmail.show();
 				} else if (v.getId() == R.id.action_how_it_work) {
 					final Dialog d = new Dialog(context);
-					d.setTitle(R.string.how_it_works_title);
+					d.setTitle(getResources().getString(R.string.how_it_works_title) + getUser());
 					d.setContentView(R.layout.how_it_works);
 					TextView text = (TextView) d.findViewById(R.id.text);
 					text.setText("Android custom dialog example!");
