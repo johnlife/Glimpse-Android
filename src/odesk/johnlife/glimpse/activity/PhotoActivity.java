@@ -24,6 +24,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -47,6 +48,8 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -506,6 +509,22 @@ public class PhotoActivity extends Activity {
 					deleteDialog.setVisibility(View.VISIBLE);
 				} else if (v.getId() == R.id.action_new_email) {
 					newEmail.show();
+				} else if (v.getId() == R.id.action_how_it_work) {
+					final Dialog d = new Dialog(context);
+					d.setTitle(R.string.how_it_works_title);
+					d.setContentView(R.layout.how_it_works);
+					TextView text = (TextView) d.findViewById(R.id.text);
+					text.setText("Android custom dialog example!");
+					ImageView image = (ImageView) d.findViewById(R.id.image);
+					image.setImageResource(R.drawable.ic_launcher);		 
+					Button dialogButton = (Button) d.findViewById(R.id.dialogButtonOK);
+					dialogButton.setOnClickListener(new OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							d.dismiss();
+						}
+					});
+					d.show();
 				} else if (v.getId() == R.id.action_reset_wifi) {
 					if (isConnected()) {
 						new WifiConnector(context).forgetCurrent();

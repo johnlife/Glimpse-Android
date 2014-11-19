@@ -44,4 +44,13 @@
         android:text="@string/action_new_email" >
     </TextView>
     
+    <TextView
+        android:id="@+id/action_how_it_work"
+        style="@style/CustomActionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:drawableLeft="@drawable/question"
+        android:text="@string/action_new_email" >
+    </TextView>
+    
 </LinearLayout>

@@ -21,6 +21,7 @@
 	<string name="action_unfreeze">Unfreeze frame</string>
 	<string name="action_reset">Reset WiFi</string>
 	<string name="action_new_email">Change email</string>
+	<string name="how_it_works">How It Works</string>
 	
 	<string name="dialog_delete">Delete current photo forever?</string>
 			
@@ -33,5 +34,8 @@
 	<string name="title_wifi_list">Select your wi-fi network below</string>
 	<string name="title_email_step1">Request new email address</string>
 	<string name="title_email_step2">New email address confirmed</string>
+	
+	<string name="how_it_works_title">How It Works?</string>
+	<string name="how_it_works_message">Very long text about how it works: as;dkj \nflas dfj;kl jas;dlkfj aslkdj f;akj \nsd;lkjfa;sl df;a jsd;lkfj a;ksl\n djfajs d;l fjkas;ldjfasdfasdfk  alsdj flaksjd flasj dlfkj ad \n dsaf asd fas df</string>
 			
 </resources>
