@@ -241,6 +241,13 @@ public class PhotoActivity extends Activity {
 					boolean connected = info.getState() == NetworkInfo.State.CONNECTED;
 					boolean connecting = info.getState() == NetworkInfo.State.CONNECTING;
 					boolean visible = listPane.getVisibility() == View.VISIBLE;
+					boolean isSuspended = info.getState() == NetworkInfo.State.SUSPENDED;
+					boolean unknown = info.getState() == NetworkInfo.State.UNKNOWN;
+					if (isSuspended || unknown)
+					{
+						showHint(getResources().getString(R.string.hint_wifi_error));
+					}
+					else 
 					if (connected) {
 						connectedListener.onConnected();
 						hideConnectionDialog();
