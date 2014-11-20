@@ -28,6 +28,7 @@ import android.util.Log;
 public class MailConnector {
 //	private static final String SSL_FACTORY = "javax.net.ssl.SSLSocketFactory";
 	private static final String SSL_FACTORY = "odesk.johnlife.glimpse.util.AlwaysTrustSSLContextFactory";
+	private static final String LOG_TAG = MailConnector.class.getSimpleName();
 	
 	private String user;
 	private String pass;
@@ -41,7 +42,7 @@ public class MailConnector {
 	}
 
 	public void connect() {
-		Log.d(getClass().getSimpleName(), String.format("Connecting to %s, user=%s, pass=%s", server, user, pass));
+		Log.d(LOG_TAG, String.format("Connecting to %s, user=%s, pass=%s", server, user, pass));
 	    Properties properties = System.getProperties();
 	    properties.setProperty("mail.store.protocol", "imaps");
 	    properties.setProperty("mail.imaps.socketFactory.class", SSL_FACTORY);
@@ -49,33 +50,34 @@ public class MailConnector {
 	        Session session = Session.getDefaultInstance(properties, null);
 	        Store store = session.getStore("imaps");
 		    store.connect(server, user, pass);
-			Log.d(getClass().getSimpleName(), "Connected to store");
+			Log.d(LOG_TAG, "Connected to store");
 			Folder folder = null;
 			folder = store.getDefaultFolder().getFolder("INBOX");
 			folder.open(Folder.READ_WRITE);
-			Log.d(getClass().getSimpleName(), "Opened inbox");
+			Log.d(LOG_TAG, "Opened inbox");
 			FileHandler fileHandler = GlimpseApp.getFileHandler();
 			Message[] messages = fileHandler.isEmpty() ?
 				folder.getMessages() : 
 				folder.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
-			Log.d(getClass().getSimpleName(), "Got "+messages.length+(fileHandler.isEmpty() ? " total" : " new")+" messages.");
+			Log.d(LOG_TAG, "Got "+messages.length+(fileHandler.isEmpty() ? " total" : " new")+" messages.");
 			for(Message msg : messages) {
 				try {
 					List<File> attachments = getAttachments((Multipart) msg.getContent());
-					Log.d(getClass().getSimpleName(), "Found "+attachments.size()+" attachments.");
+					Log.d(LOG_TAG, "Found "+attachments.size()+" attachments.");
 					for (File file : attachments) {
 						fileHandler.add(file);
 					}
 					msg.setFlag(Flags.Flag.DELETED, true);
 				} catch (Exception e) {
-//					PushLink.sendAsyncException(e);
+					Log.e(LOG_TAG, "Error: ", e);
+				//	PushLink.sendAsyncException(e);
 				}
 			}
 			folder.setFlags(messages, new Flags(Flags.Flag.SEEN), true);
 			folder.close(true);
 			store.close();
 		} catch (MessagingException e) {
-			Log.e(getClass().getSimpleName(), "Error: ", e);
+			Log.e(LOG_TAG, "Error: ", e);
 //			PushLink.sendAsyncException(e);
 		}
 	}

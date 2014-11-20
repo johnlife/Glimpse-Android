@@ -163,6 +163,10 @@ public class PhotoActivity extends Activity implements Constants {
 			step1.setVisibility(View.VISIBLE);
 			step2.setVisibility(View.GONE);
 		}
+		
+		public void hide(){
+			dialog.setVisibility(View.GONE);
+		}
 	}
 	
 	private class WifiConnectionHandler {
@@ -546,10 +550,12 @@ public class PhotoActivity extends Activity implements Constants {
 			@Override
 			public void onClick(View v) {
 				if (v.getId() == R.id.action_delete) {
+					newEmail.hide();
 					deleteDialog.setVisibility(View.VISIBLE);
 				} else if (v.getId() == R.id.action_setting) {
 					showPopupMenu(v);
-				}
+				} else
+					newEmail.hide();
 			}
 		});
 	}
@@ -560,6 +566,7 @@ public class PhotoActivity extends Activity implements Constants {
 		popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
 			@Override
 			public boolean onMenuItemClick(MenuItem item) {
+				newEmail.hide();
 				switch (item.getItemId()) {
 				case R.id.menu1:
 					newEmail.show();
