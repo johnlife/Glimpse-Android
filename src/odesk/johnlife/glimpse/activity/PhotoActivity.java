@@ -89,7 +89,7 @@ public class PhotoActivity extends Activity implements Constants {
 	private View messagePane;
 	private TextView hintText;
 	private SharedPreferences preferences;
-	private int hintTime = 2000; //ms 
+	private int hintTime = 3000; //ms 
 	private boolean isAnimationNeeded = true;
 
 	public interface ConnectedListener {
@@ -195,30 +195,23 @@ public class PhotoActivity extends Activity implements Constants {
 					TreeSet<ScanResult> sortedResults = new TreeSet<ScanResult>(
 							new Comparator<ScanResult>() {
 								@Override
-								public int compare(ScanResult lhs,
-										ScanResult rhs) {
-									return -WifiManager.compareSignalLevel(
-											lhs.level, rhs.level);
+								public int compare(ScanResult lhs, ScanResult rhs) {
+									return -WifiManager.compareSignalLevel(lhs.level, rhs.level);
 								}
 							});
 					sortedResults.addAll(wifi.getScanResults());
-					ArrayList<ScanResult> scanResults = new ArrayList<ScanResult>(
-							sortedResults.size());
+					ArrayList<ScanResult> scanResults = new ArrayList<ScanResult>(sortedResults.size());
 					TreeSet<String> nameLans = new TreeSet<String>();
 					for (ScanResult net : sortedResults) {
-						if (!net.SSID.trim().isEmpty()
-								&& nameLans.add(net.SSID)) {
+						if (!net.SSID.trim().isEmpty() && nameLans.add(net.SSID)) {
 							scanResults.add(net);
 						}
 					}
 					final ArrayAdapter<ScanResult> adapter = new ArrayAdapter<ScanResult>(
-							context, R.layout.wifi_list_item,
-							scanResults) {
+							context, R.layout.wifi_list_item, scanResults) {
 						@Override
-						public View getView(int position, View convertView,
-								ViewGroup parent) {
-							TextView view = (TextView) super.getView(position,
-									convertView, parent);
+						public View getView(int position, View convertView, ViewGroup parent) {
+							TextView view = (TextView) super.getView(position, convertView, parent);
 							view.setText(getItem(position).SSID);
 							return view;
 						}
@@ -265,31 +258,23 @@ public class PhotoActivity extends Activity implements Constants {
 					boolean visible = listPane.getVisibility() == View.VISIBLE;
 					boolean isSuspended = info.getState() == NetworkInfo.State.SUSPENDED;
 					boolean unknown = info.getState() == NetworkInfo.State.UNKNOWN;
-					if (isSuspended || unknown)
-					{
+					if (isSuspended || unknown) {
 						showHint(getResources().getString(R.string.hint_wifi_error));
-					}
-					else
-						if (details == NetworkInfo.DetailedState.DISCONNECTED && info.getExtraInfo().equals("<unknown ssid>")) {
+					} else if (details == NetworkInfo.DetailedState.DISCONNECTED) {
+						if (info.getExtraInfo().equals("<unknown ssid>")) {
 							showHint(getResources().getString(R.string.hint_wifi_error));
-							wifi.disconnect();
-							new WifiConnector(context).forgetCurrent();
+						} else {
+							showHint(getResources().getString(R.string.hint_wifi_disconnected));
 						}
-						else 
-					if (details == NetworkInfo.DetailedState.DISCONNECTED) {
-						showHint(getResources().getString(R.string.hint_wifi_disconnected));
-					}
-					else 
-					if (connected && details == NetworkInfo.DetailedState.CONNECTED) {
+						new WifiConnector(context).forgetCurrent();
+					} else if (connected && details == NetworkInfo.DetailedState.CONNECTED) {
 						connectedListener.onConnected();
 						hideConnectionDialog();
 						showHint(getResources().getString(R.string.hint_success));
-					}
-					else 
-					if (!visible && !connected && !connecting) {
+					} else if (!visible && !connected && !connecting) {
 						scanWifi();
 					}
-				}
+				}	
 			}
 		};
 
@@ -367,7 +352,7 @@ public class PhotoActivity extends Activity implements Constants {
 					errorText.setText(R.string.error_not_connected);
 					errorPane.setVisibility(View.VISIBLE);
 					isConnectErrorVisible = true;
-					errorPane.postDelayed(hideErrorPane, 5000);
+					errorPane.postDelayed(hideErrorPane, hintTime);
 				}
 			}
 		}
@@ -388,11 +373,13 @@ public class PhotoActivity extends Activity implements Constants {
 				return wifiDialog.getVisibility() == View.VISIBLE;
 			}
 		}
+		
 		public boolean isListPaneVisibie() {
-			if (listPane == null)
+			if (listPane == null) {
 				return false; 
-			else 
+			} else {
 				return listPane.getVisibility() == View.VISIBLE;
+			}
 		}
 
 		public void hideConnectionDialog() {
@@ -401,6 +388,18 @@ public class PhotoActivity extends Activity implements Constants {
             imm.hideSoftInputFromWindow(password.getWindowToken(), 0);
 		}
 	}
+	
+	public ConnectedListener connectedListener = new ConnectedListener() {
+		@Override
+		public void onConnected() {
+			Log.d("ConnectedListener", "Connected");
+			progressBar.setVisibility(View.INVISIBLE);
+			wifiConnectionHandler.hideListPane();
+			if (GlimpseApp.getFileHandler().isEmpty() && getUser() != null) {
+				showPaneError(getString(R.string.error_no_foto, getUser()));
+			}
+		}
+	};
 
 	private Runnable swipeRunnable = new Runnable() {
 		@Override
@@ -418,6 +417,17 @@ public class PhotoActivity extends Activity implements Constants {
 			}
 		}
 
+	};
+	
+	private Runnable hideErrorPane = new Runnable() {
+		@Override
+		public void run() {
+			errorPane.setVisibility(View.INVISIBLE);
+			if (isConnectErrorVisible == true) {
+				isConnectErrorVisible = false;
+				wifiConnectionHandler.scanWifi();
+			}
+		}
 	};
 	
 	private TimerTask mailPollTask = new TimerTask() {
@@ -555,16 +565,12 @@ public class PhotoActivity extends Activity implements Constants {
 		if (pagerAdapter.getCount() >= 2) rescheduleImageSwipe();
 	}
 	
-	
-	
 	@Override
 	protected void onDestroy() {
 		wifiConnectionHandler.unregisterBroadcast();
 		mailTimer.cancel();
 		super.onDestroy();
 	}
-
-
 
 	private void createActionBar() {
 		actionBar = new BlurActionBar(this);
@@ -680,17 +686,6 @@ public class PhotoActivity extends Activity implements Constants {
 		}
 	}
 
-	private Runnable hideErrorPane = new Runnable() {
-		@Override
-		public void run() {
-			errorPane.setVisibility(View.INVISIBLE);
-			if (isConnectErrorVisible == true) {
-				isConnectErrorVisible = false;
-				wifiConnectionHandler.scanWifi();
-			}
-		}
-	};
-
 	private void rescheduleImageSwipe() {
 		pager.removeCallbacks(swipeRunnable);
 		pager.postDelayed(swipeRunnable, 8000);
@@ -705,18 +700,6 @@ public class PhotoActivity extends Activity implements Constants {
 		showPaneError(context.getString(resId));
 	}
 	
-	public ConnectedListener connectedListener = new ConnectedListener() {
-		@Override
-		public void onConnected() {
-			Log.d("ConnectedListener", "Connected");
-			progressBar.setVisibility(View.INVISIBLE);
-			wifiConnectionHandler.hideListPane();
-			if (GlimpseApp.getFileHandler().isEmpty() && getUser() != null) {
-				showPaneError(getString(R.string.error_no_foto, getUser()));
-			}
-		}
-	};
-
 	private boolean isConnectedOrConnecting() {
 		return getNetworkInfo().isConnectedOrConnecting();
 	}
@@ -744,4 +727,5 @@ public class PhotoActivity extends Activity implements Constants {
 			super.onBackPressed();
 		}
 	}
+	
 }
