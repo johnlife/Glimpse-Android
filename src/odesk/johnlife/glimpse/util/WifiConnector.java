@@ -24,13 +24,10 @@ public class WifiConnector {
 		public void connect() {
 			WifiConfiguration config = new WifiConfiguration();
 			config.SSID = addQuotes(net.SSID);
-
 			config.status = WifiConfiguration.Status.ENABLED;
 			config = configure(config);
-			
 			config.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
 			config.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.SHARED);
-			
 			connectionResult = wifi.addNetwork(config);
 			Log.d("wifi", "Network added");
 			wifi.disconnect();
@@ -58,24 +55,37 @@ public class WifiConnector {
 	}
 
 	private class WpaConnector extends Connector {
+		private ScanResult net;
+		private String password;
+		
 		public WpaConnector(ScanResult net, String password) {
 			super(net, password);
+			this.net = net;
+			this.password = password;
+		}
+		
+		@Override
+		public void connect() {
+			WifiConfiguration config = new WifiConfiguration();
+			config.SSID = addQuotes(net.SSID);
+			config.BSSID = net.BSSID;
+			config.preSharedKey = addQuotes(password);
+			config.status = WifiConfiguration.Status.ENABLED;
+			config.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
+			config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
+			config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+			config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+			config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
+			config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+			config.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
+			connectionResult = wifi.addNetwork(config);
+	        wifi.enableNetwork(connectionResult, true);
+	        wifi.setWifiEnabled(true);
 		}
 
 		@Override
 		public WifiConfiguration configure(WifiConfiguration config) {
-			config.preSharedKey = addQuotes(password);
-			config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
-			config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
-			config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
-			config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
-			
-			config.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
-			config.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
-			
-			config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
-			
-			return config;
+			return null;
 		}
 	}
 
