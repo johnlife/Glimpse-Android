@@ -269,8 +269,15 @@ public class PhotoActivity extends Activity implements Constants {
 					{
 						showHint(getResources().getString(R.string.hint_wifi_error));
 					}
+					else
+						if (details == NetworkInfo.DetailedState.DISCONNECTED && info.getExtraInfo().equals("<unknown ssid>")) {
+							showHint(getResources().getString(R.string.hint_wifi_error));
+							wifi.disconnect();
+							new WifiConnector(context).forgetCurrent();
+						}
+						else 
 					if (details == NetworkInfo.DetailedState.DISCONNECTED) {
-						showHint(getResources().getString(R.string.hint_wifi_error));
+						showHint(getResources().getString(R.string.hint_wifi_disconnected));
 					}
 					else 
 					if (connected && details == NetworkInfo.DetailedState.CONNECTED) {
@@ -327,11 +334,13 @@ public class PhotoActivity extends Activity implements Constants {
 			wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
 			if (!wifi.isWifiEnabled()) {
 				wifi.setWifiEnabled(true);
+				registerReceiver(wifiScanReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 				scanWifi();
 			}
 			if (isConnectedOrConnecting()) {
 				listPane.setVisibility(View.INVISIBLE);
 			} else {
+				registerReceiver(wifiScanReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 				scanWifi();
 			}
 			registerReceiver(wifiScanReceiver, new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
@@ -365,7 +374,7 @@ public class PhotoActivity extends Activity implements Constants {
 
 		public void scanWifi() {
 			wifi.startScan();
-			registerReceiver(wifiScanReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+			
 		}
 
 		public View getView() {
