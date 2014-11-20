@@ -42,7 +42,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 		fileHandler.setObserver(new DataSetObserver() {
 			@Override
 			public void onChanged() {
-				if (wasEmpty) {
+				if (fileHandler.isEmpty()) {
 					activity.startActivity(new Intent(activity, activity.getClass()));
 					activity.finish();
 				} else {

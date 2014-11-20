@@ -30,7 +30,7 @@ public class FileHandler {
 	}
 
 	public synchronized void add(File file) {
-		cleanup(file.getTotalSpace());
+		cleanup(file.length());
 		try {
 			Bitmap bmp = BitmapFactory.decodeFile(file.getAbsolutePath());
 			if (null == bmp) return; //not an image
@@ -139,9 +139,13 @@ public class FileHandler {
 	
 	public synchronized void cleanup(long size) {
 		locked = true;
-		while ((GlimpseApp.getPicturesDir().getUsableSpace()) < size) {
-			PictureData victim = Collections.min(files, PictureData.TIME_COMPARATOR);
-			delete(victim);
+		while (GlimpseApp.getPicturesDir().getUsableSpace() < size) {
+			if (!files.isEmpty()) {
+				PictureData victim = Collections.min(files, PictureData.TIME_COMPARATOR);
+				delete(victim);
+			} else {
+				break;
+			}
 		}
 		notifyObserver();
 		locked = false;
