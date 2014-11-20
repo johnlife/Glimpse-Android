@@ -90,6 +90,7 @@ public class PhotoActivity extends Activity implements Constants {
 	private TextView hintText;
 	private SharedPreferences preferences;
 	private int hintTime = 2000; //ms 
+	private boolean isAnimationNeeded = true;
 
 	public interface ConnectedListener {
 		public void onConnected();
@@ -250,9 +251,12 @@ public class PhotoActivity extends Activity implements Constants {
 					progressBar.setVisibility(View.INVISIBLE);
 					errorPane.setVisibility(View.INVISIBLE);
 					listPane.setVisibility(View.VISIBLE);
-					listPane.setAlpha(0);
-					listPane.setTranslationX(listPane.getWidth());
-					listPane.animate().translationX(0).alpha(1).start();
+					if (isAnimationNeeded) {
+						listPane.setAlpha(0);
+						listPane.setTranslationX(listPane.getWidth());
+						listPane.animate().translationX(0).alpha(1).start();
+						isAnimationNeeded = false;
+					}
 				} else if (WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(action)) {
 					NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
 					NetworkInfo.DetailedState details = info.getDetailedState();
@@ -263,6 +267,9 @@ public class PhotoActivity extends Activity implements Constants {
 					boolean unknown = info.getState() == NetworkInfo.State.UNKNOWN;
 					if (isSuspended || unknown)
 					{
+						showHint(getResources().getString(R.string.hint_wifi_error));
+					}
+					if (details == NetworkInfo.DetailedState.DISCONNECTED) {
 						showHint(getResources().getString(R.string.hint_wifi_error));
 					}
 					else 
@@ -291,6 +298,7 @@ public class PhotoActivity extends Activity implements Constants {
 					listPane.animate().setListener(null).start();
 				}
 			}).start();
+			isAnimationNeeded = true;
 		}
 		
 		public void createUi(Bundle savedInstanceState) {
@@ -370,6 +378,12 @@ public class PhotoActivity extends Activity implements Constants {
 			} else {
 				return wifiDialog.getVisibility() == View.VISIBLE;
 			}
+		}
+		public boolean isListPaneVisibie() {
+			if (listPane == null)
+				return false; 
+			else 
+				return listPane.getVisibility() == View.VISIBLE;
 		}
 
 		public void hideConnectionDialog() {
