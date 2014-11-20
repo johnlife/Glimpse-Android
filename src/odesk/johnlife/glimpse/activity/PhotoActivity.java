@@ -229,7 +229,6 @@ public class PhotoActivity extends Activity implements Constants {
 							activeNetwork = adapter.getItem(position);
 							String cap = activeNetwork.capabilities;
 							if (cap.isEmpty() || cap.startsWith("[ESS")) {
-								hideListPane();
 								progressBar.setVisibility(View.VISIBLE);
 								new WifiConnector(PhotoActivity.this).connectTo(activeNetwork);
 							} else {
@@ -256,6 +255,7 @@ public class PhotoActivity extends Activity implements Constants {
 					listPane.animate().translationX(0).alpha(1).start();
 				} else if (WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(action)) {
 					NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+					NetworkInfo.DetailedState details = info.getDetailedState();
 					boolean connected = info.getState() == NetworkInfo.State.CONNECTED;
 					boolean connecting = info.getState() == NetworkInfo.State.CONNECTING;
 					boolean visible = listPane.getVisibility() == View.VISIBLE;
@@ -266,7 +266,7 @@ public class PhotoActivity extends Activity implements Constants {
 						showHint(getResources().getString(R.string.hint_wifi_error));
 					}
 					else 
-					if (connected) {
+					if (connected && details == NetworkInfo.DetailedState.CONNECTED) {
 						connectedListener.onConnected();
 						hideConnectionDialog();
 						showHint(getResources().getString(R.string.hint_success));
@@ -337,7 +337,6 @@ public class PhotoActivity extends Activity implements Constants {
 			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 			imm.hideSoftInputFromWindow(password.getWindowToken(), 0);
 			if (activeNetwork != null) {
-				hideListPane();
 				progressBar.setVisibility(View.VISIBLE);
 				WifiConnector wifiConnector = new WifiConnector(PhotoActivity.this);
 				wifiConnector.connectTo(activeNetwork, pass); //password.getText().toString()
