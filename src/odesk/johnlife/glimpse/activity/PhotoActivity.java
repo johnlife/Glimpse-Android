@@ -43,6 +43,7 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -55,6 +56,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -544,9 +546,29 @@ public class PhotoActivity extends Activity implements Constants {
 			public void onClick(View v) {
 				if (v.getId() == R.id.action_delete) {
 					deleteDialog.setVisibility(View.VISIBLE);
-				} else if (v.getId() == R.id.action_new_email) {
+				} else if (v.getId() == R.id.action_setting) {
+					showPopupMenu(v);
+				}
+			}
+		});
+	}
+
+	private void showPopupMenu(View v) {
+		PopupMenu popupMenu = new PopupMenu(this, v);
+		popupMenu.inflate(R.menu.popup_menu);
+		popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+			@Override
+			public boolean onMenuItemClick(MenuItem item) {
+				switch (item.getItemId()) {
+				case R.id.menu1:
 					newEmail.show();
-				} else if (v.getId() == R.id.action_how_it_work) {
+					return true;
+				case R.id.menu2:
+					if (isConnected()) {
+						new WifiConnector(context).forgetCurrent();
+					}
+					return true;
+				case R.id.menu3:
 					final Dialog d = new Dialog(context);
 					d.setTitle(getResources().getString(R.string.how_it_works_title) + getUser());
 					d.setContentView(R.layout.how_it_works);
@@ -562,16 +584,21 @@ public class PhotoActivity extends Activity implements Constants {
 						}
 					});
 					d.show();
-				} else if (v.getId() == R.id.action_reset_wifi) {
-					if (isConnected()) {
-						new WifiConnector(context).forgetCurrent();
-					}
+					return true;
+				default:
+					return false;
 				}
 			}
 		});
+		popupMenu.setOnDismissListener(new PopupMenu.OnDismissListener() {
+			@Override
+			public void onDismiss(PopupMenu menu) {
+				// TODO Auto-generated method stub
+			}
+		});
+		popupMenu.show();
 	}
-
-
+	
 	protected void showHint(String hint) {
 		hintText.setText(hint);
 		messagePane.setVisibility(View.VISIBLE);

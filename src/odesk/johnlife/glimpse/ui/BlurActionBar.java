@@ -14,7 +14,8 @@ public class BlurActionBar {
 	private class ActionClickListener implements View.OnClickListener {
 		@Override
 		public void onClick(View v) {
-			actionBar.hide();
+			if (v.getId() != R.id.action_setting)
+				actionBar.hide();
 			listener.onClick(v);
 		}
 	}
@@ -36,14 +37,11 @@ public class BlurActionBar {
 	private void createActionButtons() {
 		View deleteActionView = customActionBar.findViewById(R.id.action_delete);
 		View freezeActionView = customActionBar.findViewById(R.id.action_freeze);
-		View resetActionView = customActionBar.findViewById(R.id.action_reset_wifi);
-		View emailActionView = customActionBar.findViewById(R.id.action_new_email);
-		View howItWorkActionView = customActionBar.findViewById(R.id.action_how_it_work);
+		View settingActionView = customActionBar.findViewById(R.id.action_setting);
 		
 		ActionClickListener simpleClickListener = new ActionClickListener();
 		deleteActionView.setOnClickListener(simpleClickListener);
-		resetActionView.setOnClickListener(simpleClickListener);
-		emailActionView.setOnClickListener(simpleClickListener);
+		settingActionView.setOnClickListener(simpleClickListener);
 		freezeActionView.setOnClickListener(new ActionClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -51,7 +49,6 @@ public class BlurActionBar {
 				super.onClick(v);
 			}
 		});
-		howItWorkActionView.setOnClickListener(simpleClickListener);
 	}
 	
 	public void setOnActionClickListener(OnActionClick listener) {
