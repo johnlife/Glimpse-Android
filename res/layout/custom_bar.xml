@@ -31,7 +31,7 @@
         style="@style/CustomActionButton"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:drawableLeft="@drawable/wifi"
+        android:drawableLeft="@drawable/settings_new_small"
         android:text="@string/action_setting" >
     </TextView>
 </LinearLayout>

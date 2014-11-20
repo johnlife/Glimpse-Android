@@ -32,6 +32,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
@@ -466,7 +467,7 @@ public class PhotoActivity extends Activity implements Constants {
 		pagerAdapter = new ImagePagerAdapter(this, databaseHelper, new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (isBlocked()) return;
+				//if (isBlocked()) return;
 				ActionBar actionBar = getActionBar();
 				if (actionBar.isShowing()) {
 					actionBar.hide();
@@ -570,12 +571,15 @@ public class PhotoActivity extends Activity implements Constants {
 					return true;
 				case R.id.menu3:
 					final Dialog d = new Dialog(context);
-					d.setTitle(getResources().getString(R.string.how_it_works_title) + getUser());
+					Resources res = getResources();
+					d.setTitle(res.getString(R.string.how_it_works_title));
 					d.setContentView(R.layout.how_it_works);
-					TextView text = (TextView) d.findViewById(R.id.text);
-					text.setText("Android custom dialog example!");
-					ImageView image = (ImageView) d.findViewById(R.id.image);
-					image.setImageResource(R.drawable.ic_launcher);		 
+					TextView textEmail = (TextView) d.findViewById(R.id.textEmail);
+					textEmail.setText(res.getString(R.string.how_it_works_email) + " " + getUser());
+					ImageView image = (ImageView) d.findViewById(R.id.imageHowItWork);
+					image.setImageDrawable(res.getDrawable(R.drawable.ic_launcher));		 
+					TextView textHowItWork = (TextView)d.findViewById(R.id.textHowItWorks);
+					textHowItWork.setText(res.getString(R.string.how_it_works_message));	
 					Button dialogButton = (Button) d.findViewById(R.id.dialogButtonOK);
 					dialogButton.setOnClickListener(new OnClickListener() {
 						@Override
@@ -583,7 +587,13 @@ public class PhotoActivity extends Activity implements Constants {
 							d.dismiss();
 						}
 					});
+					WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+					lp.copyFrom(d.getWindow().getAttributes());
+				    lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+				    lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+				    //d.getWindow().setAttributes(lp);
 					d.show();
+					d.getWindow().setAttributes(lp);
 					return true;
 				default:
 					return false;
