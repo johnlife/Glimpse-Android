@@ -467,7 +467,7 @@ public class PhotoActivity extends Activity implements Constants {
 		pagerAdapter = new ImagePagerAdapter(this, databaseHelper, new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				//if (isBlocked()) return;
+				if (isBlocked()) return;
 				ActionBar actionBar = getActionBar();
 				if (actionBar.isShowing()) {
 					actionBar.hide();
