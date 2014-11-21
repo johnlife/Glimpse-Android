@@ -5,7 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Timer;
@@ -662,12 +662,12 @@ public class PhotoActivity extends Activity implements Constants {
 		}, HINT_TIME);
 	}
 	private String getUser() {
-		byte[] user = null;
+		String user = null;
 		try {
 			File dataFile = getUserDataFile();
 			if (!dataFile.exists()) return null;
 			BufferedReader br = new BufferedReader(new FileReader(dataFile));
-			byte[] line = br.readLine().getBytes(Charset.forName("UTF-8"));
+			String line = br.readLine();
 			if (line != null) {
 				user = line;
 			}
@@ -675,7 +675,7 @@ public class PhotoActivity extends Activity implements Constants {
 		} catch (Exception e) {
 			Log.e("UserInfo", e.getMessage(), e);
 		}
-		return new String(user, Charset.forName("UTF-8"));
+		return Normalizer.normalize(user, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
 	}
 
 	private File getUserDataFile() {

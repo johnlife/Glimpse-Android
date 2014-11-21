@@ -36,9 +36,7 @@ public class MailConnector {
 	
 	public MailConnector(String user, String pass, Context context) {
 		this.user = user;
-		System.out.println("!!! USER=" + user.equals("sectione@glimpseframe.com"));
 		this.pass = pass;
-		System.out.println("!!! PASS=" + pass.equals("HPgqL2658P"));
 		this.server = context.getString(R.string.email_server);
 	}
 
