@@ -238,6 +238,9 @@ public class PhotoActivity extends Activity implements Constants {
 									networkName.setText(activeNetwork.SSID);
 								}
 							}
+							if (!isConnectedOrConnecting())
+								if (wifiDialog.getVisibility() != View.VISIBLE)
+									showHint(getResources().getString(R.string.hint_wifi_error));
 						}
 					});
 					if (isConnectedOrConnecting()) return;
@@ -303,6 +306,10 @@ public class PhotoActivity extends Activity implements Constants {
 				public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 					if (actionId == EditorInfo.IME_ACTION_DONE) {
 						connectToNetwork(password.getText().toString());
+						hideConnectionDialog();
+						connectToNetwork(password.getText().toString());
+						if (!isConnectedOrConnecting())
+							showHint(getResources().getString(R.string.hint_wifi_error));
 						return true;
 					}
 					return false;
@@ -313,7 +320,10 @@ public class PhotoActivity extends Activity implements Constants {
 				new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
+						hideConnectionDialog();
 						connectToNetwork(password.getText().toString());
+						if (!isConnectedOrConnecting())
+							showHint(getResources().getString(R.string.hint_wifi_error));
 					}
 				});
 			wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
