@@ -26,7 +26,6 @@ import android.content.Context;
 import android.util.Log;
 
 public class MailConnector {
-//	private static final String SSL_FACTORY = "javax.net.ssl.SSLSocketFactory";
 	private static final String SSL_FACTORY = "odesk.johnlife.glimpse.util.AlwaysTrustSSLContextFactory";
 	private static final String LOG_TAG = MailConnector.class.getSimpleName();
 	
@@ -37,7 +36,9 @@ public class MailConnector {
 	
 	public MailConnector(String user, String pass, Context context) {
 		this.user = user;
+		System.out.println("!!! USER=" + user.equals("sectione@glimpseframe.com"));
 		this.pass = pass;
+		System.out.println("!!! PASS=" + pass.equals("HPgqL2658P"));
 		this.server = context.getString(R.string.email_server);
 	}
 

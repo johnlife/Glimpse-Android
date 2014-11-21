@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Timer;
@@ -661,12 +662,12 @@ public class PhotoActivity extends Activity implements Constants {
 		}, HINT_TIME);
 	}
 	private String getUser() {
-		String user = null;
+		byte[] user = null;
 		try {
 			File dataFile = getUserDataFile();
 			if (!dataFile.exists()) return null;
 			BufferedReader br = new BufferedReader(new FileReader(dataFile));
-			String line = br.readLine();
+			byte[] line = br.readLine().getBytes(Charset.forName("UTF-8"));
 			if (line != null) {
 				user = line;
 			}
@@ -674,7 +675,7 @@ public class PhotoActivity extends Activity implements Constants {
 		} catch (Exception e) {
 			Log.e("UserInfo", e.getMessage(), e);
 		}
-		return user;
+		return new String(user, Charset.forName("UTF-8"));
 	}
 
 	private File getUserDataFile() {
