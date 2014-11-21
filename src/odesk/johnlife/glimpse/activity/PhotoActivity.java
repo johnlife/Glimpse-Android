@@ -91,7 +91,6 @@ public class PhotoActivity extends Activity implements Constants {
 	private View messagePane;
 	private TextView hintText;
 	private SharedPreferences preferences;
-	private int hintTime = 3000; //ms 
 	private boolean isAnimationNeeded = true;
 
 	public interface ConnectedListener {
@@ -364,7 +363,7 @@ public class PhotoActivity extends Activity implements Constants {
 					errorText.setText(R.string.error_not_connected);
 					errorPane.setVisibility(View.VISIBLE);
 					isConnectErrorVisible = true;
-					errorPane.postDelayed(hideErrorPane, hintTime);
+					errorPane.postDelayed(hideErrorPane, HINT_TIME);
 				}
 			}
 		}
@@ -383,14 +382,6 @@ public class PhotoActivity extends Activity implements Constants {
 				return false;
 			} else {
 				return wifiDialog.getVisibility() == View.VISIBLE;
-			}
-		}
-		
-		public boolean isListPaneVisibie() {
-			if (listPane == null) {
-				return false; 
-			} else {
-				return listPane.getVisibility() == View.VISIBLE;
 			}
 		}
 
@@ -568,7 +559,7 @@ public class PhotoActivity extends Activity implements Constants {
 			}
 		});
 		final String user = getUser();
-		mailTimer.scheduleAtFixedRate(mailPollTask, 0, 120000);
+		mailTimer.scheduleAtFixedRate(mailPollTask, 0, REFRESH_RATE);
 		Log.w(tag, "Got user "+user);
 		if (user == null) {
 			showPaneError(R.string.error_no_user_data);
@@ -663,12 +654,11 @@ public class PhotoActivity extends Activity implements Constants {
 		hintText.setText(hint);
 		messagePane.setVisibility(View.VISIBLE);
 		messagePane.postDelayed(new Runnable() {
-			
 			@Override
 			public void run() {
 				messagePane.setVisibility(View.GONE);
 			}
-		}, hintTime);
+		}, HINT_TIME);
 	}
 	private String getUser() {
 		String user = null;
