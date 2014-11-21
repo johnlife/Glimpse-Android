@@ -619,6 +619,7 @@ public class PhotoActivity extends Activity implements Constants {
 					Resources res = getResources();
 					d.setTitle(res.getString(R.string.how_it_works_title));
 					d.setContentView(R.layout.how_it_works);
+					getActionBar().hide();
 					TextView textEmail = (TextView) d.findViewById(R.id.textEmail);
 					textEmail.setText(res.getString(R.string.how_it_works_email) + " " + getUser());
 					ImageView image = (ImageView) d.findViewById(R.id.imageHowItWork);
