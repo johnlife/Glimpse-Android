@@ -91,7 +91,7 @@ public class PictureData {
 
 	@Override
 	public boolean equals(Object o) {
-		return o instanceof PictureData && id == ((PictureData)o).id;
+		return o instanceof PictureData && (id == ((PictureData)o).id || path.equals(((PictureData)o).path));
 	}
 
 	private synchronized long getWeight() {

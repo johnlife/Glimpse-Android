@@ -3,9 +3,11 @@ package odesk.johnlife.glimpse.app;
 import java.io.File;
 
 import odesk.johnlife.glimpse.data.FileHandler;
+import odesk.johnlife.glimpse.data.PictureData;
 import odesk.johnlife.glimpse.util.DeviceScreen;
 import android.app.Application;
 import android.content.SharedPreferences;
+import android.os.FileObserver;
 import android.preference.PreferenceManager;
 
 import com.lazydroid.autoupdateapk.SilentAutoUpdate;
@@ -18,6 +20,7 @@ public class GlimpseApp extends Application{
 	private static FileHandler fileHandler;
 	private SilentAutoUpdate autoUpdater;
 	private static final String FIRST_LAUNCH = "odesk.johnlife.glimpse.first.launch";
+	private FileObserver directoryObserver;
 
 	@Override
 	public void onCreate() {
@@ -33,6 +36,15 @@ public class GlimpseApp extends Application{
 		tempDir = getCacheDir();
 		screen = new DeviceScreen(this);
 		fileHandler = new FileHandler(this);
+		directoryObserver = new FileObserver(GlimpseApp.getPicturesDir().getAbsolutePath()) {
+			@Override
+			public void onEvent(int event, String path) {
+				if (event == FileObserver.DELETE) {
+					fileHandler.delete(new PictureData(GlimpseApp.getPicturesDir().getAbsolutePath() + "/" + path));
+				}
+			}
+		};
+		directoryObserver.startWatching();
 	}
 
 	public static File getPicturesDir() {

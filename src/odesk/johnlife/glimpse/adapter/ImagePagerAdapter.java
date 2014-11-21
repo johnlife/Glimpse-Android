@@ -1,5 +1,7 @@
 package odesk.johnlife.glimpse.adapter;
 
+import java.io.File;
+
 import odesk.johnlife.glimpse.R;
 import odesk.johnlife.glimpse.app.GlimpseApp;
 import odesk.johnlife.glimpse.data.DatabaseHelper;
@@ -37,8 +39,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 		this.context = activity;
 		this.onClickListener = onClickListener;
 		this.fileHandler = GlimpseApp.getFileHandler();
-		final boolean wasEmpty = fileHandler.isEmpty();
-		Log.d("Start - adapter", "Filehadler ready "+(wasEmpty ? "and empty" : ", pics: "+fileHandler.size()));
+		Log.d("Start - adapter", "Filehadler ready "+(fileHandler.isEmpty() ? "and empty" : ", pics: "+fileHandler.size()));
 		fileHandler.setObserver(new DataSetObserver() {
 			@Override
 			public void onChanged() {
@@ -78,6 +79,9 @@ public class ImagePagerAdapter extends PagerAdapter {
 			Log.d("Start - adapter", "Created view for startup screen");
 		} else {
 			PictureData pictureData = fileHandler.getLightest();
+			if (!new File(pictureData.getPath()).exists()) {
+				fileHandler.delete(pictureData);
+			}
 			pictureData.viewCreated();
 			pictures.put(position, pictureData);
 			if (pictureData.createdToday()) {
