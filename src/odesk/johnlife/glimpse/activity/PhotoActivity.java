@@ -267,17 +267,25 @@ public class PhotoActivity extends Activity implements Constants {
 					if (isSuspended || unknown) {
 						showHint(getResources().getString(R.string.hint_wifi_error));
 					} else if (details == NetworkInfo.DetailedState.DISCONNECTED) {
-						if (info.getExtraInfo()!=null)
-							if (info.getExtraInfo().equals("<unknown ssid>")) {
+						getActionBar().hide();
+						if (wifi.isWifiEnabled()) {
+							if (info.getExtraInfo() != null && info.getExtraInfo().equals("<unknown ssid>")) {
 								showHint(getResources().getString(R.string.hint_wifi_error));
+								new WifiConnector(context).forgetCurrent();
 							} else {
 								showHint(getResources().getString(R.string.hint_wifi_disconnected));
 							}
+						} else {
+							showHint(getResources().getString(R.string.error_not_connected));
+							wifi.setWifiEnabled(true);
+						}
+						scanWifi();
 					} else if (connected && details == NetworkInfo.DetailedState.CONNECTED) {
 						connectedListener.onConnected();
 						hideConnectionDialog();
 						showHint(getResources().getString(R.string.hint_success));
 					} else if (!visible && !connected && !connecting) {
+						getActionBar().hide();
 						if (details != NetworkInfo.DetailedState.SCANNING)
 							scanWifi();
 					}
