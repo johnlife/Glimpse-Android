@@ -266,23 +266,26 @@ public class PhotoActivity extends Activity implements Constants {
 					if (isSuspended || unknown) {
 						showHint(getResources().getString(R.string.hint_wifi_error));
 					} else if (details == NetworkInfo.DetailedState.DISCONNECTED) {
-						if (info.getExtraInfo().equals("<unknown ssid>")) {
-							showHint(getResources().getString(R.string.hint_wifi_error));
-						} else {
-							showHint(getResources().getString(R.string.hint_wifi_disconnected));
-						}
-						new WifiConnector(context).forgetCurrent();
+						if (info.getExtraInfo()!=null)
+							if (info.getExtraInfo().equals("<unknown ssid>")) {
+								showHint(getResources().getString(R.string.hint_wifi_error));
+							} else {
+								showHint(getResources().getString(R.string.hint_wifi_disconnected));
+							}
 					} else if (connected && details == NetworkInfo.DetailedState.CONNECTED) {
 						connectedListener.onConnected();
 						hideConnectionDialog();
 						showHint(getResources().getString(R.string.hint_success));
 					} else if (!visible && !connected && !connecting) {
-						scanWifi();
+						if (details != NetworkInfo.DetailedState.SCANNING)
+							scanWifi();
 					}
 				}	
 			}
 		};
-
+		public  BroadcastReceiver getReceiver() {
+			return wifiScanReceiver;
+		}
 		private void hideListPane() {
 			listPane.animate()
 			.translationX(listPane.getWidth()).alpha(0)
@@ -310,7 +313,7 @@ public class PhotoActivity extends Activity implements Constants {
 						connectToNetwork(password.getText().toString());
 						hideConnectionDialog();
 						connectToNetwork(password.getText().toString());
-						if (!isConnectedOrConnecting())
+						if (!isConnectedOrConnecting()) 
 							showHint(getResources().getString(R.string.hint_wifi_error));
 						return true;
 					}
@@ -606,6 +609,8 @@ public class PhotoActivity extends Activity implements Constants {
 				case R.id.menu2:
 					if (isConnected()) {
 						new WifiConnector(context).forgetCurrent();
+						progressBar.setVisibility(View.VISIBLE);
+						registerReceiver(wifiConnectionHandler.getReceiver(), new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 					}
 					return true;
 				case R.id.menu3:
