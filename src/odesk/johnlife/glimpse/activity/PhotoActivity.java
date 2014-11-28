@@ -242,7 +242,8 @@ public class PhotoActivity extends Activity implements Constants {
 							}
 							if (!isConnectedOrConnecting())
 								if (wifiDialog.getVisibility() != View.VISIBLE)
-									showHint(getResources().getString(R.string.hint_wifi_error));
+									if (progressBar.getVisibility() == View.GONE)
+										showHint(getResources().getString(R.string.hint_wifi_error));
 						}
 					});
 					if (isConnectedOrConnecting()) return;
@@ -312,7 +313,6 @@ public class PhotoActivity extends Activity implements Constants {
 					if (actionId == EditorInfo.IME_ACTION_DONE) {
 						connectToNetwork(password.getText().toString());
 						hideConnectionDialog();
-						connectToNetwork(password.getText().toString());
 						if (!isConnectedOrConnecting()) 
 							showHint(getResources().getString(R.string.hint_wifi_error));
 						return true;
@@ -328,7 +328,8 @@ public class PhotoActivity extends Activity implements Constants {
 						hideConnectionDialog();
 						connectToNetwork(password.getText().toString());
 						if (!isConnectedOrConnecting())
-							showHint(getResources().getString(R.string.hint_wifi_error));
+							if (progressBar.getVisibility() == View.GONE)
+								showHint(getResources().getString(R.string.hint_wifi_error));
 					}
 				});
 			wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
