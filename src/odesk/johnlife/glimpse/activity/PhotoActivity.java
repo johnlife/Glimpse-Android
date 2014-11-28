@@ -609,6 +609,7 @@ public class PhotoActivity extends Activity implements Constants {
 				case R.id.menu2:
 					if (isConnected()) {
 						new WifiConnector(context).forgetCurrent();
+						hideErrorPane();
 						progressBar.setVisibility(View.VISIBLE);
 						registerReceiver(wifiConnectionHandler.getReceiver(), new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 					}
