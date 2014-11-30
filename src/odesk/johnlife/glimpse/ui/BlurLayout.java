@@ -7,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 
@@ -43,10 +44,15 @@ public class BlurLayout extends FrameLayout {
 		canvas.drawBitmap(bmp, src, dst, null);
 		super.onDraw(canvas);
 	}
-
+	
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		return true;
+	}
+	
 	private void renderBlur() {
 		renderingBlur = true;
-		View parentView = (View)getParent();
+		View parentView = (View)getParent().getParent();
 		bmp = Bitmap.createBitmap(parentView.getWidth(), parentView.getHeight(), Config.ARGB_8888);
 		Canvas cnv = new Canvas(bmp);
 		parentView.draw(cnv);

@@ -48,8 +48,10 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
@@ -58,6 +60,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.PopupMenu;
@@ -88,6 +91,7 @@ public class PhotoActivity extends Activity implements Constants {
 	private boolean isConnectErrorVisible = false;
 	private Timer mailTimer = new Timer();
 	private View deleteDialog;
+	private FrameLayout deleteFrame;
 	private NewEmailWizard newEmail;
 	private View messagePane;
 	private TextView hintText;
@@ -99,6 +103,7 @@ public class PhotoActivity extends Activity implements Constants {
 	}
 
 	private class NewEmailWizard {
+		View frame;
 		View dialog;
 		View step1;
 		View step2;
@@ -116,13 +121,22 @@ public class PhotoActivity extends Activity implements Constants {
 		};
 		
 		public NewEmailWizard() {
+			frame = findViewById(R.id.new_email_frame);
 			dialog = findViewById(R.id.new_email_dialog);
+			dialog.setClickable(false);
 			step1 = dialog.findViewById(R.id.step1);
 			step2 = dialog.findViewById(R.id.step2);
 			emailView = (TextView) step2.findViewById(R.id.email);
 			error = (TextView) step2.findViewById(R.id.error);
 			step1.findViewById(R.id.cancel).setOnClickListener(closeListener);
 			step2.findViewById(R.id.cancel).setOnClickListener(closeListener);
+			frame.setOnTouchListener(new OnTouchListener() {
+				@Override
+				public boolean onTouch(View view, MotionEvent motionEvent) {
+					hide();
+					return true;
+				}
+			});
 			step1.findViewById(R.id.received).setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
@@ -162,12 +176,14 @@ public class PhotoActivity extends Activity implements Constants {
 		}
 
 		public void show() {
+			frame.setVisibility(View.VISIBLE);
 			dialog.setVisibility(View.VISIBLE);
 			step1.setVisibility(View.VISIBLE);
 			step2.setVisibility(View.GONE);
 		}
 		
 		public void hide(){
+			frame.setVisibility(View.GONE);
 			dialog.setVisibility(View.GONE);
 		}
 	}
@@ -554,6 +570,15 @@ public class PhotoActivity extends Activity implements Constants {
 		errorText = ((TextView) errorPane.findViewById(R.id.error_text));
 		wifiConnectionHandler.createUi(savedInstanceState);
 		Log.w(tag, "Wifi ui created");
+		deleteFrame = (FrameLayout) findViewById(R.id.delete_frame);
+		deleteFrame.setOnTouchListener(new OnTouchListener() {
+			@Override
+			public boolean onTouch(View view, MotionEvent motionEvent) {
+				deleteFrame.setVisibility(View.GONE);
+				deleteDialog.setVisibility(View.GONE);
+				return true;
+			}
+		});
 		deleteDialog = findViewById(R.id.delete_confirm);
 		deleteDialog.findViewById(R.id.delete).setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -595,6 +620,7 @@ public class PhotoActivity extends Activity implements Constants {
 			public void onClick(View v) {
 				if (v.getId() == R.id.action_delete) {
 					newEmail.hide();
+					deleteFrame.setVisibility(View.VISIBLE);
 					deleteDialog.setVisibility(View.VISIBLE);
 				} else if (v.getId() == R.id.action_setting) {
 					showPopupMenu(v);
