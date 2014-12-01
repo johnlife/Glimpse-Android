@@ -684,6 +684,7 @@ public class PhotoActivity extends Activity implements Constants {
 			change_email.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
+					getActionBar().hide();
 					popupWindow.dismiss();
 					newEmail.show();
 				}
