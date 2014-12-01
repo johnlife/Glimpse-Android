@@ -24,7 +24,7 @@
 
     <style name="ActionBarStyle" parent="android:style/Widget.Holo.Light.ActionBar.Solid">
         <item name="android:displayOptions">showCustom</item>
-        <item name="android:background">@color/black_overlay</item>
+        <item name="android:background">@color/background_shade</item>
     </style>
 
     <style name="CustomActionButton" parent="android:style/Widget.Holo.Light.ActionButton">

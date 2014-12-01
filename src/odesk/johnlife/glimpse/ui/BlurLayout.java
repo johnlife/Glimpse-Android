@@ -1,5 +1,6 @@
 package odesk.johnlife.glimpse.ui;
 
+import odesk.johnlife.glimpse.R;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -52,7 +53,14 @@ public class BlurLayout extends FrameLayout {
 	
 	private void renderBlur() {
 		renderingBlur = true;
-		View parentView = (View)getParent().getParent();
+		View parentView = null;
+		if (getId() == R.id.custom_popup_menu) {
+			parentView = (View)getParent();
+		} else if (getId() == R.id.custom_bar) {
+			parentView = (View)getRootView().findViewById(R.id.pager).getParent();
+		} else {
+			parentView = (View) getParent().getParent();
+		}
 		bmp = Bitmap.createBitmap(parentView.getWidth(), parentView.getHeight(), Config.ARGB_8888);
 		Canvas cnv = new Canvas(bmp);
 		parentView.draw(cnv);

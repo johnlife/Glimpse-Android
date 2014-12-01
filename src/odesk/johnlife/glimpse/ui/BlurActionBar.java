@@ -28,7 +28,6 @@ public class BlurActionBar {
 	public BlurActionBar(Activity activity) {
 		this.actionBar = activity.getActionBar();
 		customActionBar = activity.getLayoutInflater().inflate(R.layout.custom_bar, null);
-		actionBar.hide();
 		actionBar.setCustomView(customActionBar);
 		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
 		createActionButtons();

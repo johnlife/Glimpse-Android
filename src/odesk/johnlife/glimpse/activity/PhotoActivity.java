@@ -32,6 +32,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -188,6 +190,7 @@ public class PhotoActivity extends Activity implements Constants {
 	
 	private class HowItWorks {
 		View frame;
+		View dialog;
 		
 		public HowItWorks() {
 			frame = findViewById(R.id.how_it_works_frame);
@@ -198,6 +201,7 @@ public class PhotoActivity extends Activity implements Constants {
 					return true;
 				}
 			});
+			dialog = findViewById(R.id.how_it_works);
 			findViewById(R.id.dialogButtonOK).setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
@@ -213,10 +217,12 @@ public class PhotoActivity extends Activity implements Constants {
 
 		public void show() {
 			frame.setVisibility(View.VISIBLE);
+			dialog.setVisibility(View.VISIBLE);
 		}
 		
 		public void hide(){
 			frame.setVisibility(View.GONE);
+			dialog.setVisibility(View.GONE);
 		}
 	}
 	
@@ -563,6 +569,7 @@ public class PhotoActivity extends Activity implements Constants {
 			Log.d(tag, "SDCard is ready");
 		}
 		createActionBar();
+		getActionBar().hide();
 		Log.w(tag, "Actionbar created");
 		context = this;
 		howItWorks = new HowItWorks();
@@ -572,6 +579,7 @@ public class PhotoActivity extends Activity implements Constants {
 			@Override
 			public void onClick(View v) {
 				if (isBlocked()) return;
+				createActionBar();
 				ActionBar actionBar = getActionBar();
 				if (actionBar.isShowing()) {
 					actionBar.hide();
@@ -677,11 +685,7 @@ public class PhotoActivity extends Activity implements Constants {
 			popupWindow.setOutsideTouchable(true);
 			popupWindow.setTouchable(true);
 			popupWindow.setFocusable(true);
-			popupWindow.setBackgroundDrawable(new BitmapDrawable());
-			final TextView change_email = (TextView) layout.findViewById(R.id.change_email);
-			final TextView reset_wifi = (TextView) layout.findViewById(R.id.reset_wifi);
-			final TextView how_it_works = (TextView) layout.findViewById(R.id.how_it_works);
-			change_email.setOnClickListener(new OnClickListener() {
+			layout.findViewById(R.id.change_email).setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
 					getActionBar().hide();
@@ -689,7 +693,7 @@ public class PhotoActivity extends Activity implements Constants {
 					newEmail.show();
 				}
 			});
-			reset_wifi.setOnClickListener(new OnClickListener() {
+			layout.findViewById(R.id.reset_wifi).setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
 					popupWindow.dismiss();
@@ -701,7 +705,7 @@ public class PhotoActivity extends Activity implements Constants {
 					}
 				}
 			});
-			how_it_works.setOnClickListener(new OnClickListener() {
+			layout.findViewById(R.id.how_it_works).setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
 					popupWindow.dismiss();
@@ -815,12 +819,6 @@ public class PhotoActivity extends Activity implements Constants {
 	private NetworkInfo getNetworkInfo() {
 		ConnectivityManager connectionManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 		return connectionManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
 	}
 
 	@Override
