@@ -518,13 +518,16 @@ public class PhotoActivity extends Activity implements Constants {
 			errorPane, 
 			deleteDialog,
 			newEmail.dialog,
+			howItWorks.frame,
 			progressBar 
 		};
-		boolean blocked = !isConnectedOrConnecting();
+		if (!isConnectedOrConnecting())
+			return true;
 		for (View blocker : swipeBlockers) {
-			blocked |= blocker.getVisibility() == View.VISIBLE;
+			if (blocker.getVisibility() == View.VISIBLE)
+				return true;
 		}
-		return blocked;
+		return false;
 	}
 
 	private void restart() {
