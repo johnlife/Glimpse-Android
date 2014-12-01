@@ -26,14 +26,12 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.ActionBar;
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
@@ -59,9 +57,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.ProgressBar;
@@ -93,6 +89,7 @@ public class PhotoActivity extends Activity implements Constants {
 	private View deleteDialog;
 	private FrameLayout deleteFrame;
 	private NewEmailWizard newEmail;
+	private HowItWorks howItWorks;
 	private View messagePane;
 	private TextView hintText;
 	private SharedPreferences preferences;
@@ -185,6 +182,40 @@ public class PhotoActivity extends Activity implements Constants {
 		public void hide(){
 			frame.setVisibility(View.GONE);
 			dialog.setVisibility(View.GONE);
+		}
+	}
+	
+	private class HowItWorks {
+		View frame;
+		
+		public HowItWorks() {
+			frame = findViewById(R.id.how_it_works_frame);
+			frame.setOnTouchListener(new OnTouchListener() {
+				@Override
+				public boolean onTouch(View view, MotionEvent motionEvent) {
+					hide();
+					return true;
+				}
+			});
+			findViewById(R.id.dialogButtonOK).setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					hide();
+				}
+			});
+			TextView textEmail = (TextView) findViewById(R.id.textEmail);
+			final SpannableStringBuilder string = new SpannableStringBuilder(getString(R.string.how_it_works_email) + " " + getUser());
+		    string.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD), getString(R.string.how_it_works_email).length(), string.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+			textEmail.setText(string);
+			
+		}
+
+		public void show() {
+			frame.setVisibility(View.VISIBLE);
+		}
+		
+		public void hide(){
+			frame.setVisibility(View.GONE);
 		}
 	}
 	
@@ -530,6 +561,7 @@ public class PhotoActivity extends Activity implements Constants {
 		createActionBar();
 		Log.w(tag, "Actionbar created");
 		context = this;
+		howItWorks = new HowItWorks();
 		databaseHelper = DatabaseHelper.getInstance(getApplicationContext());
 		pager = (ViewPager) findViewById(R.id.pager);
 		pagerAdapter = new ImagePagerAdapter(this, databaseHelper, new OnClickListener() {
@@ -650,33 +682,8 @@ public class PhotoActivity extends Activity implements Constants {
 					}
 					return true;
 				case R.id.menu3:
-					final Dialog d = new Dialog(context);
-					Resources res = getResources();
-					d.setTitle(res.getString(R.string.how_it_works_title));
-					d.setContentView(R.layout.how_it_works);
 					getActionBar().hide();
-					TextView textEmail = (TextView) d.findViewById(R.id.textEmail);
-					final SpannableStringBuilder string = new SpannableStringBuilder(res.getString(R.string.how_it_works_email) + " " + getUser());
-				    string.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD), res.getString(R.string.how_it_works_email).length(), string.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-					textEmail.setText(string);
-					ImageView image = (ImageView) d.findViewById(R.id.imageHowItWork);
-					image.setImageDrawable(res.getDrawable(R.drawable.ic_launcher));		 
-					TextView textHowItWork = (TextView)d.findViewById(R.id.textHowItWorks);
-					textHowItWork.setText(res.getString(R.string.how_it_works_message));	
-					Button dialogButton = (Button) d.findViewById(R.id.dialogButtonOK);
-					dialogButton.setOnClickListener(new OnClickListener() {
-						@Override
-						public void onClick(View v) {
-							d.dismiss();
-						}
-					});
-					WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-					lp.copyFrom(d.getWindow().getAttributes());
-				    lp.width = WindowManager.LayoutParams.MATCH_PARENT;
-				    lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
-				    //d.getWindow().setAttributes(lp);
-					d.show();
-					d.getWindow().setAttributes(lp);
+					howItWorks.show();
 					return true;
 				default:
 					return false;

@@ -268,6 +268,7 @@
             </LinearLayout>
         </odesk.johnlife.glimpse.ui.BlurLayout>
     </FrameLayout>
+    
     <!-- delete confirmation dialog -->
 
     <FrameLayout
@@ -332,6 +333,77 @@
         </odesk.johnlife.glimpse.ui.BlurLayout>
     </FrameLayout>
 
+    <!-- How it works dialog -->
+
+    <FrameLayout
+        android:id="@+id/how_it_works_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" >
+
+        <odesk.johnlife.glimpse.ui.BlurLayout
+            android:id="@+id/how_it_works"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/background_shade"
+                android:divider="@drawable/layout_divider"
+                android:dividerPadding="0dp"
+                android:orientation="vertical"
+                android:padding="4dp"
+                android:showDividers="middle" >
+
+                <TextView
+                    style="@style/title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/how_it_works" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:showDividers="middle" >
+
+                    <ImageView
+                        android:id="@+id/imageHowItWork"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_launcher" />
+
+                    <TextView
+                        android:id="@+id/textEmail"
+                        style="@style/txtViewStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp" />
+
+                    <TextView
+                        style="@style/txtViewStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp"
+                        android:text="@string/how_it_works_message" />
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/dialogButtonOK"
+                    style="@style/btnStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    android:text="@android:string/ok" />
+            </LinearLayout>
+        </odesk.johnlife.glimpse.ui.BlurLayout>
+
+    </FrameLayout>
+    
     <!-- error message -->
 
     <odesk.johnlife.glimpse.ui.BlurLayout
