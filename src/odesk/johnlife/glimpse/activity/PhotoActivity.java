@@ -32,6 +32,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
@@ -44,8 +45,8 @@ import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -59,7 +60,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ListView;
-import android.widget.PopupMenu;
+import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -662,41 +663,86 @@ public class PhotoActivity extends Activity implements Constants {
 		});
 	}
 
-	private void showPopupMenu(View v) {
-		PopupMenu popupMenu = new PopupMenu(this, v);
-		popupMenu.inflate(R.menu.popup_menu);
-		popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-			@Override
-			public boolean onMenuItemClick(MenuItem item) {
-				newEmail.hide();
-				switch (item.getItemId()) {
-				case R.id.menu1:
+	private void showPopupMenu(View view) {
+		try {
+			LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			View layout = layoutInflater.inflate(R.layout.popup_menu, null);
+			final PopupWindow popupWindow = new PopupWindow(context);
+			popupWindow.setContentView(layout);
+			popupWindow.setWidth(ViewGroup.LayoutParams.WRAP_CONTENT);
+			popupWindow.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
+			popupWindow.setOutsideTouchable(true);
+			popupWindow.setTouchable(true);
+			popupWindow.setFocusable(true);
+			popupWindow.setBackgroundDrawable(new BitmapDrawable());
+			final TextView change_email = (TextView) layout.findViewById(R.id.change_email);
+			final TextView reset_wifi = (TextView) layout.findViewById(R.id.reset_wifi);
+			final TextView how_it_works = (TextView) layout.findViewById(R.id.how_it_works);
+			change_email.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					popupWindow.dismiss();
 					newEmail.show();
-					return true;
-				case R.id.menu2:
+				}
+			});
+			reset_wifi.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					popupWindow.dismiss();
 					if (isConnected()) {
 						new WifiConnector(context).forgetCurrent();
 						hideErrorPane();
 						progressBar.setVisibility(View.VISIBLE);
 						registerReceiver(wifiConnectionHandler.getReceiver(), new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 					}
-					return true;
-				case R.id.menu3:
+				}
+			});
+			how_it_works.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					popupWindow.dismiss();
 					getActionBar().hide();
 					howItWorks.show();
-					return true;
-				default:
-					return false;
 				}
-			}
-		});
-		popupMenu.setOnDismissListener(new PopupMenu.OnDismissListener() {
-			@Override
-			public void onDismiss(PopupMenu menu) {
-				// TODO Auto-generated method stub
-			}
-		});
-		popupMenu.show();
+			});
+			popupWindow.showAsDropDown(view, 5, 5);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}		
+//		PopupMenu popupMenu = new PopupMenu(this, v);
+//		popupMenu.inflate(R.menu.popup_menu);
+//		popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+//			@Override
+//			public boolean onMenuItemClick(MenuItem item) {
+//				newEmail.hide();
+//				switch (item.getItemId()) {
+//				case R.id.menu1:
+//					newEmail.show();
+//					return true;
+//				case R.id.menu2:
+//					if (isConnected()) {
+//						new WifiConnector(context).forgetCurrent();
+//						hideErrorPane();
+//						progressBar.setVisibility(View.VISIBLE);
+//						registerReceiver(wifiConnectionHandler.getReceiver(), new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+//					}
+//					return true;
+//				case R.id.menu3:
+//					getActionBar().hide();
+//					howItWorks.show();
+//					return true;
+//				default:
+//					return false;
+//				}
+//			}
+//		});
+//		popupMenu.setOnDismissListener(new PopupMenu.OnDismissListener() {
+//			@Override
+//			public void onDismiss(PopupMenu menu) {
+//				// TODO Auto-generated method stub
+//			}
+//		});
+//		popupMenu.show();
 	}
 	
 	protected void showHint(String hint) {
