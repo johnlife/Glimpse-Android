@@ -600,6 +600,7 @@ public class PhotoActivity extends Activity implements Constants {
 			@Override
 			public void onPageSelected(int position) {
 				rescheduleImageSwipe();
+				getActionBar().hide();
 				pagerAdapter.setImageShown(position);
 				if (actionBar.isFreeze()) {
 					actionBar.unFreeze();
