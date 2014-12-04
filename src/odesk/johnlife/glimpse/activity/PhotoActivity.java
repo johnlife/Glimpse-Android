@@ -285,7 +285,7 @@ public class PhotoActivity extends Activity implements Constants {
 					list.setOnItemClickListener(new OnItemClickListener() {
 						@Override
 						public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-							list.setOnItemClickListener(null);
+							view.setClickable(false);
 							activeNetwork = adapter.getItem(position);
 							String cap = activeNetwork.capabilities;
 							if (cap.isEmpty() || cap.startsWith("[ESS")) {
@@ -308,6 +308,7 @@ public class PhotoActivity extends Activity implements Constants {
 								if (wifiDialog.getVisibility() != View.VISIBLE)
 									if (progressBar.getVisibility() == View.GONE) 
 										showHint(getResources().getString(R.string.hint_wifi_error));
+							view.setClickable(true);
 						}
 					});
 					if (isConnectedOrConnecting()) return;
