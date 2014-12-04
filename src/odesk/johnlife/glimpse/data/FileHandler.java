@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import odesk.johnlife.glimpse.app.GlimpseApp;
@@ -23,6 +24,7 @@ public class FileHandler {
 	private DatabaseHelper databaseHelper;
 	private List<PictureData> files;
 	private DataSetObserver datasetObserver;
+	private int nextPosition;
 	
 	public FileHandler(Context context) {
 		databaseHelper = DatabaseHelper.getInstance(context);
@@ -133,6 +135,14 @@ public class FileHandler {
 	public synchronized PictureData getLightest() {
 		locked = true;
 		PictureData value = Collections.min(files, PictureData.WEIGHT_COMPARATOR);
+		locked = false;
+		return value;
+	}
+	
+	public synchronized PictureData getNext(Comparator<PictureData> comparator) {
+		locked = true;
+		nextPosition %= files.size();
+		PictureData value = Collections.max(files.subList(0, files.size() - nextPosition++), comparator);
 		locked = false;
 		return value;
 	}

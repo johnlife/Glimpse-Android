@@ -78,21 +78,12 @@ public class ImagePagerAdapter extends PagerAdapter {
 			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wp1);
 			Log.d("Start - adapter", "Created view for startup screen");
 		} else {
-			PictureData pictureData = fileHandler.getLightest();
+			PictureData pictureData = fileHandler.getNext(PictureData.TIME_COMPARATOR);
 			if (!new File(pictureData.getPath()).exists()) {
 				fileHandler.delete(pictureData);
 			}
 			pictureData.viewCreated();
 			pictures.put(position, pictureData);
-			if (pictureData.createdToday()) {
-				FrameLayout frame = new FrameLayout(context);
-				frame.addView(image);
-				ImageView poster = new ImageView(context);
-				poster.setImageResource(R.drawable.new_pane);
-				poster.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.TOP|Gravity.RIGHT));
-				frame.addView(poster);
-				view = frame;
-			}
 			bitmap = BitmapFactory.decodeFile(pictureData.getPath());
 			Log.d("Start - adapter", "Created view for "+pictureData.getPath());
 		}
