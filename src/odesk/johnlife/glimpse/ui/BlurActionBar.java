@@ -25,11 +25,12 @@ public class BlurActionBar {
 	private boolean isFreeze = false;
 	private OnActionClick listener;
 	
-	public BlurActionBar(Activity activity) {
+	public BlurActionBar(Activity activity, boolean isFreeze) {
 		this.actionBar = activity.getActionBar();
 		customActionBar = activity.getLayoutInflater().inflate(R.layout.custom_bar, null);
 		actionBar.setCustomView(customActionBar);
 		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+		this.isFreeze = isFreeze;
 		createActionButtons();
 	}
 	
@@ -37,13 +38,14 @@ public class BlurActionBar {
 		View deleteActionView = customActionBar.findViewById(R.id.action_delete);
 		View freezeActionView = customActionBar.findViewById(R.id.action_freeze);
 		View settingActionView = customActionBar.findViewById(R.id.action_setting);
-		
+		chageFreezeFrame(isFreeze, freezeActionView);
 		ActionClickListener simpleClickListener = new ActionClickListener();
 		deleteActionView.setOnClickListener(simpleClickListener);
 		settingActionView.setOnClickListener(simpleClickListener);
 		freezeActionView.setOnClickListener(new ActionClickListener() {
 			@Override
 			public void onClick(View v) {
+				System.err.println(isFreeze);
 				chageFreezeFrame(!isFreeze, v);
 				super.onClick(v);
 			}
@@ -67,6 +69,10 @@ public class BlurActionBar {
 
 	public void unFreeze() {
 		chageFreezeFrame(false, customActionBar);
+	}
+	
+	public void freeze() {
+		chageFreezeFrame(true, customActionBar);
 	}
 
 }

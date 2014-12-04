@@ -95,6 +95,7 @@ public class PhotoActivity extends Activity implements Constants {
 	private TextView hintText;
 	private SharedPreferences preferences;
 	private boolean isAnimationNeeded = true;
+	private boolean isFreeze = false;
 
 	public interface ConnectedListener {
 		public void onConnected();
@@ -521,7 +522,8 @@ public class PhotoActivity extends Activity implements Constants {
 			wifiConnectionHandler.getView(),
 			errorPane, 
 			deleteDialog,
-			newEmail.dialog,
+			/** uncomment if newEmail is needing*/
+//			newEmail.dialog,
 			howItWorks.frame,
 			progressBar 
 		};
@@ -547,7 +549,8 @@ public class PhotoActivity extends Activity implements Constants {
 		setContentView(R.layout.activity_photo);
 		preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 		final String tag = "StartUp";
-		newEmail = new NewEmailWizard();
+		/** uncomment if newEmailWizard is needed*/
+//		newEmail = new NewEmailWizard();
 		progressBar = (ProgressBar) findViewById(R.id.progressLoading);
 		boolean sdcardReady = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED) && GlimpseApp.getPicturesDir().canWrite();
 		if (!sdcardReady) {
@@ -659,18 +662,24 @@ public class PhotoActivity extends Activity implements Constants {
 	}
 
 	private void createActionBar() {
-		actionBar = new BlurActionBar(this);
+		if (actionBar == null)
+			actionBar = new BlurActionBar(this, isFreeze);
+		else 
+			actionBar = new BlurActionBar(this, actionBar.isFreeze());
 		actionBar.setOnActionClickListener(new OnActionClick() {
 			@Override
 			public void onClick(View v) {
-				if (v.getId() == R.id.action_delete) {
-					newEmail.hide();
+				switch (v.getId()) {
+				case R.id.action_delete:
 					deleteFrame.setVisibility(View.VISIBLE);
 					deleteDialog.setVisibility(View.VISIBLE);
-				} else if (v.getId() == R.id.action_setting) {
+					break;
+				case R.id.action_setting:
 					showPopupMenu(v);
-				} else
-					newEmail.hide();
+					break;
+				case R.id.action_freeze:
+					break;
+				}
 			}
 		});
 	}
