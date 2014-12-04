@@ -11,7 +11,7 @@
         android:orientation="vertical"
         android:showDividers="middle"
         android:background="@color/background_shade" >
-
+<!--
         <TextView
             android:id="@+id/change_email"
             android:layout_width="match_parent"
@@ -22,7 +22,7 @@
             android:paddingStart="?android:attr/listPreferredItemPaddingStart"
             android:text="Change email"
             android:textAppearance="?android:attr/textAppearanceListItemSmall" />
-
+-->
         <TextView
             android:id="@+id/reset_wifi"
             android:layout_width="match_parent"

@@ -686,14 +686,16 @@ public class PhotoActivity extends Activity implements Constants {
 			popupWindow.setOutsideTouchable(true);
 			popupWindow.setTouchable(true);
 			popupWindow.setFocusable(true);
-			layout.findViewById(R.id.change_email).setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					getActionBar().hide();
-					popupWindow.dismiss();
-					newEmail.show();
-				}
-			});
+			/**
+			 * uncomment if the item "change email" is needed */
+//			layout.findViewById(R.id.change_email).setOnClickListener(new OnClickListener() {
+//				@Override
+//				public void onClick(View v) {
+//					getActionBar().hide();
+//					popupWindow.dismiss();
+//					newEmail.show();
+//				}
+//			});
 			layout.findViewById(R.id.reset_wifi).setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
