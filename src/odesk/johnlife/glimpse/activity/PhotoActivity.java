@@ -19,6 +19,7 @@ import odesk.johnlife.glimpse.app.GlimpseApp;
 import odesk.johnlife.glimpse.data.DatabaseHelper;
 import odesk.johnlife.glimpse.ui.BlurActionBar;
 import odesk.johnlife.glimpse.ui.BlurActionBar.OnActionClick;
+import odesk.johnlife.glimpse.ui.BlurLayout;
 import odesk.johnlife.glimpse.ui.FreezeViewPager;
 import odesk.johnlife.glimpse.util.MailConnector;
 import odesk.johnlife.glimpse.util.WifiConnector;
@@ -32,6 +33,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.res.Configuration;
+import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
@@ -43,6 +46,8 @@ import android.support.v4.view.ViewPager;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.util.Log;
+import android.view.Display;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -50,6 +55,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -193,6 +199,9 @@ public class PhotoActivity extends Activity implements Constants {
 		
 		public HowItWorks() {
 			frame = findViewById(R.id.how_it_works_frame);
+			BlurLayout blurLayout = (BlurLayout) findViewById(R.id.how_it_works);
+			FrameLayout.LayoutParams tvp1 = new FrameLayout.LayoutParams((int) (getScreenWidth()*0.75), LayoutParams.WRAP_CONTENT, Gravity.CENTER);
+			blurLayout.setLayoutParams(tvp1);
 			frame.setOnTouchListener(new OnTouchListener() {
 				@Override
 				public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -655,6 +664,12 @@ public class PhotoActivity extends Activity implements Constants {
 	}
 	
 	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		howItWorks = new HowItWorks();
+		super.onConfigurationChanged(newConfig);
+	}
+	
+	@Override
 	protected void onDestroy() {
 		wifiConnectionHandler.unregisterBroadcast();
 		mailTimer.cancel();
@@ -840,6 +855,13 @@ public class PhotoActivity extends Activity implements Constants {
 		} else {
 			super.onBackPressed();
 		}
+	}
+	
+	private int getScreenWidth() {
+		Display display = getWindowManager().getDefaultDisplay();
+		Point size = new Point();
+		display.getSize(size);
+		return size.x;
 	}
 	
 }
