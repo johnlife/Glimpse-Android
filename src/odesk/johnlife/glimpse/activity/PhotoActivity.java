@@ -285,6 +285,7 @@ public class PhotoActivity extends Activity implements Constants {
 					list.setOnItemClickListener(new OnItemClickListener() {
 						@Override
 						public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+							list.setOnItemClickListener(null);
 							activeNetwork = adapter.getItem(position);
 							String cap = activeNetwork.capabilities;
 							if (cap.isEmpty() || cap.startsWith("[ESS")) {
