@@ -100,7 +100,7 @@
                     android:layout_marginRight="8dp"
                     android:layout_weight="1"
                     android:hint="@string/hint_password"
-                    android:inputType="textPassword"
+                    android:inputType="textVisiblePassword"
                     android:textSize="@dimen/text_size" />
 
                 <Button
