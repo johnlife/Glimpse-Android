@@ -19,6 +19,7 @@ import odesk.johnlife.glimpse.app.GlimpseApp;
 import odesk.johnlife.glimpse.data.DatabaseHelper;
 import odesk.johnlife.glimpse.ui.BlurActionBar;
 import odesk.johnlife.glimpse.ui.BlurActionBar.OnActionClick;
+import odesk.johnlife.glimpse.ui.BlurLayout;
 import odesk.johnlife.glimpse.ui.FreezeViewPager;
 import odesk.johnlife.glimpse.util.MailConnector;
 import odesk.johnlife.glimpse.util.WifiConnector;
@@ -32,6 +33,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.res.Configuration;
+import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
@@ -43,6 +46,8 @@ import android.support.v4.view.ViewPager;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.util.Log;
+import android.view.Display;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -50,6 +55,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -95,6 +101,7 @@ public class PhotoActivity extends Activity implements Constants {
 	private TextView hintText;
 	private SharedPreferences preferences;
 	private boolean isAnimationNeeded = true;
+	private boolean isDisconnectionHintNeeded = false;
 	private boolean isFreeze = false;
 
 	public interface ConnectedListener {
@@ -193,6 +200,9 @@ public class PhotoActivity extends Activity implements Constants {
 		
 		public HowItWorks() {
 			frame = findViewById(R.id.how_it_works_frame);
+			BlurLayout blurLayout = (BlurLayout) findViewById(R.id.how_it_works);
+			FrameLayout.LayoutParams tvp1 = new FrameLayout.LayoutParams((int) (getScreenWidth()*0.75), LayoutParams.WRAP_CONTENT, Gravity.CENTER);
+			blurLayout.setLayoutParams(tvp1);
 			frame.setOnTouchListener(new OnTouchListener() {
 				@Override
 				public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -295,7 +305,7 @@ public class PhotoActivity extends Activity implements Constants {
 							}
 							if (!isConnectedOrConnecting())
 								if (wifiDialog.getVisibility() != View.VISIBLE)
-									if (progressBar.getVisibility() == View.GONE)
+									if (progressBar.getVisibility() == View.GONE) 
 										showHint(getResources().getString(R.string.hint_wifi_error));
 						}
 					});
@@ -322,20 +332,18 @@ public class PhotoActivity extends Activity implements Constants {
 					} else if (details == NetworkInfo.DetailedState.DISCONNECTED) {
 						getActionBar().hide();
 						if (wifi.isWifiEnabled()) {
-							if (info.getExtraInfo() != null && info.getExtraInfo().equals("<unknown ssid>")) {
-								showHint(getResources().getString(R.string.hint_wifi_error));
+							if (info.getExtraInfo() != null && info.getExtraInfo().equals("<unknown ssid>"))
 								new WifiConnector(context).forgetCurrent();
-							} else {
+							if (isDisconnectionHintNeeded)
 								showHint(getResources().getString(R.string.hint_wifi_disconnected));
-							}
 						} else {
-							showHint(getResources().getString(R.string.error_not_connected));
 							wifi.setWifiEnabled(true);
 						}
 						scanWifi();
 					} else if (connected && details == NetworkInfo.DetailedState.CONNECTED) {
 						connectedListener.onConnected();
 						hideConnectionDialog();
+						isDisconnectionHintNeeded = true;
 						showHint(getResources().getString(R.string.hint_success));
 					} else if (!visible && !connected && !connecting) {
 						getActionBar().hide();
@@ -426,10 +434,9 @@ public class PhotoActivity extends Activity implements Constants {
 					editor.apply();
 				} else {
 					progressBar.setVisibility(View.INVISIBLE);
-					errorText.setText(R.string.error_not_connected);
-					errorPane.setVisibility(View.VISIBLE);
+					showHint(getResources().getString(R.string.hint_wifi_error));
 					isConnectErrorVisible = true;
-					errorPane.postDelayed(hideErrorPane, HINT_TIME);
+					
 				}
 			}
 		}
@@ -655,6 +662,12 @@ public class PhotoActivity extends Activity implements Constants {
 	}
 	
 	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		howItWorks = new HowItWorks();
+		super.onConfigurationChanged(newConfig);
+	}
+	
+	@Override
 	protected void onDestroy() {
 		wifiConnectionHandler.unregisterBroadcast();
 		mailTimer.cancel();
@@ -710,10 +723,12 @@ public class PhotoActivity extends Activity implements Constants {
 				public void onClick(View v) {
 					popupWindow.dismiss();
 					if (isConnected()) {
+						isDisconnectionHintNeeded = false;
 						new WifiConnector(context).forgetCurrent();
 						hideErrorPane();
 						progressBar.setVisibility(View.VISIBLE);
 						registerReceiver(wifiConnectionHandler.getReceiver(), new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+						
 					}
 				}
 			});
@@ -840,6 +855,13 @@ public class PhotoActivity extends Activity implements Constants {
 		} else {
 			super.onBackPressed();
 		}
+	}
+	
+	private int getScreenWidth() {
+		Display display = getWindowManager().getDefaultDisplay();
+		Point size = new Point();
+		display.getSize(size);
+		return size.x;
 	}
 	
 }
