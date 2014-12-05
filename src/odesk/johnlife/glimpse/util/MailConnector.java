@@ -19,25 +19,36 @@ import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.search.FlagTerm;
 
+import odesk.johnlife.glimpse.Constants;
 import odesk.johnlife.glimpse.R;
 import odesk.johnlife.glimpse.app.GlimpseApp;
 import odesk.johnlife.glimpse.data.FileHandler;
 import android.content.Context;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
-public class MailConnector {
+public class MailConnector implements Constants {
+	
+	public interface OnItemDownloadListener {
+		public void onItemDownload();
+	}
+	
 	private static final String SSL_FACTORY = "odesk.johnlife.glimpse.util.AlwaysTrustSSLContextFactory";
 	private static final String LOG_TAG = MailConnector.class.getSimpleName();
 	
 	private String user;
 	private String pass;
 	private String server;
+	private Context context;
+	private OnItemDownloadListener onItemDownLoadListener;
 	byte[] buf = new byte[4096];
 	
-	public MailConnector(String user, String pass, Context context) {
+	public MailConnector(String user, String pass, Context context, OnItemDownloadListener onItemDownLoadListener) {
 		this.user = user;
 		this.pass = pass;
+		this.context = context;
 		this.server = context.getString(R.string.email_server);
+		this.onItemDownLoadListener = onItemDownLoadListener;
 	}
 
 	public void connect() {
@@ -59,18 +70,21 @@ public class MailConnector {
 				folder.getMessages() : 
 				folder.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
 			Log.d(LOG_TAG, "Got "+messages.length+(fileHandler.isEmpty() ? " total" : " new")+" messages.");
+			int position = GlimpseApp.getFileHandler().size();
+			PreferenceManager.getDefaultSharedPreferences(context).edit().putInt(PREF_POSITION_NEW_PHOTOS, position).commit();
+			List<File> attachments = new ArrayList<File>();
 			for(Message msg : messages) {
 				try {
-					List<File> attachments = getAttachments((Multipart) msg.getContent());
-					Log.d(LOG_TAG, "Found "+attachments.size()+" attachments.");
-					for (File file : attachments) {
-						fileHandler.add(file);
-					}
+					attachments.addAll(getAttachments((Multipart) msg.getContent()));
 					msg.setFlag(Flags.Flag.DELETED, true);
 				} catch (Exception e) {
 					Log.e(LOG_TAG, "Error: ", e);
 				//	PushLink.sendAsyncException(e);
 				}
+			}
+			if (!attachments.isEmpty()) {
+				fileHandler.add(attachments);
+				onItemDownLoadListener.onItemDownload();
 			}
 			folder.setFlags(messages, new Flags(Flags.Flag.SEEN), true);
 			folder.close(true);
@@ -109,6 +123,7 @@ public class MailConnector {
 //				PushLink.sendAsyncException(e);
 			}
 		}
+		Log.d(LOG_TAG, "Found "+attachments.size()+" attachments.");
 		return attachments;
 	}
 	

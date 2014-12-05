@@ -22,6 +22,7 @@ import odesk.johnlife.glimpse.ui.BlurActionBar.OnActionClick;
 import odesk.johnlife.glimpse.ui.BlurLayout;
 import odesk.johnlife.glimpse.ui.FreezeViewPager;
 import odesk.johnlife.glimpse.util.MailConnector;
+import odesk.johnlife.glimpse.util.MailConnector.OnItemDownloadListener;
 import odesk.johnlife.glimpse.util.WifiConnector;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -478,6 +479,7 @@ public class PhotoActivity extends Activity implements Constants {
 			}
 		}
 	};
+	
 
 	private Runnable swipeRunnable = new Runnable() {
 		@Override
@@ -495,6 +497,16 @@ public class PhotoActivity extends Activity implements Constants {
 			}
 		}
 
+	};
+	
+	private Runnable showNewPhotos = new Runnable() {
+		@Override
+		public void run() {
+			//pager.setCurrentItem(0, false);
+			//pager.setAdapter(null);
+			pagerAdapter = createAdapter();
+			pager.setAdapter(pagerAdapter);
+		}
 	};
 	
 	private Runnable hideErrorPane = new Runnable() {
@@ -515,7 +527,12 @@ public class PhotoActivity extends Activity implements Constants {
 			Log.w(tag, "Polling mail server");
 			String user = getUser();
 			if (isConnected() && null != user) {
-				MailConnector mailer = new MailConnector(user, "HPgqL2658P", context);
+				MailConnector mailer = new MailConnector(user, "HPgqL2658P", context, new OnItemDownloadListener() {
+					@Override
+					public void onItemDownload() {
+						pager.post(showNewPhotos);
+					}
+				});
 				mailer.connect();
 				if (!GlimpseApp.getFileHandler().isEmpty()) {
 					hideErrorPane();
@@ -585,19 +602,7 @@ public class PhotoActivity extends Activity implements Constants {
 		howItWorks = new HowItWorks();
 		databaseHelper = DatabaseHelper.getInstance(getApplicationContext());
 		pager = (ViewPager) findViewById(R.id.pager);
-		pagerAdapter = new ImagePagerAdapter(this, databaseHelper, new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (isBlocked()) return;
-				createActionBar();
-				ActionBar actionBar = getActionBar();
-				if (actionBar.isShowing()) {
-					actionBar.hide();
-				} else {
-					actionBar.show();
-				}
-			}
-		});
+		pagerAdapter = createAdapter();
 		((FreezeViewPager)pager).setSwipeValidator(new FreezeViewPager.SwipeValidator() {
 			@Override
 			public boolean isSwipeBlocked() {
@@ -661,6 +666,22 @@ public class PhotoActivity extends Activity implements Constants {
 			return;
 		}
 		if (pagerAdapter.getCount() >= 2) rescheduleImageSwipe();
+	}
+	
+	private ImagePagerAdapter createAdapter() {
+		return new ImagePagerAdapter(this, databaseHelper, new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (isBlocked()) return;
+				createActionBar();
+				ActionBar actionBar = getActionBar();
+				if (actionBar.isShowing()) {
+					actionBar.hide();
+				} else {
+					actionBar.show();
+				}
+			}
+		});
 	}
 	
 	@Override

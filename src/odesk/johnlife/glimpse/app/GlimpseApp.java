@@ -2,6 +2,7 @@ package odesk.johnlife.glimpse.app;
 
 import java.io.File;
 
+import odesk.johnlife.glimpse.Constants;
 import odesk.johnlife.glimpse.data.FileHandler;
 import odesk.johnlife.glimpse.data.PictureData;
 import odesk.johnlife.glimpse.util.DeviceScreen;
@@ -12,23 +13,22 @@ import android.preference.PreferenceManager;
 
 import com.lazydroid.autoupdateapk.SilentAutoUpdate;
 
-public class GlimpseApp extends Application{
+public class GlimpseApp extends Application implements Constants {
 
 	private static File picturesDir;
 	private static File tempDir;
 	private static DeviceScreen screen;
 	private static FileHandler fileHandler;
 	private SilentAutoUpdate autoUpdater;
-	private static final String FIRST_LAUNCH = "odesk.johnlife.glimpse.first.launch";
 	private FileObserver directoryObserver;
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-		if (!prefs.contains(FIRST_LAUNCH)) {
+		if (!prefs.contains(PREF_FIRST_LAUNCH)) {
 			//TODO backend
-			prefs.edit().putBoolean(FIRST_LAUNCH, false).commit();
+			prefs.edit().putBoolean(PREF_FIRST_LAUNCH, false).commit();
 		}
 		autoUpdater = new SilentAutoUpdate(this);
 		picturesDir = getExternalFilesDir("pictures");

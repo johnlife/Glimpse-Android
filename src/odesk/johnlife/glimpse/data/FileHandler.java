@@ -31,7 +31,7 @@ public class FileHandler {
 		files = databaseHelper.getPictures();
 	}
 
-	public synchronized void add(File file) {
+	private synchronized void addFile(File file) {
 		cleanup(file.length());
 		try {
 			Bitmap bmp = BitmapFactory.decodeFile(file.getAbsolutePath());
@@ -49,12 +49,25 @@ public class FileHandler {
 			PictureData picture = new PictureData(path);
 			picture = databaseHelper.addOrUpdate(picture);
 			files.add(picture);
-			notifyObserver();
 			file.delete();
 			locked = false;
 		} catch (IllegalStateException e) {
 //			PushLink.sendAsyncException(e);
 		}
+	}
+	
+	public synchronized void add(List<File> files) {
+		for (File file : files) {
+			addFile(file);
+		}
+		nextPosition = 0;
+		notifyObserver();
+	}
+	
+	public synchronized void add(File file) {
+		addFile(file);
+		nextPosition = 0;
+		notifyObserver();		
 	}
 
 	private Bitmap scaleAndRotate(Bitmap bmp, File file) {
