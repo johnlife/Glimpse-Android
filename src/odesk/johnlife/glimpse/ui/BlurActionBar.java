@@ -38,7 +38,7 @@ public class BlurActionBar {
 		View deleteActionView = customActionBar.findViewById(R.id.action_delete);
 		View freezeActionView = customActionBar.findViewById(R.id.action_freeze);
 		View settingActionView = customActionBar.findViewById(R.id.action_setting);
-		chageFreezeFrame(isFreeze, freezeActionView);
+		chageFreezeState(isFreeze, freezeActionView);
 		ActionClickListener simpleClickListener = new ActionClickListener();
 		deleteActionView.setOnClickListener(simpleClickListener);
 		settingActionView.setOnClickListener(simpleClickListener);
@@ -46,7 +46,7 @@ public class BlurActionBar {
 			@Override
 			public void onClick(View v) {
 				System.err.println(isFreeze);
-				chageFreezeFrame(!isFreeze, v);
+				chageFreezeState(!isFreeze, v);
 				super.onClick(v);
 			}
 		});
@@ -56,7 +56,7 @@ public class BlurActionBar {
 		this.listener = listener;
 	}
 	
-	private void chageFreezeFrame(boolean isFreeze, View view) {
+	private void chageFreezeState(boolean isFreeze, View view) {
 		this.isFreeze = isFreeze;
 		TextView action = (TextView) view.findViewById(R.id.action_freeze);
 		action.setText(isFreeze ? R.string.action_unfreeze : R.string.action_freeze);
@@ -68,11 +68,11 @@ public class BlurActionBar {
 	}
 
 	public void unFreeze() {
-		chageFreezeFrame(false, customActionBar);
+		chageFreezeState(false, customActionBar);
 	}
 	
 	public void freeze() {
-		chageFreezeFrame(true, customActionBar);
+		chageFreezeState(true, customActionBar);
 	}
 
 }

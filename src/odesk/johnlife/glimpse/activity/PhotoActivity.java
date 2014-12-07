@@ -234,6 +234,10 @@ public class PhotoActivity extends Activity implements Constants {
 			frame.setVisibility(View.GONE);
 			dialog.setVisibility(View.GONE);
 		}
+
+		public View getFrame() {
+			return frame;
+		}
 	}
 	
 	private class WifiConnectionHandler {
@@ -307,8 +311,9 @@ public class PhotoActivity extends Activity implements Constants {
 							}
 							if (!isConnectedOrConnecting())
 								if (wifiDialog.getVisibility() != View.VISIBLE)
-									if (progressBar.getVisibility() == View.GONE) 
+									if (progressBar.getVisibility() == View.GONE) {
 										showHint(getResources().getString(R.string.hint_wifi_error));
+									}
 							view.setClickable(true);
 						}
 					});
@@ -335,10 +340,12 @@ public class PhotoActivity extends Activity implements Constants {
 					} else if (details == NetworkInfo.DetailedState.DISCONNECTED) {
 						getActionBar().hide();
 						if (wifi.isWifiEnabled()) {
-							if (info.getExtraInfo() != null && info.getExtraInfo().equals("<unknown ssid>"))
+							if (info.getExtraInfo() != null && info.getExtraInfo().equals("<unknown ssid>")) {
 								new WifiConnector(context).forgetCurrent();
-							if (isDisconnectionHintNeeded)
+							}
+							if (isDisconnectionHintNeeded) {
 								showHint(getResources().getString(R.string.hint_wifi_disconnected));
+							}
 						} else {
 							wifi.setWifiEnabled(true);
 						}
@@ -350,8 +357,9 @@ public class PhotoActivity extends Activity implements Constants {
 						showHint(getResources().getString(R.string.hint_success));
 					} else if (!visible && !connected && !connecting) {
 						getActionBar().hide();
-						if (details != NetworkInfo.DetailedState.SCANNING)
+						if (details != NetworkInfo.DetailedState.SCANNING) {
 							scanWifi();
+						}
 					}
 				}	
 			}
@@ -550,7 +558,7 @@ public class PhotoActivity extends Activity implements Constants {
 			deleteDialog,
 			/** uncomment if newEmail is needing*/
 //			newEmail.dialog,
-			howItWorks.frame,
+			howItWorks.getFrame(),
 			progressBar 
 		};
 		if (!isConnectedOrConnecting())
@@ -698,10 +706,12 @@ public class PhotoActivity extends Activity implements Constants {
 	}
 
 	private void createActionBar() {
-		if (actionBar == null)
+		if (actionBar == null) {
 			actionBar = new BlurActionBar(this, isFreeze);
-		else 
+		}
+		else {
 			actionBar = new BlurActionBar(this, actionBar.isFreeze());
+		}
 		actionBar.setOnActionClickListener(new OnActionClick() {
 			@Override
 			public void onClick(View v) {
