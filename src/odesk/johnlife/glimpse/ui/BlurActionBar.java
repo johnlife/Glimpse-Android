@@ -45,7 +45,6 @@ public class BlurActionBar {
 		freezeActionView.setOnClickListener(new ActionClickListener() {
 			@Override
 			public void onClick(View v) {
-				System.err.println(isFreeze);
 				chageFreezeState(!isFreeze, v);
 				super.onClick(v);
 			}
