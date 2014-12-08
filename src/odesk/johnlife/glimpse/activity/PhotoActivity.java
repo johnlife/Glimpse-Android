@@ -11,6 +11,7 @@ import java.util.Comparator;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeSet;
+
 import odesk.johnlife.glimpse.Constants;
 import odesk.johnlife.glimpse.R;
 import odesk.johnlife.glimpse.adapter.ImagePagerAdapter;
@@ -40,6 +41,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
@@ -70,6 +72,7 @@ import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
 import com.crashlytics.android.Crashlytics;
 
 /**
@@ -614,7 +617,10 @@ public class PhotoActivity extends Activity implements Constants {
 			@Override
 			public void onPageScrollStateChanged(int state) {
 				if (state == 2 || state == 1) {
-					seeNewPhoto.setAnimation(null);
+					seeNewPhoto.clearAnimation();
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+						seeNewPhoto.animate().cancel();
+					}
 					seeNewPhoto.setVisibility(View.GONE);
 					pager.setAlpha(0);
 				} else if (state == 0) {
