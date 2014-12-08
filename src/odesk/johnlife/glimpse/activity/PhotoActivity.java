@@ -614,6 +614,7 @@ public class PhotoActivity extends Activity implements Constants {
 			@Override
 			public void onPageScrollStateChanged(int state) {
 				if (state == 2 || state == 1) {
+					seeNewPhoto.setAnimation(null);
 					seeNewPhoto.setVisibility(View.GONE);
 					pager.setAlpha(0);
 				} else if (state == 0) {
