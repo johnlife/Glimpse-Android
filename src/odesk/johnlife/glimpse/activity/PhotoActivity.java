@@ -364,9 +364,11 @@ public class PhotoActivity extends Activity implements Constants {
 				}	
 			}
 		};
+		
 		public  BroadcastReceiver getReceiver() {
 			return wifiScanReceiver;
 		}
+		
 		private void hideListPane() {
 			listPane.animate()
 			.translationX(listPane.getWidth()).alpha(0)
@@ -507,15 +509,16 @@ public class PhotoActivity extends Activity implements Constants {
 
 	};
 	
-	private Runnable showNewPhotos = new Runnable() {
-		@Override
-		public void run() {
-			//pager.setCurrentItem(0, false);
-			//pager.setAdapter(null);
-			pagerAdapter = createAdapter();
-			pager.setAdapter(pagerAdapter);
-		}
-	};
+	private void showNewPhotos() {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				pagerAdapter = createAdapter();
+				pager.setAdapter(pagerAdapter);
+				rescheduleImageSwipe();
+			}
+		});
+	}
 	
 	private Runnable hideErrorPane = new Runnable() {
 		@Override
@@ -538,7 +541,7 @@ public class PhotoActivity extends Activity implements Constants {
 				MailConnector mailer = new MailConnector(user, "HPgqL2658P", context, new OnItemDownloadListener() {
 					@Override
 					public void onItemDownload() {
-						pager.post(showNewPhotos);
+						showNewPhotos();
 					}
 				});
 				mailer.connect();
