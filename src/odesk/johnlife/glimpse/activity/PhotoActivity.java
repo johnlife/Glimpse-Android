@@ -581,13 +581,22 @@ public class PhotoActivity extends Activity implements Constants {
 		pager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
 			@Override
 			public void onPageSelected(int position) {	
-				Animation animation = AnimationUtils.loadAnimation(PhotoActivity.this, R.anim.image_alpha);
-				pager.setAnimation(animation);
 				rescheduleImageSwipe();
 				getActionBar().hide();
 				pagerAdapter.setImageShown(position);
 				if (actionBar.isFreeze()) {
 					actionBar.unFreeze();
+				}
+			}
+
+			@Override
+			public void onPageScrollStateChanged(int state) {
+				if (state == 2 || state == 1) {
+					pager.setAlpha(0);
+				} else if (state == 0) {
+					Animation animation = AnimationUtils.loadAnimation(PhotoActivity.this, R.anim.image_alpha);
+					pager.startAnimation(animation);
+					pager.setAlpha(1);
 				}
 			}
 		});
