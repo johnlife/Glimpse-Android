@@ -668,12 +668,15 @@ public class PhotoActivity extends Activity implements Constants {
 	}
 	
 	private void recreateSeeNewPhoto() {
+		seeNewPhotoBtn.setVisibility(View.VISIBLE);
 		final Animation animation = AnimationUtils.loadAnimation(PhotoActivity.this, R.anim.image_alpha);
 		seeNewPhoto.postDelayed(new Runnable() {
 			@Override
 			public void run() {
 				seeNewPhoto.setVisibility(View.VISIBLE); // need to invalidate background
-				seeNewPhoto.startAnimation(animation);
+				Animation anim = animation;
+				anim.setDuration(anim.getDuration()/2);
+				seeNewPhoto.startAnimation(anim);
 			}
 		}, animation.getDuration());
 	}
@@ -728,6 +731,7 @@ public class PhotoActivity extends Activity implements Constants {
 			wifiConnectionHandler.getView(),
 			errorPane, 
 			deleteDialog,
+			messagePane,
 			/** uncomment if newEmail is needing*/
 //			newEmail.dialog,
 			howItWorks.getFrame(),

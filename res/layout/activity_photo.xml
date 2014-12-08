@@ -448,14 +448,15 @@
     <odesk.johnlife.glimpse.ui.BlurLayout
         android:id="@+id/see_new_photos_layout"
         android:layout_width="match_parent"
-        android:layout_height="48sp"
+        android:layout_height="@dimen/see_new_photos_layout_hight"
         android:layout_gravity="center_horizontal|bottom"
         android:visibility="gone" >   
     </odesk.johnlife.glimpse.ui.BlurLayout>
      <TextView
             android:id="@+id/see_new_photos"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_height="@dimen/see_new_photos_layout_hight"
             android:background="@color/background_shade"
             android:fontFamily="sans-serif-thin"
             android:gravity="center"
