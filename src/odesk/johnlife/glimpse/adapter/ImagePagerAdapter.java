@@ -18,9 +18,12 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 
@@ -30,6 +33,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 	private FileHandler fileHandler;
 	private SparseArray<PictureData> pictures;
 	private OnClickListener onClickListener;
+	private boolean hasNewPhotos = false;
 	
 	public ImagePagerAdapter(final Activity activity, DatabaseHelper databaseHelper, OnClickListener onClickListener) {
 		super();
@@ -80,6 +84,15 @@ public class ImagePagerAdapter extends PagerAdapter {
 				fileHandler.delete(pictureData);
 			}
 			pictureData.viewCreated();
+			if (pictureData.createdToday()) {
+				FrameLayout frame = new FrameLayout(context);
+				frame.addView(image);
+				ImageView poster = new ImageView(context);
+				poster.setImageResource(R.drawable.new_pane);
+				poster.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.TOP|Gravity.RIGHT));
+				frame.addView(poster);
+				view = frame;
+			}
 			pictures.put(position, pictureData);
 			bitmap = BitmapFactory.decodeFile(pictureData.getPath());
 			Log.d("Start - adapter", "Created view for "+pictureData.getPath());
@@ -138,6 +151,21 @@ public class ImagePagerAdapter extends PagerAdapter {
 		PictureData item = getItem(position);
 		if (null == item) return; 
 		fileHandler.show(item);
+	}
+	public void setHasNewPhotos(boolean newPhotos) {
+		hasNewPhotos = newPhotos;
+	}
+	public boolean hasNewPhotos() {
+		return hasNewPhotos;
+	}
+	public void checkNewPhotos() {
+		PictureData pictureData = fileHandler.getNext(PictureData.TIME_COMPARATOR);
+		if (!new File(pictureData.getPath()).exists()) {
+			fileHandler.delete(pictureData);
+		}
+		if (pictureData.createdToday()) {
+			hasNewPhotos = true;
+		}
 	}
 
 }

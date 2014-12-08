@@ -445,7 +445,26 @@
             android:textColor="@color/text"
             android:textSize="@dimen/error_pane" />
     </odesk.johnlife.glimpse.ui.BlurLayout>
-    
+    <FrameLayout
+        android:id="@+id/see_new_photos_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|bottom"
+        android:visibility="gone" >
+
+        <TextView
+            android:id="@+id/see_new_photos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/background_shade"
+            android:fontFamily="sans-serif-thin"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:text="@string/text_see_new_photos"
+            android:padding="8dp"
+            android:textColor="@color/text"
+            android:textSize="@dimen/error_pane" />
+    </FrameLayout>
     <!--
         TextView
         android:layout_width="wrap_content"

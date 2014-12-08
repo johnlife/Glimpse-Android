@@ -484,6 +484,8 @@ public class PhotoActivity extends Activity implements Constants {
 					@Override
 					public void onItemDownload() {
 						showNewPhotos();
+						pagerAdapter.setHasNewPhotos(true);
+						recreateSeeNewPhoto();
 					}
 				});
 				mailer.connect();
@@ -513,6 +515,8 @@ public class PhotoActivity extends Activity implements Constants {
 	private FrameLayout deleteFrame;
 	private NewEmailWizard newEmail;
 	private HowItWorks howItWorks;
+	private View seeNewPhoto;
+	private TextView seeNewPhotoBtn;
 	private View messagePane;
 	private TextView hintText;
 	private SharedPreferences preferences;
@@ -545,6 +549,8 @@ public class PhotoActivity extends Activity implements Constants {
 		/** uncomment if newEmailWizard is needed*/
 //		newEmail = new NewEmailWizard();
 		progressBar = (ProgressBar) findViewById(R.id.progressLoading);
+		seeNewPhoto = findViewById(R.id.see_new_photos_layout);
+		seeNewPhotoBtn =  (TextView) findViewById(R.id.see_new_photos);
 		boolean sdcardReady = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED) && GlimpseApp.getPicturesDir().canWrite();
 		if (!sdcardReady) {
 			Log.w(tag, "SDcard isn't ready, scheduling restart");
@@ -576,6 +582,16 @@ public class PhotoActivity extends Activity implements Constants {
 				return isBlocked();
 			}
 		});
+		pagerAdapter.checkNewPhotos();
+		seeNewPhotoBtn.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				seeNewPhoto.setVisibility(View.GONE);
+				pagerAdapter.setHasNewPhotos(false);
+				showNewPhotos();
+			}
+		});
 		pager.setAdapter(pagerAdapter);
 		pager.setOffscreenPageLimit(2);
 		pager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
@@ -586,6 +602,9 @@ public class PhotoActivity extends Activity implements Constants {
 				pagerAdapter.setImageShown(position);
 				if (actionBar.isFreeze()) {
 					actionBar.unFreeze();
+				}
+				if (pagerAdapter.hasNewPhotos()) {
+					recreateSeeNewPhoto();
 				}
 			}
 
@@ -644,6 +663,19 @@ public class PhotoActivity extends Activity implements Constants {
 		if (pagerAdapter.getCount() >= 2) rescheduleImageSwipe();
 	}
 	
+	private void recreateSeeNewPhoto() {
+		seeNewPhoto.setVisibility(View.GONE);
+		Animation animation = AnimationUtils.loadAnimation(PhotoActivity.this, R.anim.image_alpha);
+		seeNewPhoto.startAnimation(animation);
+		seeNewPhoto.postDelayed(new Runnable() {
+			
+			@Override
+			public void run() {
+				seeNewPhoto.setVisibility(View.VISIBLE);
+			}
+		}, animation.getDuration());
+	}
+
 	@Override
 	protected void onDestroy() {
 		wifiConnectionHandler.unregisterBroadcast();
@@ -680,7 +712,9 @@ public class PhotoActivity extends Activity implements Constants {
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
+				boolean old = pagerAdapter.hasNewPhotos();
 				pagerAdapter = createAdapter();
+				pagerAdapter.setHasNewPhotos(old);
 				pager.setAdapter(pagerAdapter);
 				rescheduleImageSwipe();
 			}
