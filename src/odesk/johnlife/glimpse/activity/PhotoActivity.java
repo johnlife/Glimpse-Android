@@ -11,7 +11,6 @@ import java.util.Comparator;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeSet;
-
 import odesk.johnlife.glimpse.Constants;
 import odesk.johnlife.glimpse.R;
 import odesk.johnlife.glimpse.adapter.ImagePagerAdapter;
@@ -26,6 +25,7 @@ import odesk.johnlife.glimpse.util.MailConnector.OnItemDownloadListener;
 import odesk.johnlife.glimpse.util.WifiConnector;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -70,7 +70,6 @@ import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
 import com.crashlytics.android.Crashlytics;
 
 /**
@@ -583,11 +582,15 @@ public class PhotoActivity extends Activity implements Constants {
 			}
 		});
 		pagerAdapter.checkNewPhotos();
+		if (pagerAdapter.hasNewPhotos()) {
+			recreateSeeNewPhoto();
+		}
 		seeNewPhotoBtn.setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
 				seeNewPhoto.setVisibility(View.GONE);
+				seeNewPhotoBtn.setVisibility(View.GONE);
 				pagerAdapter.setHasNewPhotos(false);
 				showNewPhotos();
 			}
@@ -611,6 +614,7 @@ public class PhotoActivity extends Activity implements Constants {
 			@Override
 			public void onPageScrollStateChanged(int state) {
 				if (state == 2 || state == 1) {
+					seeNewPhoto.setVisibility(View.GONE);
 					pager.setAlpha(0);
 				} else if (state == 0) {
 					Animation animation = AnimationUtils.loadAnimation(PhotoActivity.this, R.anim.image_alpha);
@@ -664,14 +668,12 @@ public class PhotoActivity extends Activity implements Constants {
 	}
 	
 	private void recreateSeeNewPhoto() {
-		seeNewPhoto.setVisibility(View.GONE);
-		Animation animation = AnimationUtils.loadAnimation(PhotoActivity.this, R.anim.image_alpha);
-		seeNewPhoto.startAnimation(animation);
+		final Animation animation = AnimationUtils.loadAnimation(PhotoActivity.this, R.anim.image_alpha);
 		seeNewPhoto.postDelayed(new Runnable() {
-			
 			@Override
 			public void run() {
-				seeNewPhoto.setVisibility(View.VISIBLE);
+				seeNewPhoto.setVisibility(View.VISIBLE); // need to invalidate background
+				seeNewPhoto.startAnimation(animation);
 			}
 		}, animation.getDuration());
 	}
