@@ -28,6 +28,28 @@
         android:layout_gravity="center_horizontal|center_vertical"
         android:visibility="invisible" />
 
+    <odesk.johnlife.glimpse.ui.BlurLayout
+        android:id="@+id/see_new_photos_layout"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/see_new_photos_layout_hight"
+        android:layout_gravity="center_horizontal|bottom"
+        android:visibility="gone" >   
+        
+        <TextView
+            android:id="@+id/see_new_photos"
+            android:layout_width="match_parent"
+            android:visibility="gone"
+            android:layout_height="@dimen/see_new_photos_layout_hight"
+            android:background="@color/background_shade"
+            android:fontFamily="sans-serif-thin"
+            android:gravity="center"
+            android:layout_gravity="center_horizontal|bottom"
+            android:text="@string/text_see_new_photos"
+            android:padding="8dp"
+            android:textColor="@color/text"
+            android:textSize="@dimen/see_new_photos_pane" />
+    </odesk.johnlife.glimpse.ui.BlurLayout>
+    
     <!-- wifi list -->
 
     <odesk.johnlife.glimpse.ui.BlurLayout
@@ -372,35 +394,41 @@
                     android:layout_height="wrap_content"
                     android:text="@string/how_it_works" />
 
-                <LinearLayout
+                <ScrollView 
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:showDividers="middle" >
-
-                    <ImageView
-                        android:id="@+id/imageHowItWork"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:padding="8dp"
-                        android:src="@drawable/ic_launcher" />
-
-                    <TextView
-                        android:id="@+id/textEmail"
-                        style="@style/txtViewStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:padding="8dp" />
-
-                    <TextView
-                        style="@style/txtViewStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:padding="8dp"
-                        android:text="@string/how_it_works_message" />
-                </LinearLayout>
-
+                    android:layout_height="0dp"
+                    android:layout_weight="1">
+                
+	                <LinearLayout
+	                    android:layout_width="match_parent"
+	                    android:layout_height="wrap_content"
+	                    android:orientation="vertical"
+	                    android:showDividers="middle" >
+	
+	                    <ImageView
+	                        android:id="@+id/imageHowItWork"
+	                        android:layout_width="wrap_content"
+	                        android:layout_height="wrap_content"
+	                        android:layout_gravity="center"
+	                        android:padding="8dp"
+	                        android:src="@drawable/ic_launcher" />
+	
+	                    <TextView
+	                        android:id="@+id/textEmail"
+	                        style="@style/txtViewStyle"
+	                        android:layout_width="wrap_content"
+	                        android:layout_height="wrap_content"
+	                        android:padding="8dp" />
+	
+	                    <TextView
+	                        style="@style/txtViewStyle"
+	                        android:layout_width="wrap_content"
+	                        android:layout_height="wrap_content"
+	                        android:padding="8dp"
+	                        android:text="@string/how_it_works_message" />
+	                </LinearLayout>
+                </ScrollView>
+                
                 <Button
                     android:id="@+id/dialogButtonOK"
                     style="@style/btnStyle"
@@ -453,26 +481,6 @@
             android:textColor="@color/text"
             android:textSize="@dimen/error_pane" />
     </odesk.johnlife.glimpse.ui.BlurLayout>
-    <odesk.johnlife.glimpse.ui.BlurLayout
-        android:id="@+id/see_new_photos_layout"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/see_new_photos_layout_hight"
-        android:layout_gravity="center_horizontal|bottom"
-        android:visibility="gone" >   
-    </odesk.johnlife.glimpse.ui.BlurLayout>
-     <TextView
-            android:id="@+id/see_new_photos"
-            android:layout_width="match_parent"
-            android:visibility="gone"
-            android:layout_height="@dimen/see_new_photos_layout_hight"
-            android:background="@color/background_shade"
-            android:fontFamily="sans-serif-thin"
-            android:gravity="center"
-            android:layout_gravity="center_horizontal|bottom"
-            android:text="@string/text_see_new_photos"
-            android:padding="8dp"
-            android:textColor="@color/text"
-            android:textSize="@dimen/see_new_photos_pane" />
     <!--
         TextView
         android:layout_width="wrap_content"

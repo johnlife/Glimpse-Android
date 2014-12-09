@@ -182,7 +182,7 @@ public class PhotoActivity extends Activity implements Constants {
 		public HowItWorks() {
 			frame = findViewById(R.id.how_it_works_frame);
 			dialog = (BlurLayout) findViewById(R.id.how_it_works);
-			FrameLayout.LayoutParams tvp1 = new FrameLayout.LayoutParams((int) (getScreenWidth()*0.75), LayoutParams.WRAP_CONTENT, Gravity.CENTER);
+			FrameLayout.LayoutParams tvp1 = new FrameLayout.LayoutParams(getScreenWidth(0.75), getScreenHeight(0.75), Gravity.CENTER);
 			dialog.setLayoutParams(tvp1);
 			frame.setOnTouchListener(new OnTouchListener() {
 				@Override
@@ -960,11 +960,19 @@ public class PhotoActivity extends Activity implements Constants {
 		return connectionManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 	}
 	
-	private int getScreenWidth() {
+	private Point getScreenSize() {
 		Display display = getWindowManager().getDefaultDisplay();
 		Point size = new Point();
 		display.getSize(size);
-		return size.x;
+		return size;
+	}
+	
+	private int getScreenWidth(double coefficient) {
+		return (int) (getScreenSize().x * coefficient);
+	}
+	
+	private int getScreenHeight(double coefficient) {
+		return (int) (getScreenSize().y * coefficient);
 	}
 	
 	/*
