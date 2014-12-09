@@ -11,7 +11,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
 	private static final String DB_NAME = "Glimpse.db";
-	private static final int SCHEMA_VERSION = 1;
+	private static final int SCHEMA_VERSION = 2;
 	private static DatabaseHelper instance = null;
 
 	private DatabaseHelper(Context context) {
@@ -32,8 +32,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		//TODO: add some code when schema changes
-		
+		db.execSQL("DROP TABLE IF EXISTS " + PictureData.TABLE_NAME);
+		onCreate(db);
 	}
 
 	PictureData addOrUpdate(PictureData picture) {

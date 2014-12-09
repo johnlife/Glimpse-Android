@@ -7,12 +7,14 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 public class PictureData {
-	private static final String TABLE_NAME = "table_photo";
+	public static final String TABLE_NAME = "table_photo";
 	private static final String COLUMN_ID = "_id";
 	private static final String COLUMN_PICTURES = "pictures";
 	private static final String COLUMN_COUNT = "count";
 	private static final String COLUMN_LOAD_TIME = "load_time";
 	private static final String COLUMN_LAST_TIME = "last_time";
+	private static final String COLUMN_SENDER_ADDRESS = "sender_address";
+	private static final String COLUMN_HEART_STATE = "heart_state";
 //	private static final int[] calendarFields = {Calendar.DAY_OF_MONTH, Calendar.MONTH, Calendar.YEAR};
 
 	static String getCreationSQL() {
@@ -21,7 +23,9 @@ public class PictureData {
 				COLUMN_PICTURES + " TEXT, " +
 				COLUMN_COUNT + " INTEGER, " +
 				COLUMN_LOAD_TIME + " INTEGER, " +
-				COLUMN_LAST_TIME + " INTEGER);";
+				COLUMN_LAST_TIME + " INTEGER, " +
+				COLUMN_SENDER_ADDRESS + " TEXT, " +
+				COLUMN_HEART_STATE + " INTEGER);";
 	}
 
 	static String getSelectionSQL() {
@@ -48,6 +52,8 @@ public class PictureData {
 	private int count;
 	private long created;
 	private long lastSeen;
+	private String senderAddress;
+	private boolean heartState;
 	private long weight = -1;
 	private long weightCalc = -1;
 	
@@ -58,12 +64,20 @@ public class PictureData {
 		this.count = 0;
 	}
 	
+	public PictureData(String path, String senderAddress, boolean heartState) {
+		this(path);
+		this.senderAddress = senderAddress;
+		this.heartState = heartState;
+	}
+	
 	public PictureData(Cursor c) {
 		id = c.getInt(0);
 		path = c.getString(1);
 		count = c.getInt(2);
 		created = c.getLong(3);
 		lastSeen = c.getLong(4);
+		senderAddress = c.getString(5);
+		heartState = c.getInt(6) == 1 ? true : false;
 	}
 
 	PictureData toDb(SQLiteDatabase db) {
@@ -72,6 +86,8 @@ public class PictureData {
 		cv.put(COLUMN_COUNT, count);
 		cv.put(COLUMN_LOAD_TIME, created);
 		cv.put(COLUMN_LAST_TIME, lastSeen);
+		cv.put(COLUMN_SENDER_ADDRESS, senderAddress);
+		cv.put(COLUMN_HEART_STATE, heartState ? 1 : 0);
 		if (-1 == id) {
 			id = db.insert(TABLE_NAME, null, cv);
 		} else {
@@ -123,4 +139,12 @@ public class PictureData {
 		return path.substring(path.lastIndexOf('/'));
 	}
 
+	public String getSenderAddress() {
+		return senderAddress;
+	}
+
+	public boolean getHeartState() {
+		return heartState;
+	}
+	
 }
