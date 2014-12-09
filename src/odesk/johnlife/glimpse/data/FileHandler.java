@@ -60,13 +60,13 @@ public class FileHandler {
 		for (File file : files) {
 			addFile(file);
 		}
-		nextPosition = 0;
+		resetCurrentPicture();
 		notifyObserver();
 	}
 	
 	public synchronized void add(File file) {
 		addFile(file);
-		nextPosition = 0;
+		resetCurrentPicture();
 		notifyObserver();		
 	}
 
@@ -119,6 +119,10 @@ public class FileHandler {
 		notifyObserver();
 		locked = false;
 		return deleted;
+	}
+	
+	public void resetCurrentPicture() {
+		nextPosition = 0;
 	}
 	
 	public void show(PictureData picture) {

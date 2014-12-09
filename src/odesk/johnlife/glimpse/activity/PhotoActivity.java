@@ -510,9 +510,9 @@ public class PhotoActivity extends Activity implements Constants {
 							@Override
 							public void run() {
 								recreateSeeNewPhoto();
+								showNewPhotos();
 							}
 						});
-						showNewPhotos();
 					}
 				});
 				mailer.connect();

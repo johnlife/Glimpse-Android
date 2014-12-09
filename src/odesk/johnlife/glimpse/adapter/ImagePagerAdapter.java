@@ -47,17 +47,18 @@ public class ImagePagerAdapter extends PagerAdapter {
 				if (fileHandler.isEmpty()) {
 					activity.startActivity(new Intent(activity, activity.getClass()));
 					activity.finish();
-				} else {
+				}/* else {
 					activity.runOnUiThread(new Runnable() {
 						@Override
 						public void run() {
-							//notifyDataSetChanged();
+							notifyDataSetChanged();
 						}
 					});
-				}
+				}*/
 			}
 		});
 		this.pictures = new SparseArray<PictureData>(fileHandler.size());
+		fileHandler.resetCurrentPicture();
 	}
 
 	@Override
@@ -71,7 +72,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 	}
 
 	@Override
-	public Object instantiateItem(ViewGroup pager, int position){
+	public Object instantiateItem(ViewGroup pager, int position) {
 		ImageView image = new ImageView(context);
 		View view = image;
 		Bitmap bitmap;
@@ -159,7 +160,12 @@ public class ImagePagerAdapter extends PagerAdapter {
 		return hasNewPhotos;
 	}
 	public void checkNewPhotos() {
+		if (fileHandler.isEmpty()) {
+			hasNewPhotos = false;
+			return;
+		}
 		PictureData pictureData = fileHandler.getNext(PictureData.TIME_COMPARATOR);
+		fileHandler.resetCurrentPicture();
 		if (!new File(pictureData.getPath()).exists()) {
 			fileHandler.delete(pictureData);
 		}
