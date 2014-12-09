@@ -38,10 +38,12 @@ public class BlurActionBar {
 		View deleteActionView = customActionBar.findViewById(R.id.action_delete);
 		View freezeActionView = customActionBar.findViewById(R.id.action_freeze);
 		View settingActionView = customActionBar.findViewById(R.id.action_setting);
+		View galleryActionView = customActionBar.findViewById(R.id.action_gallery);
 		chageFreezeState(isFreeze, freezeActionView);
 		ActionClickListener simpleClickListener = new ActionClickListener();
 		deleteActionView.setOnClickListener(simpleClickListener);
 		settingActionView.setOnClickListener(simpleClickListener);
+		galleryActionView.setOnClickListener(simpleClickListener);
 		freezeActionView.setOnClickListener(new ActionClickListener() {
 			@Override
 			public void onClick(View v) {

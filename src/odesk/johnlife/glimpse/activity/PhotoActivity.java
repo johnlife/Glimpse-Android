@@ -804,6 +804,10 @@ public class PhotoActivity extends Activity implements Constants {
 				case R.id.action_freeze:
 					recreateSeeNewPhoto();
 					break;
+				case R.id.action_gallery:
+					//TODO
+					System.out.println("!!! action_gallery");
+					break;
 				}
 			}
 		});
