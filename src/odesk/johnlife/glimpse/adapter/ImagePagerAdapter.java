@@ -3,6 +3,7 @@ package odesk.johnlife.glimpse.adapter;
 import java.io.File;
 
 import odesk.johnlife.glimpse.R;
+import odesk.johnlife.glimpse.activity.PhotoActivity;
 import odesk.johnlife.glimpse.app.GlimpseApp;
 import odesk.johnlife.glimpse.data.DatabaseHelper;
 import odesk.johnlife.glimpse.data.FileHandler;
@@ -70,11 +71,12 @@ public class ImagePagerAdapter extends PagerAdapter {
 	private PictureData getItem(int position) {
 		return pictures.get(position);
 	}
-
+	
 	@Override
 	public Object instantiateItem(ViewGroup pager, int position) {
 		ImageView image = new ImageView(context);
-		View view = image;
+		FrameLayout frame = new FrameLayout(context);
+		frame.addView(image);
 		Bitmap bitmap;
 		if (fileHandler.isEmpty()) {
 			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wp1);
@@ -86,10 +88,16 @@ public class ImagePagerAdapter extends PagerAdapter {
 			}
 			pictureData.viewCreated();
 			if (pictureData.createdToday()) {
-				view = imposeImageOnImage(image, R.drawable.new_pane, new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.TOP|Gravity.RIGHT));
+				ImageView poster = new ImageView(context);
+				poster.setImageResource(R.drawable.new_pane);
+				poster.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.TOP|Gravity.RIGHT));
+				frame.addView(poster);
 			}
-			//adding small heart
-			//view = imposeImageOnImage(image, R.drawable.new_pane,new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.BOTTOM|Gravity.RIGHT));
+			ImageView like = new ImageView(context);
+			like.setImageResource(R.drawable.like);
+			like.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.BOTTOM|Gravity.RIGHT));
+			frame.addView(like);
+			like.setOnClickListener(likeClickListener);
 			pictures.put(position, pictureData);
 			bitmap = BitmapFactory.decodeFile(pictureData.getPath());
 			Log.d("Start - adapter", "Created view for "+pictureData.getPath());
@@ -97,19 +105,10 @@ public class ImagePagerAdapter extends PagerAdapter {
 		image.setImageBitmap(bitmap);
 		image.setOnClickListener(onClickListener);
 		setScaleType(image, bitmap);
-		pager.addView(view);
-		return view;		
+		pager.addView(frame);
+		return frame;		
 	}
 
-	private View imposeImageOnImage(final ImageView image, int newImageRes, android.widget.FrameLayout.LayoutParams layoutParams) {
-		FrameLayout frame = new FrameLayout(context);
-		frame.addView(image);
-		ImageView poster = new ImageView(context);
-		poster.setImageResource(newImageRes);
-		poster.setLayoutParams(layoutParams);
-		frame.addView(poster);
-		return frame;
-	}
 
 	@Override
 	public void destroyItem(View collection, int position, Object view) {
@@ -179,5 +178,13 @@ public class ImagePagerAdapter extends PagerAdapter {
 			hasNewPhotos = true;
 		}
 	}
-
+	final OnClickListener likeClickListener = new OnClickListener() {
+		
+		@Override
+		public void onClick(View v) {
+			v.setOnClickListener(null);
+			((ImageView)v).setImageResource(R.drawable.like_fill);
+			((PhotoActivity)context).showHint(R.string.hint_like_is_clicked);
+		}
+	};
 }

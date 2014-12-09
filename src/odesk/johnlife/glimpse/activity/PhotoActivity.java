@@ -890,7 +890,9 @@ public class PhotoActivity extends Activity implements Constants {
 //		});
 //		popupMenu.show();
 	}
-	
+	public void showHint(int resId) {
+		showHint(getResources().getString(resId));
+	}
 	private void showHint(String hint) {
 		hintText.setText(hint);
 		messagePane.setVisibility(View.VISIBLE);
