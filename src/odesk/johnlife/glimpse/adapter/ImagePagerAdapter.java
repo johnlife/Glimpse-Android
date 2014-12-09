@@ -94,7 +94,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 				frame.addView(poster);
 			}
 			ImageView like = new ImageView(context);
-			like.setImageResource(R.drawable.like);
+			like.setImageResource(R.drawable.heart);
 			like.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.BOTTOM|Gravity.RIGHT));
 			frame.addView(like);
 			like.setOnClickListener(likeClickListener);
@@ -183,7 +183,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 		@Override
 		public void onClick(View v) {
 			v.setOnClickListener(null);
-			((ImageView)v).setImageResource(R.drawable.like_fill);
+			((ImageView)v).setImageResource(R.drawable.solid_heart);
 			((PhotoActivity)context).showHint(R.string.hint_like_is_clicked);
 		}
 	};
