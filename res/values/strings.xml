@@ -26,6 +26,7 @@
 	<string name="action_freeze">Pause</string>
 	<string name="action_unfreeze">Resume</string>
 	<string name="action_reset">Reset WiFi</string>
+	<string name="action_gallery">Gallery</string>	
 	<string name="action_setting">Settings</string>
 	<string name="action_new_email">Change email</string>
 	<string name="how_it_works">How It Works</string>
