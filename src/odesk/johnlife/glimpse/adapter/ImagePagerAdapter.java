@@ -86,14 +86,10 @@ public class ImagePagerAdapter extends PagerAdapter {
 			}
 			pictureData.viewCreated();
 			if (pictureData.createdToday()) {
-				FrameLayout frame = new FrameLayout(context);
-				frame.addView(image);
-				ImageView poster = new ImageView(context);
-				poster.setImageResource(R.drawable.new_pane);
-				poster.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.TOP|Gravity.RIGHT));
-				frame.addView(poster);
-				view = frame;
+				view = imposeImageOnImage(image, R.drawable.new_pane, new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.TOP|Gravity.RIGHT));
 			}
+			//adding small heart
+			//view = imposeImageOnImage(image, R.drawable.new_pane,new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.BOTTOM|Gravity.RIGHT));
 			pictures.put(position, pictureData);
 			bitmap = BitmapFactory.decodeFile(pictureData.getPath());
 			Log.d("Start - adapter", "Created view for "+pictureData.getPath());
@@ -103,6 +99,16 @@ public class ImagePagerAdapter extends PagerAdapter {
 		setScaleType(image, bitmap);
 		pager.addView(view);
 		return view;		
+	}
+
+	private View imposeImageOnImage(final ImageView image, int newImageRes, android.widget.FrameLayout.LayoutParams layoutParams) {
+		FrameLayout frame = new FrameLayout(context);
+		frame.addView(image);
+		ImageView poster = new ImageView(context);
+		poster.setImageResource(newImageRes);
+		poster.setLayoutParams(layoutParams);
+		frame.addView(poster);
+		return frame;
 	}
 
 	@Override

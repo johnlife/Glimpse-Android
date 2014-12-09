@@ -610,7 +610,7 @@ public class PhotoActivity extends Activity implements Constants {
 			}
 		});
 		pagerAdapter.checkNewPhotos();
-		if (pagerAdapter.hasNewPhotos()) {
+		if (pagerAdapter.hasNewPhotos() && isConnected()) {
 			recreateSeeNewPhoto();
 		}
 		seeNewPhotoBtn.setOnClickListener(new OnClickListener() {
@@ -791,6 +791,8 @@ public class PhotoActivity extends Activity implements Constants {
 		actionBar.setOnActionClickListener(new OnActionClick() {
 			@Override
 			public void onClick(View v) {
+				seeNewPhoto.setVisibility(View.GONE);
+				seeNewPhotoBtn.setVisibility(View.GONE);
 				switch (v.getId()) {
 				case R.id.action_delete:
 					deleteFrame.setVisibility(View.VISIBLE);
@@ -800,6 +802,7 @@ public class PhotoActivity extends Activity implements Constants {
 					showPopupMenu(v);
 					break;
 				case R.id.action_freeze:
+					recreateSeeNewPhoto();
 					break;
 				}
 			}
