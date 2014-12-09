@@ -44,8 +44,10 @@ import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.EditTextPreference;
 import android.preference.PreferenceManager;
 import android.support.v4.view.ViewPager;
+import android.text.InputType;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.util.Log;
@@ -67,6 +69,10 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
@@ -217,6 +223,7 @@ public class PhotoActivity extends Activity implements Constants {
 		private ListView list;
 		private View wifiDialog;
 		private TextView password;
+		private CheckBox showPassword;
 		private TextView networkName;
 		private ScanResult activeNetwork;
 
@@ -361,6 +368,7 @@ public class PhotoActivity extends Activity implements Constants {
 			listPane = findViewById(R.id.list_container);
 			wifiDialog = findViewById(R.id.wifi_pane);
 			password = (TextView) wifiDialog.findViewById(R.id.password);
+			showPassword = (CheckBox) wifiDialog.findViewById(R.id.is_password_vivsible);
 			password.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 				@Override
 				public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -373,6 +381,18 @@ public class PhotoActivity extends Activity implements Constants {
 						return true;
 					}
 					return false;
+				}
+			});
+			showPassword.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+				
+				@Override
+				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+					if (isChecked) {
+						((EditText)password).setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+					} else {
+						((EditText)password).setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+					}
+					
 				}
 			});
 			networkName = (TextView) wifiDialog.findViewById(R.id.title);

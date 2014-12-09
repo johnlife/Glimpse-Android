@@ -19,6 +19,7 @@
 	<string name="text_new_email_step2">Enter your new email below. Only do so if you\'ve received confirmation from our team, otherwise your frame may stop working!</string>
 	<string name="text_at_glimpseframe">\@glimpseframe.com</string>	
 	<string name="text_see_new_photos">See New Photos</string>	
+	<string name="text_show_pass_checkbox">Show password</string>
 		
 	<string name="action_delete">Delete</string>
 	<string name="action_freeze">Pause</string>
