@@ -491,4 +491,11 @@
         android:textSize="92sp" /
     -->
 
+	<Gallery
+        android:id="@+id/gallery1"
+        android:layout_width="match_parent"
+        android:visibility="visible"
+        android:layout_gravity="bottom"
+        android:layout_height="wrap_content" />
+
 </FrameLayout>

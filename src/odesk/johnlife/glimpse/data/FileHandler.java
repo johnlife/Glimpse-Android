@@ -182,4 +182,8 @@ public class FileHandler {
 		return locked;
 	}
 	
+	public List<PictureData> getFiles() {
+		return files;
+	}
+	
 }

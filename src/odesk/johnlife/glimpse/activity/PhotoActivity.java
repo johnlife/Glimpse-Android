@@ -15,6 +15,7 @@ import java.util.TreeSet;
 import odesk.johnlife.glimpse.Constants;
 import odesk.johnlife.glimpse.R;
 import odesk.johnlife.glimpse.adapter.ImagePagerAdapter;
+import odesk.johnlife.glimpse.adapter.ImagesGalleryAdapter;
 import odesk.johnlife.glimpse.app.GlimpseApp;
 import odesk.johnlife.glimpse.data.DatabaseHelper;
 import odesk.johnlife.glimpse.ui.BlurActionBar;
@@ -26,7 +27,6 @@ import odesk.johnlife.glimpse.util.MailConnector.OnItemDownloadListener;
 import odesk.johnlife.glimpse.util.WifiConnector;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -44,7 +44,6 @@ import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.preference.EditTextPreference;
 import android.preference.PreferenceManager;
 import android.support.v4.view.ViewPager;
 import android.text.InputType;
@@ -60,7 +59,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -74,10 +72,12 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.Gallery;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 
@@ -655,7 +655,14 @@ public class PhotoActivity extends Activity implements Constants {
 				}
 			}
 		});
-		Log.w(tag, "Pager created");
+		Gallery gallery = (Gallery) findViewById(R.id.gallery1);
+		gallery.setAdapter(new ImagesGalleryAdapter(this));
+		gallery.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+				Toast.makeText(PhotoActivity.this, "Позиция: " + position, Toast.LENGTH_SHORT).show();
+			}
+		});
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		errorPane = findViewById(R.id.error_pane);
 		messagePane = findViewById(R.id.message_pane);
