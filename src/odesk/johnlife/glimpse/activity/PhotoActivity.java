@@ -485,9 +485,14 @@ public class PhotoActivity extends Activity implements Constants {
 				MailConnector mailer = new MailConnector(user, "HPgqL2658P", context, new OnItemDownloadListener() {
 					@Override
 					public void onItemDownload() {
-						showNewPhotos();
 						pagerAdapter.setHasNewPhotos(true);
-						recreateSeeNewPhoto();
+						runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+								recreateSeeNewPhoto();
+							}
+						});
+						showNewPhotos();
 					}
 				});
 				mailer.connect();
