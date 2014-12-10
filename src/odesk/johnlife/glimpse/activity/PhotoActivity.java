@@ -809,7 +809,9 @@ public class PhotoActivity extends Activity implements Constants {
 					showPopupMenu(v);
 					break;
 				case R.id.action_freeze:
-					recreateSeeNewPhoto();
+					if (pagerAdapter.hasNewPhotos()) {
+						recreateSeeNewPhoto();
+					}
 					break;
 				case R.id.action_gallery:
 					//TODO

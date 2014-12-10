@@ -146,5 +146,8 @@ public class PictureData {
 	public boolean getHeartState() {
 		return heartState;
 	}
+	public void setHeartState(boolean state) {
+		heartState = state;
+	}
 	
 }

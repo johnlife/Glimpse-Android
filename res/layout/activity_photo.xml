@@ -494,7 +494,7 @@
 	<Gallery
         android:id="@+id/gallery1"
         android:layout_width="match_parent"
-        android:visibility="visible"
+        android:visibility="gone"
         android:layout_gravity="bottom"
         android:layout_height="wrap_content" />
 

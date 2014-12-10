@@ -82,7 +82,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wp1);
 			Log.d("Start - adapter", "Created view for startup screen");
 		} else {
-			PictureData pictureData = fileHandler.getNext(PictureData.TIME_COMPARATOR);
+			final PictureData pictureData = fileHandler.getNext(PictureData.TIME_COMPARATOR);
 			if (!new File(pictureData.getPath()).exists()) {
 				fileHandler.delete(pictureData);
 			}
@@ -94,10 +94,19 @@ public class ImagePagerAdapter extends PagerAdapter {
 				frame.addView(poster);
 			}
 			ImageView like = new ImageView(context);
-			like.setImageResource(R.drawable.heart);
+			like.setImageResource(pictureData.getHeartState() ? R.drawable.solid_heart : R.drawable.heart);
 			like.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.BOTTOM|Gravity.RIGHT));
 			frame.addView(like);
-			like.setOnClickListener(likeClickListener);
+			like.setOnClickListener(new OnClickListener() {
+				//only//only for first click
+					@Override
+					public void onClick(View v) {
+						v.setOnClickListener(null);
+						pictureData.setHeartState(true);
+						((ImageView)v).setImageResource(R.drawable.solid_heart);
+						((PhotoActivity)context).showHint(R.string.hint_like_is_clicked);
+					}
+				});
 			pictures.put(position, pictureData);
 			bitmap = BitmapFactory.decodeFile(pictureData.getPath());
 			Log.d("Start - adapter", "Created view for "+pictureData.getPath());
@@ -178,13 +187,4 @@ public class ImagePagerAdapter extends PagerAdapter {
 			hasNewPhotos = true;
 		}
 	}
-	final OnClickListener likeClickListener = new OnClickListener() {
-		
-		@Override
-		public void onClick(View v) {
-			v.setOnClickListener(null);
-			((ImageView)v).setImageResource(R.drawable.solid_heart);
-			((PhotoActivity)context).showHint(R.string.hint_like_is_clicked);
-		}
-	};
 }
