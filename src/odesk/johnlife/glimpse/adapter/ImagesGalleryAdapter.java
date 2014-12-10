@@ -1,5 +1,6 @@
 package odesk.johnlife.glimpse.adapter;
 
+import odesk.johnlife.glimpse.Constants;
 import odesk.johnlife.glimpse.app.GlimpseApp;
 import odesk.johnlife.glimpse.data.FileHandler;
 import android.content.Context;
@@ -11,7 +12,7 @@ import android.widget.BaseAdapter;
 import android.widget.Gallery;
 import android.widget.ImageView;
 
-public class ImagesGalleryAdapter extends BaseAdapter {
+public class ImagesGalleryAdapter extends BaseAdapter implements Constants {
 
 	private Context context;
 	private FileHandler fileHandler;
@@ -35,14 +36,15 @@ public class ImagesGalleryAdapter extends BaseAdapter {
 	public long getItemId(int position) {
 		return fileHandler.getFiles().get(position).hashCode();
 	}
-
+	
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		ImageView view = new ImageView(context);
 		Bitmap bitmap = BitmapFactory.decodeFile(fileHandler.getFiles().get(position).getPath());
 		view.setImageBitmap(bitmap);
-		view.setLayoutParams(new Gallery.LayoutParams(400, 400));
-		view.setScaleType(ImageView.ScaleType.CENTER_CROP);
+		int size = (int) (GlimpseApp.getScreen().getHeight() * IMAGE_SIZE_PERCENTAGE);
+		view.setLayoutParams(new Gallery.LayoutParams(size, size));
+		view.setScaleType(ImageView.ScaleType.FIT_XY);
 		return view;
 	}
 	

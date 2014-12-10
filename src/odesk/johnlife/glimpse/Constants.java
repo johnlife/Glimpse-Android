@@ -15,5 +15,6 @@ public interface Constants {
 	public static final int REFRESH_RATE = 120000;
 	public static final int HINT_TIME = 3000;
 	public static final int RESCHEDULE_REFRESH_RATE = 8000;
+	public static final double IMAGE_SIZE_PERCENTAGE = 0.3;
 
 }
