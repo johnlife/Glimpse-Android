@@ -36,7 +36,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		onCreate(db);
 	}
 
-	PictureData addOrUpdate(PictureData picture) {
+	public PictureData addOrUpdate(PictureData picture) {
 		return picture.toDb(getWritableDatabase());
 	}
 	
