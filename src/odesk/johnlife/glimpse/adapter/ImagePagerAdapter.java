@@ -7,6 +7,7 @@ import odesk.johnlife.glimpse.activity.PhotoActivity;
 import odesk.johnlife.glimpse.app.GlimpseApp;
 import odesk.johnlife.glimpse.data.DatabaseHelper;
 import odesk.johnlife.glimpse.data.FileHandler;
+import odesk.johnlife.glimpse.data.MailSender;
 import odesk.johnlife.glimpse.data.PictureData;
 import android.app.Activity;
 import android.content.Context;
@@ -15,6 +16,7 @@ import android.content.res.Configuration;
 import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -108,7 +110,21 @@ public class ImagePagerAdapter extends PagerAdapter {
 						pictureData.setHeartState(true);
 						dbHelper.addOrUpdate(pictureData);
 						((ImageView) v).setImageResource(R.drawable.solid_heart);
-						((PhotoActivity) context).showHint(R.string.hint_like_is_clicked);
+						((PhotoActivity) context).showHint(context.getString(R.string.hint_like_is_clicked, pictureData.getSenderAddress()));
+						new AsyncTask<Object, String, Boolean>() {
+							@Override
+							protected Boolean doInBackground(Object... params) {
+								try {
+									MailSender mailSender = new MailSender(((PhotoActivity) context).getUser(), "HPgqL2658P");
+									mailSender.postMail(pictureData.getSenderAddress(), pictureData.getPath());
+								} catch (Exception e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+									return false;
+								}
+								return true;
+							}
+						}.execute();
 					}
 				});
 			}

@@ -40,7 +40,7 @@ public class GlimpseApp extends Application implements Constants {
 			@Override
 			public void onEvent(int event, String path) {
 				if (event == FileObserver.DELETE) {
-					fileHandler.delete(new PictureData(GlimpseApp.getPicturesDir().getAbsolutePath() + "/" + path));
+					fileHandler.delete(new PictureData(GlimpseApp.getPicturesDir().getAbsolutePath() + "/" + path, ""));
 				}
 			}
 		};

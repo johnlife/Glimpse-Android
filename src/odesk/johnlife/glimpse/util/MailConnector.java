@@ -17,14 +17,12 @@ import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.Store;
+import javax.mail.internet.InternetAddress;
 import javax.mail.search.FlagTerm;
 
 import odesk.johnlife.glimpse.Constants;
-import odesk.johnlife.glimpse.R;
 import odesk.johnlife.glimpse.app.GlimpseApp;
 import odesk.johnlife.glimpse.data.FileHandler;
-import android.content.Context;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 public class MailConnector implements Constants {
@@ -33,21 +31,18 @@ public class MailConnector implements Constants {
 		public void onItemDownload();
 	}
 	
-	private static final String SSL_FACTORY = "odesk.johnlife.glimpse.util.AlwaysTrustSSLContextFactory";
 	private static final String LOG_TAG = MailConnector.class.getSimpleName();
 	
 	private String user;
 	private String pass;
 	private String server;
-	private Context context;
 	private OnItemDownloadListener onItemDownLoadListener;
 	byte[] buf = new byte[4096];
 	
-	public MailConnector(String user, String pass, Context context, OnItemDownloadListener onItemDownLoadListener) {
+	public MailConnector(String user, String pass, OnItemDownloadListener onItemDownLoadListener) {
 		this.user = user;
 		this.pass = pass;
-		this.context = context;
-		this.server = context.getString(R.string.email_server);
+		this.server = EMAIL_SERVER;
 		this.onItemDownLoadListener = onItemDownLoadListener;
 	}
 
@@ -69,22 +64,18 @@ public class MailConnector implements Constants {
 			Message[] messages = fileHandler.isEmpty() ?
 				folder.getMessages() : 
 				folder.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
-			Log.d(LOG_TAG, "Got "+messages.length+(fileHandler.isEmpty() ? " total" : " new")+" messages.");
-			int position = GlimpseApp.getFileHandler().size();
-			PreferenceManager.getDefaultSharedPreferences(context).edit().putInt(PREF_POSITION_NEW_PHOTOS, position).commit();
-			List<File> attachments = new ArrayList<File>();
 			for(Message msg : messages) {
 				try {
-					attachments.addAll(getAttachments((Multipart) msg.getContent()));
+					List<File> attachments = getAttachments((Multipart) msg.getContent());
+					if (!attachments.isEmpty()) {
+						fileHandler.add(attachments, ((InternetAddress) msg.getFrom()[0]).getAddress());
+						onItemDownLoadListener.onItemDownload();
+					}
 					msg.setFlag(Flags.Flag.DELETED, true);
 				} catch (Exception e) {
 					Log.e(LOG_TAG, "Error: ", e);
 				//	PushLink.sendAsyncException(e);
 				}
-			}
-			if (!attachments.isEmpty()) {
-				fileHandler.add(attachments);
-				onItemDownLoadListener.onItemDownload();
 			}
 			folder.setFlags(messages, new Flags(Flags.Flag.SEEN), true);
 			folder.close(true);

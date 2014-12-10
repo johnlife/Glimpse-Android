@@ -57,17 +57,12 @@ public class PictureData {
 	private long weight = -1;
 	private long weightCalc = -1;
 	
-	public PictureData(String path) {
+	public PictureData(String path, String senderAddress) {
 		this.path = path;
 		this.created = System.currentTimeMillis();
 		this.lastSeen = -1;
 		this.count = 0;
-	}
-	
-	public PictureData(String path, String senderAddress, boolean heartState) {
-		this(path);
 		this.senderAddress = senderAddress;
-		this.heartState = heartState;
 	}
 	
 	public PictureData(Cursor c) {

@@ -31,7 +31,7 @@ public class FileHandler {
 		files = databaseHelper.getPictures();
 	}
 
-	private synchronized void addFile(File file) {
+	private synchronized void addFile(File file, String from) {
 		cleanup(file.length());
 		try {
 			Bitmap bmp = BitmapFactory.decodeFile(file.getAbsolutePath());
@@ -46,7 +46,7 @@ public class FileHandler {
 				Log.e(getClass().getName(), "Error writing scaled bitmap", e);
 			}
 			locked = true;
-			PictureData picture = new PictureData(path);
+			PictureData picture = new PictureData(path, from);
 			picture = databaseHelper.addOrUpdate(picture);
 			files.add(picture);
 			file.delete();
@@ -56,16 +56,16 @@ public class FileHandler {
 		}
 	}
 	
-	public synchronized void add(List<File> files) {
+	public synchronized void add(List<File> files, String from) {
 		for (File file : files) {
-			addFile(file);
+			addFile(file, from);
 		}
 		resetCurrentPicture();
 		notifyObserver();
 	}
 	
-	public synchronized void add(File file) {
-		addFile(file);
+	public synchronized void add(File file, String from) {
+		addFile(file, from);
 		resetCurrentPicture();
 		notifyObserver();		
 	}

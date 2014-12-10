@@ -502,7 +502,7 @@ public class PhotoActivity extends Activity implements Constants {
 			Log.w(tag, "Polling mail server");
 			String user = getUser();
 			if (isConnected() && null != user) {
-				MailConnector mailer = new MailConnector(user, "HPgqL2658P", context, new OnItemDownloadListener() {
+				MailConnector mailer = new MailConnector(user, "HPgqL2658P", new OnItemDownloadListener() {
 					@Override
 					public void onItemDownload() {
 						pagerAdapter.setHasNewPhotos(true);
@@ -903,10 +903,12 @@ public class PhotoActivity extends Activity implements Constants {
 //		});
 //		popupMenu.show();
 	}
+	
 	public void showHint(int resId) {
 		showHint(getResources().getString(resId));
 	}
-	private void showHint(String hint) {
+	
+	public void showHint(String hint) {
 		hintText.setText(hint);
 		messagePane.setVisibility(View.VISIBLE);
 		messagePane.postDelayed(new Runnable() {
@@ -917,7 +919,7 @@ public class PhotoActivity extends Activity implements Constants {
 		}, HINT_TIME);
 	}
 	
-	private String getUser() {
+	public String getUser() {
 		String user = null;
 		try {
 			File dataFile = getUserDataFile();
