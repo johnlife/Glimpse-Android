@@ -631,7 +631,6 @@ public class PhotoActivity extends Activity implements Constants {
 			@Override
 			public void onPageSelected(int position) {	
 				rescheduleImageSwipe();
-				getActionBar().hide();
 				pagerAdapter.setImageShown(position);
 				if (actionBar.isFreeze()) {
 					actionBar.unFreeze();
@@ -645,6 +644,9 @@ public class PhotoActivity extends Activity implements Constants {
 			public void onPageScrollStateChanged(int state) {
 				if (state == 2 || state == 1) {
 					seeNewPhoto.clearAnimation();
+					if (getActionBar() != null && getActionBar().isShowing()) {
+						getActionBar().hide();
+					}
 					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 						seeNewPhoto.animate().cancel();
 					}
