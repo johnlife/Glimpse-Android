@@ -1,6 +1,8 @@
 package odesk.johnlife.glimpse.adapter;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import odesk.johnlife.glimpse.R;
 import odesk.johnlife.glimpse.activity.PhotoActivity;
@@ -34,9 +36,10 @@ public class ImagePagerAdapter extends PagerAdapter {
 
 	private Context context;
 	private FileHandler fileHandler;
-	private SparseArray<PictureData> pictures;
+	private List<PictureData> pictures;
 	private OnClickListener onClickListener;
-	DatabaseHelper dbHelper;
+	private DatabaseHelper dbHelper;
+	private PictureData firstPicture;
 	private boolean hasNewPhotos = false;
 	
 	public ImagePagerAdapter(final Activity activity, DatabaseHelper databaseHelper, OnClickListener onClickListener) {
@@ -62,8 +65,13 @@ public class ImagePagerAdapter extends PagerAdapter {
 				}*/
 			}
 		});
-		this.pictures = new SparseArray<PictureData>(fileHandler.size());
+		this.pictures = new ArrayList<PictureData>();
 		fileHandler.resetCurrentPicture();
+	}
+	
+	public ImagePagerAdapter(Activity activity, PictureData pictureData, DatabaseHelper databaseHelper, OnClickListener onClickListener) {
+		this(activity, databaseHelper, onClickListener);
+		firstPicture = pictureData;
 	}
 
 	@Override
@@ -86,7 +94,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wp1);
 			Log.d("Start - adapter", "Created view for startup screen");
 		} else {
-			final PictureData pictureData = fileHandler.getNext(PictureData.TIME_COMPARATOR);
+			final PictureData pictureData = firstPicture != null && position == 0 ? firstPicture : fileHandler.getNext(PictureData.TIME_COMPARATOR);
 			if (!new File(pictureData.getPath()).exists()) {
 				fileHandler.delete(pictureData);
 			}
@@ -128,7 +136,11 @@ public class ImagePagerAdapter extends PagerAdapter {
 					}
 				});
 			}
-			pictures.put(position, pictureData);
+			if (pictures.size() > position) {
+				pictures.set(position, pictureData);
+			} else {
+				pictures.add(pictureData);
+			}
 			bitmap = BitmapFactory.decodeFile(pictureData.getPath());
 			Log.d("Start - adapter", "Created view for "+pictureData.getPath());
 		}
@@ -143,7 +155,6 @@ public class ImagePagerAdapter extends PagerAdapter {
 	@Override
 	public void destroyItem(View collection, int position, Object view) {
 		((ViewPager) collection).removeView((View) view);
-		pictures.remove(position);
 	}
 
 	@Override

@@ -18,6 +18,7 @@ import odesk.johnlife.glimpse.adapter.ImagePagerAdapter;
 import odesk.johnlife.glimpse.adapter.ImagesGalleryAdapter;
 import odesk.johnlife.glimpse.app.GlimpseApp;
 import odesk.johnlife.glimpse.data.DatabaseHelper;
+import odesk.johnlife.glimpse.data.PictureData;
 import odesk.johnlife.glimpse.ui.BlurActionBar;
 import odesk.johnlife.glimpse.ui.BlurActionBar.OnActionClick;
 import odesk.johnlife.glimpse.ui.BlurLayout;
@@ -546,6 +547,7 @@ public class PhotoActivity extends Activity implements Constants {
 	private TextView seeNewPhotoBtn;
 	private View messagePane;
 	private TextView hintText;
+	private Gallery gallery;
 	private SharedPreferences preferences;
 	private boolean isAnimationNeeded = true;
 	private boolean isDisconnectionHintNeeded = false;
@@ -655,12 +657,14 @@ public class PhotoActivity extends Activity implements Constants {
 				}
 			}
 		});
-		Gallery gallery = (Gallery) findViewById(R.id.gallery1);
+		gallery = (Gallery) findViewById(R.id.gallery1);
 		gallery.setAdapter(new ImagesGalleryAdapter(this));
 		gallery.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-				Toast.makeText(PhotoActivity.this, "Позиция: " + position, Toast.LENGTH_SHORT).show();
+				gallery.setVisibility(View.GONE);
+				pagerAdapter = createAdapter((PictureData) gallery.getItemAtPosition(position));
+				pager.setAdapter(pagerAdapter);
 			}
 		});
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -728,7 +732,15 @@ public class PhotoActivity extends Activity implements Constants {
 	}
 	
 	private ImagePagerAdapter createAdapter() {
-		return new ImagePagerAdapter(this, databaseHelper, new OnClickListener() {
+		return new ImagePagerAdapter(this, databaseHelper, createOnCkickListener());
+	}
+	
+	private ImagePagerAdapter createAdapter(PictureData pictureData) {
+		return new ImagePagerAdapter(this, pictureData, databaseHelper, createOnCkickListener());
+	}
+	
+	private OnClickListener createOnCkickListener() {
+		return new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				if (isBlocked()) return;
@@ -740,7 +752,7 @@ public class PhotoActivity extends Activity implements Constants {
 					actionBar.show();
 				}
 			}
-		});
+		};
 	}
 
 	private void onConnected() {
@@ -814,8 +826,7 @@ public class PhotoActivity extends Activity implements Constants {
 					}
 					break;
 				case R.id.action_gallery:
-					//TODO
-					System.out.println("!!! action_gallery");
+					gallery.setVisibility(View.VISIBLE);
 					break;
 				}
 			}
