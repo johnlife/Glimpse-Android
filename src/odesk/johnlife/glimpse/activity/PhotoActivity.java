@@ -552,6 +552,7 @@ public class PhotoActivity extends Activity implements Constants {
 	private boolean isAnimationNeeded = true;
 	private boolean isDisconnectionHintNeeded = false;
 	private boolean isFreeze = false;
+	private boolean galleryHideSeeNewPhoto;
 	
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
@@ -667,6 +668,9 @@ public class PhotoActivity extends Activity implements Constants {
 				gallery.setVisibility(View.GONE);
 				pagerAdapter = createAdapter((PictureData) gallery.getItemAtPosition(position));
 				pager.setAdapter(pagerAdapter);
+				if (galleryHideSeeNewPhoto) {
+					recreateSeeNewPhoto();
+				}
 			}
 		});
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -713,6 +717,7 @@ public class PhotoActivity extends Activity implements Constants {
 	}
 	
 	private void recreateSeeNewPhoto() {
+		if (gallery != null && gallery.getVisibility() == View.VISIBLE) return;
 		seeNewPhotoBtn.setVisibility(View.VISIBLE);
 		final Animation animation = AnimationUtils.loadAnimation(PhotoActivity.this, R.anim.image_alpha);
 		seeNewPhoto.postDelayed(new Runnable() {
@@ -812,8 +817,6 @@ public class PhotoActivity extends Activity implements Constants {
 		actionBar.setOnActionClickListener(new OnActionClick() {
 			@Override
 			public void onClick(View v) {
-				seeNewPhoto.setVisibility(View.GONE);
-				seeNewPhotoBtn.setVisibility(View.GONE);
 				switch (v.getId()) {
 				case R.id.action_delete:
 					deleteFrame.setVisibility(View.VISIBLE);
@@ -829,8 +832,12 @@ public class PhotoActivity extends Activity implements Constants {
 					break;
 				case R.id.action_gallery:
 					gallery.setVisibility(View.VISIBLE);
+					if (seeNewPhoto.getVisibility() == View.VISIBLE) {
+						galleryHideSeeNewPhoto = true;
+					}
 					break;
 				}
+				seeNewPhoto.setVisibility(View.GONE);
 			}
 		});
 	}
