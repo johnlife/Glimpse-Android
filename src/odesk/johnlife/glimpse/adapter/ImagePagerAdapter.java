@@ -104,38 +104,8 @@ public class ImagePagerAdapter extends PagerAdapter {
 				poster.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.TOP|Gravity.RIGHT));
 				frame.addView(poster);
 			}
-			ImageView like = new ImageView(context);
-			like.setImageResource(pictureData.getHeartState() ? R.drawable.solid_heart : R.drawable.heart);
-			like.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.BOTTOM|Gravity.RIGHT));
-			int heart_padding = (int) context.getResources().getDimension(R.dimen.heart_padding);
-			like.setPadding(0, 0, heart_padding, heart_padding);
-			frame.addView(like);
-			if (!pictureData.getHeartState()) {
-				like.setOnClickListener(new OnClickListener() {
-					// only//only for first click
-					@Override
-					public void onClick(View v) {
-						v.setOnClickListener(null);
-						pictureData.setHeartState(true);
-						dbHelper.addOrUpdate(pictureData);
-						((ImageView) v).setImageResource(R.drawable.solid_heart);
-						((PhotoActivity) context).showHint(context.getString(R.string.hint_like_is_clicked, pictureData.getSenderAddress()));
-						new AsyncTask<Object, String, Boolean>() {
-							@Override
-							protected Boolean doInBackground(Object... params) {
-								try {
-									MailSender mailSender = new MailSender(((PhotoActivity) context).getUser(), "HPgqL2658P");
-									mailSender.postMail(pictureData.getSenderAddress(), pictureData.getPath());
-								} catch (Exception e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-									return false;
-								}
-								return true;
-							}
-						}.execute();
-					}
-				});
+			if (pictureData.getSenderAddress() != null) {
+				frame.addView(createLikeButton(pictureData));
 			}
 			if (pictures.size() > position) {
 				pictures.set(position, pictureData);
@@ -152,6 +122,39 @@ public class ImagePagerAdapter extends PagerAdapter {
 		return frame;		
 	}
 
+	private ImageView createLikeButton(final PictureData pictureData) {
+		ImageView like = new ImageView(context);
+		like.setImageResource(pictureData.getHeartState() ? R.drawable.solid_heart : R.drawable.heart);
+		like.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.BOTTOM|Gravity.RIGHT));
+		if (!pictureData.getHeartState()) {
+			like.setOnClickListener(new OnClickListener() {
+				// only//only for first click
+				@Override
+				public void onClick(View v) {
+					v.setOnClickListener(null);
+					pictureData.setHeartState(true);
+					dbHelper.addOrUpdate(pictureData);
+					((ImageView) v).setImageResource(R.drawable.solid_heart);
+					((PhotoActivity) context).showHint(context.getString(R.string.hint_like_is_clicked, pictureData.getSenderAddress()));
+					new AsyncTask<Object, String, Boolean>() {
+						@Override
+						protected Boolean doInBackground(Object... params) {
+							try {
+								MailSender mailSender = new MailSender(((PhotoActivity) context).getUser(), "HPgqL2658P");
+								mailSender.postMail(pictureData.getSenderAddress(), pictureData.getPath());
+							} catch (Exception e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+								return false;
+							}
+							return true;
+						}
+					}.execute();
+				}
+			});
+		}
+		return like;
+	}
 
 	@Override
 	public void destroyItem(View collection, int position, Object view) {
