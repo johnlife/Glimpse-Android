@@ -661,7 +661,6 @@ public class PhotoActivity extends Activity implements Constants {
 			}
 		});
 		gallery = (Gallery) findViewById(R.id.gallery1);
-		gallery.setAdapter(new ImagesGalleryAdapter(this));
 		gallery.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
@@ -831,6 +830,7 @@ public class PhotoActivity extends Activity implements Constants {
 					}
 					break;
 				case R.id.action_gallery:
+					gallery.setAdapter(new ImagesGalleryAdapter(PhotoActivity.this));
 					gallery.setVisibility(View.VISIBLE);
 					if (seeNewPhoto.getVisibility() == View.VISIBLE) {
 						galleryHideSeeNewPhoto = true;

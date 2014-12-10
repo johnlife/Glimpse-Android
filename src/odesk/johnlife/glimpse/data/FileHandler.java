@@ -24,11 +24,13 @@ public class FileHandler {
 	private DatabaseHelper databaseHelper;
 	private List<PictureData> files;
 	private DataSetObserver datasetObserver;
+	private Comparator<PictureData> comparator;
 	private int nextPosition;
 	
 	public FileHandler(Context context) {
 		databaseHelper = DatabaseHelper.getInstance(context);
 		files = databaseHelper.getPictures();
+		comparator = PictureData.TIME_COMPARATOR;
 	}
 
 	private synchronized void addFile(File file, String from) {
@@ -156,7 +158,7 @@ public class FileHandler {
 		return value;
 	}
 	
-	public synchronized PictureData getNext(Comparator<PictureData> comparator) {
+	public synchronized PictureData getNext() {
 		locked = true;
 		nextPosition %= files.size();
 		PictureData value = Collections.max(files.subList(0, files.size() - nextPosition++), comparator);
@@ -186,4 +188,11 @@ public class FileHandler {
 		return files;
 	}
 	
+	public void rewind(PictureData pictureData) {
+		for (int i = 0; i < files.size(); i++) {
+			if (getNext().equals(pictureData)) {
+				nextPosition--;
+			}
+		}
+	}	
 }

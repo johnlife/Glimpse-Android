@@ -38,7 +38,6 @@ public class ImagePagerAdapter extends PagerAdapter {
 	private List<PictureData> pictures;
 	private OnClickListener onClickListener;
 	private DatabaseHelper dbHelper;
-	private PictureData firstPicture;
 	private boolean hasNewPhotos = false;
 	
 	public ImagePagerAdapter(final Activity activity, DatabaseHelper databaseHelper, OnClickListener onClickListener) {
@@ -70,7 +69,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 	
 	public ImagePagerAdapter(Activity activity, PictureData pictureData, DatabaseHelper databaseHelper, OnClickListener onClickListener) {
 		this(activity, databaseHelper, onClickListener);
-		firstPicture = pictureData;
+		fileHandler.rewind(pictureData);
 	}
 
 	@Override
@@ -93,7 +92,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wp1);
 			Log.d("Start - adapter", "Created view for startup screen");
 		} else {
-			final PictureData pictureData = firstPicture != null && position == 0 ? firstPicture : fileHandler.getNext(PictureData.TIME_COMPARATOR);
+			final PictureData pictureData = fileHandler.getNext();
 			if (!new File(pictureData.getPath()).exists()) {
 				fileHandler.delete(pictureData);
 			}
@@ -214,7 +213,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 			hasNewPhotos = false;
 			return;
 		}
-		PictureData pictureData = fileHandler.getNext(PictureData.TIME_COMPARATOR);
+		PictureData pictureData = fileHandler.getNext();
 		fileHandler.resetCurrentPicture();
 		if (!new File(pictureData.getPath()).exists()) {
 			fileHandler.delete(pictureData);
