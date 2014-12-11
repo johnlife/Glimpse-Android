@@ -80,7 +80,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 	}
 	
 	private PictureData getItem(int position) {
-		return position >= pictures.size() ? null : pictures.get(position); // fix me 
+		return pictures.get(position);
 	}
 	
 	@Override
