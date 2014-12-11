@@ -643,7 +643,7 @@ public class PhotoActivity extends Activity implements Constants {
 			}
 		});
 		pager.setAdapter(pagerAdapter);
-		pager.setOffscreenPageLimit(2);
+		pager.setOffscreenPageLimit(SCREEN_PAGE_LIMIT);
 		pager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
 			@Override
 			public void onPageSelected(int position) {	
@@ -728,7 +728,7 @@ public class PhotoActivity extends Activity implements Constants {
 			showPaneError(R.string.error_no_user_data);
 			return;
 		}
-		if (pagerAdapter.getCount() >= 2) rescheduleImageSwipe();
+		if (pagerAdapter.getCount() >= SCREEN_PAGE_LIMIT) rescheduleImageSwipe();
 	}
 	
 	private void recreateSeeNewPhoto() {

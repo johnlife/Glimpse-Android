@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import odesk.johnlife.glimpse.Constants;
 import odesk.johnlife.glimpse.R;
 import odesk.johnlife.glimpse.activity.PhotoActivity;
 import odesk.johnlife.glimpse.app.GlimpseApp;
@@ -136,6 +137,9 @@ public class ImagePagerAdapter extends PagerAdapter {
 					pictureData.setHeartState(true);
 					dbHelper.addOrUpdate(pictureData);
 					((ImageView) v).setImageResource(R.drawable.solid_heart);
+					if (pictures.size() <= Constants.SCREEN_PAGE_LIMIT+1) {
+						notifyDataSetChanged();
+					}
 					((PhotoActivity) context).showHint(context.getString(R.string.hint_like_is_clicked, pictureData.getSenderAddress()));
 					new AsyncTask<Object, String, Boolean>() {
 						@Override
