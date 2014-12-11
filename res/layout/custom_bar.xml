@@ -10,7 +10,6 @@
         android:background="@color/background_shade"
         android:divider="@drawable/layout_divider"
         android:dividerPadding="4dp"
-        android:gravity="right"
         android:orientation="horizontal"
         android:showDividers="middle" >
 
@@ -49,5 +48,11 @@
             android:drawableLeft="@android:drawable/ic_menu_preferences"
             android:text="@string/action_setting" >
         </TextView>
+        
+        <!-- to fill -->
+		<View
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"/>
     </LinearLayout>
 </odesk.johnlife.glimpse.ui.BlurLayout>
