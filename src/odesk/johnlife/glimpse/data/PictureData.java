@@ -1,12 +1,15 @@
 package odesk.johnlife.glimpse.data;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 public class PictureData {
+	
 	public static final String TABLE_NAME = "table_photo";
 	private static final String COLUMN_ID = "_id";
 	private static final String COLUMN_PICTURES = "pictures";
@@ -16,36 +19,6 @@ public class PictureData {
 	private static final String COLUMN_SENDER_ADDRESS = "sender_address";
 	private static final String COLUMN_HEART_STATE = "heart_state";
 //	private static final int[] calendarFields = {Calendar.DAY_OF_MONTH, Calendar.MONTH, Calendar.YEAR};
-
-	static String getCreationSQL() {
-		return "CREATE TABLE " + TABLE_NAME + " (" + 
-				COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-				COLUMN_PICTURES + " TEXT, " +
-				COLUMN_COUNT + " INTEGER, " +
-				COLUMN_LOAD_TIME + " INTEGER, " +
-				COLUMN_LAST_TIME + " INTEGER, " +
-				COLUMN_SENDER_ADDRESS + " TEXT, " +
-				COLUMN_HEART_STATE + " INTEGER);";
-	}
-
-	static String getSelectionSQL() {
-		return "SELECT * FROM "+TABLE_NAME;
-	}
-
-	public static final Comparator<PictureData> WEIGHT_COMPARATOR = new Comparator<PictureData>() {
-
-		@Override
-		public int compare(PictureData lhs, PictureData rhs) {
-			return (int) Math.signum(lhs.getWeight() - rhs.getWeight());
-		}
-	};
-	public static final Comparator<PictureData> TIME_COMPARATOR = new Comparator<PictureData>() {
-		@Override
-		public int compare(PictureData lhs, PictureData rhs) {
-			long dif = lhs.created - rhs.created;
-			return (int) (dif/Math.abs(dif));
-		}
-	};
 	
 	private long id = -1;
 	private String path;
@@ -75,7 +48,45 @@ public class PictureData {
 		heartState = c.getInt(6) == 1 ? true : false;
 	}
 
-	PictureData toDb(SQLiteDatabase db) {
+	/*package*/ static String getCreationSQL() {
+		return "CREATE TABLE " + TABLE_NAME + " (" + 
+				COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+				COLUMN_PICTURES + " TEXT, " +
+				COLUMN_COUNT + " INTEGER, " +
+				COLUMN_LOAD_TIME + " INTEGER, " +
+				COLUMN_LAST_TIME + " INTEGER, " +
+				COLUMN_SENDER_ADDRESS + " TEXT, " + 
+				COLUMN_HEART_STATE + " INTEGER);";
+	}
+
+	/*package*/ static String getSelectionSQL() {
+		return "SELECT * FROM " + TABLE_NAME;
+	}
+	
+	/*package*/ static List<String> getAddingColumnsSQL() {
+		List<String> queries = new ArrayList<String>(2);
+		String base = "ALTER TABLE " + TABLE_NAME + " ADD COLUMN ";
+		queries.add(base + COLUMN_SENDER_ADDRESS + " TEXT;");
+		queries.add(base + COLUMN_HEART_STATE + " INTEGER;");	
+		return queries;
+	}
+
+	public static final Comparator<PictureData> WEIGHT_COMPARATOR = new Comparator<PictureData>() {
+		@Override
+		public int compare(PictureData lhs, PictureData rhs) {
+			return (int) Math.signum(lhs.getWeight() - rhs.getWeight());
+		}
+	};
+	
+	public static final Comparator<PictureData> TIME_COMPARATOR = new Comparator<PictureData>() {
+		@Override
+		public int compare(PictureData lhs, PictureData rhs) {
+			long dif = lhs.created - rhs.created;
+			return (int) (dif/Math.abs(dif));
+		}
+	};
+
+	/*package*/ PictureData toDb(SQLiteDatabase db) {
 		ContentValues cv = new ContentValues();
 		cv.put(COLUMN_PICTURES, path);
 		cv.put(COLUMN_COUNT, count);

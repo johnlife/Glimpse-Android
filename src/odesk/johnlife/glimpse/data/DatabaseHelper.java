@@ -32,19 +32,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		db.execSQL("DROP TABLE IF EXISTS " + PictureData.TABLE_NAME);
-		onCreate(db);
+		if (oldVersion == 1 && newVersion == 2) {
+			List<String> queries = PictureData.getAddingColumnsSQL();
+			for (String query : queries) {
+				db.execSQL(query); 
+			}
+		}
 	}
 
 	public PictureData addOrUpdate(PictureData picture) {
 		return picture.toDb(getWritableDatabase());
 	}
 	
-	void delete(PictureData pictureData) {
+	/*package*/ void delete(PictureData pictureData) {
 		pictureData.delete(getWritableDatabase());
 	}
 
-	List<PictureData> getPictures() {
+	/*package*/ List<PictureData> getPictures() {
 		Cursor cur = getReadableDatabase().rawQuery(PictureData.getSelectionSQL(), null);
 		int size = cur.getCount();
 		List<PictureData> value = new ArrayList<PictureData>(size);
@@ -55,6 +59,5 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		cur.close();
 		return value;
 	}
-	
 	
 }
