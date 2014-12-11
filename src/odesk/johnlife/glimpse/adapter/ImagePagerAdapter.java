@@ -125,6 +125,8 @@ public class ImagePagerAdapter extends PagerAdapter {
 		ImageView like = new ImageView(context);
 		like.setImageResource(pictureData.getHeartState() ? R.drawable.solid_heart : R.drawable.heart);
 		like.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.BOTTOM|Gravity.RIGHT));
+		int heartPadding = (int) context.getResources().getDimension(R.dimen.heart_padding);
+		like.setPadding(0, 0, heartPadding, heartPadding);
 		if (!pictureData.getHeartState()) {
 			like.setOnClickListener(new OnClickListener() {
 				// only//only for first click

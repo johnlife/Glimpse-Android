@@ -12,7 +12,7 @@ public interface Constants {
 	public static final String EMAIL_SUBJECT = "Someone liked a photo you sent to Glimpse.";
 	public static final String EMAIL_TEXT = "In the body is some dummy text that we’ll fill in later + a thumbnail of the liked photo.";
 	
-	public static final int REFRESH_RATE = 120000;
+	public static final int REFRESH_RATE = 10000;
 	public static final int HINT_TIME = 3000;
 	public static final int RESCHEDULE_REFRESH_RATE = 8000;
 	public static final double IMAGE_SIZE_PERCENTAGE = 0.3;

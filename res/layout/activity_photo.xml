@@ -8,7 +8,7 @@
         android:id="@+id/pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-
+<!--
     <ProgressBar
         android:id="@+id/progress"
         style="?android:attr/progressBarStyleHorizontal"
@@ -18,15 +18,16 @@
         android:max="50"
         android:progress="0"
         android:progressDrawable="@drawable/progress"
-        android:visibility="invisible" />
-
+        android:visibility="gone" />
+ -->
+ 
     <ProgressBar
         android:id="@+id/progressLoading"
         style="?android:attr/progressBarStyleLarge"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_gravity="center_horizontal|center_vertical"
-        android:visibility="invisible" />
+        android:visibility="gone" />
 
     <odesk.johnlife.glimpse.ui.BlurLayout
         android:id="@+id/see_new_photos_layout"
@@ -56,7 +57,8 @@
         android:id="@+id/list_container"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="right" >
+        android:layout_gravity="right"
+        android:visibility="gone">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -84,65 +86,73 @@
 
     <!-- wifi connection dialog -->
 
-    <odesk.johnlife.glimpse.ui.BlurLayout
-        android:id="@+id/wifi_pane"
-        android:layout_width="300dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:visibility="invisible" >
+	<FrameLayout
+	    android:id="@+id/wifi_pane_frame"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
+	    android:visibility="gone" >
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/background_shade"
-            android:divider="@drawable/layout_divider"
-            android:dividerPadding="0dp"
-            android:orientation="vertical"
-            android:showDividers="middle" >
+	    <odesk.johnlife.glimpse.ui.BlurLayout
+	        android:id="@+id/wifi_pane"
+	        android:layout_width="300dp"
+	        android:layout_height="wrap_content"
+	        android:layout_gravity="center"
+	        android:visibility="gone" >
 
-            <TextView
-                android:id="@+id/title"
-                style="@style/title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+	        <LinearLayout
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content"
+	            android:background="@color/background_shade"
+	            android:divider="@drawable/layout_divider"
+	            android:dividerPadding="0dp"
+	            android:orientation="vertical"
+	            android:showDividers="middle" >
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:divider="@drawable/layout_divider"
-                android:dividerPadding="0dp"
-                android:orientation="horizontal"
-                android:padding="4dp"
-                android:showDividers="middle" >
+	            <TextView
+	                android:id="@+id/title"
+	                style="@style/title"
+	                android:layout_width="match_parent"
+	                android:layout_height="wrap_content" />
 
-                <EditText
-                    android:id="@+id/password"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="8dp"
-                    android:layout_weight="1"
-                    android:hint="@string/hint_password"
-                    android:inputType="textPassword"
-                    android:textSize="@dimen/text_size" />
+	            <LinearLayout
+	                android:layout_width="match_parent"
+	                android:layout_height="wrap_content"
+	                android:divider="@drawable/layout_divider"
+	                android:dividerPadding="0dp"
+	                android:orientation="horizontal"
+	                android:padding="4dp"
+	                android:showDividers="middle" >
 
-                <Button
-                    android:id="@+id/connect"
-                    style="@style/btnStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="8dp"
-                    android:text="@string/button_connect" />
-            </LinearLayout>
-            <CheckBox 
-                    android:id="@+id/is_password_vivsible"
-                    android:layout_width="wrap_content"
-                    android:visibility="visible"
-                    android:layout_height="wrap_content"
-                    android:textSize="@dimen/text_size"
-                    android:checked="false"
-                    android:text="@string/text_show_pass_checkbox"/>
-        </LinearLayout>
-    </odesk.johnlife.glimpse.ui.BlurLayout>
+	                <EditText
+	                    android:id="@+id/password"
+	                    android:layout_width="0dp"
+	                    android:layout_height="wrap_content"
+	                    android:layout_marginRight="8dp"
+	                    android:layout_weight="1"
+	                    android:hint="@string/hint_password"
+	                    android:inputType="textPassword"
+	                    android:textSize="@dimen/text_size" />
+
+	                <Button
+	                    android:id="@+id/connect"
+	                    style="@style/btnStyle"
+	                    android:layout_width="wrap_content"
+	                    android:layout_height="wrap_content"
+	                    android:layout_marginLeft="8dp"
+	                    android:text="@string/button_connect" />
+	            </LinearLayout>
+
+	            <CheckBox
+	                android:id="@+id/is_password_vivsible"
+	                android:layout_width="wrap_content"
+	                android:layout_height="wrap_content"
+	                android:checked="false"
+	                android:text="@string/text_show_pass_checkbox"
+	                android:textSize="@dimen/text_size"
+	                android:visibility="visible" />
+	        </LinearLayout>
+	    </odesk.johnlife.glimpse.ui.BlurLayout>
+	</FrameLayout>
 
     <!-- change email dialog -->
 

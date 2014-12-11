@@ -5,7 +5,7 @@
     <dimen name="text_size">24sp</dimen>
     <dimen name="action">24sp</dimen>
     <dimen name="error_pane">24sp</dimen>
-    <dimen name="heart_padding">32sp</dimen>
+    <dimen name="heart_padding">32dp</dimen>
     <dimen name="see_new_photos_pane">24sp</dimen>
     <dimen name="see_new_photos_layout_hight">48sp</dimen>
     
