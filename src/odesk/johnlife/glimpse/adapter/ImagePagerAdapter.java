@@ -105,7 +105,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 				frame.addView(poster);
 			}
 			if (pictureData.getSenderAddress() != null) {
-				frame.addView(createLikeButton(pictureData));
+				frame.addView(createLikeButton(pictureData, position));
 			}
 			if (pictures.size() > position) {
 				pictures.set(position, pictureData);
@@ -122,7 +122,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 		return frame;		
 	}
 
-	private ImageView createLikeButton(final PictureData pictureData) {
+	private ImageView createLikeButton(final PictureData pictureData, int position) {
 		ImageView like = new ImageView(context);
 		like.setImageResource(pictureData.getHeartState() ? R.drawable.solid_heart : R.drawable.heart);
 		like.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.BOTTOM|Gravity.RIGHT));
@@ -137,7 +137,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 					pictureData.setHeartState(true);
 					dbHelper.addOrUpdate(pictureData);
 					((ImageView) v).setImageResource(R.drawable.solid_heart);
-					if (pictures.size() <= Constants.SCREEN_PAGE_LIMIT+1) {
+					if (fileHandler.size() == 2) {
 						notifyDataSetChanged();
 					}
 					((PhotoActivity) context).showHint(context.getString(R.string.hint_like_is_clicked, pictureData.getSenderAddress()));
