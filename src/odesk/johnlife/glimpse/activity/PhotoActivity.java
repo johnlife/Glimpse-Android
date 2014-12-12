@@ -773,6 +773,9 @@ public class PhotoActivity extends Activity implements Constants {
 				} else {
 					actionBar.show();
 				}
+				if (gallery != null && gallery.getVisibility() == View.VISIBLE) {
+					gallery.setVisibility(View.GONE);
+				}
 			}
 		};
 	}
