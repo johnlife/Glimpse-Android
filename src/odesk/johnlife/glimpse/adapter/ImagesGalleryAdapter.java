@@ -17,8 +17,8 @@ public class ImagesGalleryAdapter extends BaseAdapter implements Constants {
 	private Context context;
 	private FileHandler fileHandler;
 
-	public ImagesGalleryAdapter(Context ñontext) {
-		this.context = ñontext;
+	public ImagesGalleryAdapter(Context context) {
+		this.context = context;
 		this.fileHandler = GlimpseApp.getFileHandler();
 	}
 

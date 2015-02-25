@@ -39,6 +39,5 @@ public class FreezeViewPager extends ViewPager {
 		}
 		return super.onInterceptTouchEvent(ev);
 	}
-	
-	
+
 }

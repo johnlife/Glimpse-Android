@@ -35,6 +35,24 @@ public class WifiConnector {
 			wifi.reconnect();
 			Log.d("wifi", "Connecting..");
 		}
+		
+		protected boolean isHexString(String s) {
+		    if (s == null) {
+		        return false;
+		    }
+		    int len = s.length();
+		    if (len != 10 && len != 26 && len != 58) {
+		        return false;
+		    }
+		    for (int i = 0; i < len; ++i) {
+		        char c = s.charAt(i);
+		        if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
+		            continue;
+		        }
+		        return false;
+		    }
+		    return true;
+		}
 	}
 	
 	private class WepConnector extends Connector {
@@ -42,16 +60,45 @@ public class WifiConnector {
 			super(net, password);
 		}
 
-		@Override
-		public WifiConfiguration configure(WifiConfiguration config) {
-			config.wepKeys[0] = addQuotes(password); 
-			config.wepTxKeyIndex = 0;
-			config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP40); 
-			config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP104);
+		public void connect() {
+			WifiConfiguration config;
+			config = new WifiConfiguration();
+			config.SSID = addQuotes(net.SSID);
+			config.status = WifiConfiguration.Status.DISABLED;
 			config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
-			config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+			config.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
+			config.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
+			config.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
+			config.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.SHARED);
+			config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+			config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
+			config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP40);
+			config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP104);  
+			config.priority = 40;
+			if (isHexString(password)) {
+				config.wepKeys[0] = password;
+//				config.wepKeys[1] = password;
+//				config.wepKeys[2] = password;
+//				config.wepKeys[3] = password;
+			} else {
+				config.wepKeys[0] = "\"".concat(password).concat("\"");
+//				config.wepKeys[1] = "\"".concat(password).concat("\"");
+//				config.wepKeys[2] = "\"".concat(password).concat("\"");
+//				config.wepKeys[3] = "\"".concat(password).concat("\"");
+			}
+			config.wepTxKeyIndex = 0;
+			
+			wifi.setWifiEnabled(true);
+		    int res = wifi.addNetwork(config);
+		    wifi.saveConfiguration();
+		    wifi.enableNetwork(res, true);
+		}
+		
+		@Override
+		public WifiConfiguration configure(WifiConfiguration config) {		
 			return config;
 		}
+		
 	}
 
 	private class WpaConnector extends Connector {
@@ -88,7 +135,6 @@ public class WifiConnector {
 			return null;
 		}
 	}
-
 	
 	private class OpenConnector extends Connector {
 		public OpenConnector(ScanResult net, String password) {
@@ -102,7 +148,6 @@ public class WifiConnector {
 		}
 	}
 
-	
 	private static final Pattern CAPABILITIES_SPLITTER = Pattern.compile("(?<=[\\]])");
 
 	private WifiManager wifi;
