@@ -243,10 +243,8 @@ public class PhotoActivity extends Activity implements Constants {
 				progressBar.setVisibility(View.GONE);
 				listPane.setVisibility(View.GONE);
 				String action = intent.getAction();
-				Log.d("aaa", "onReceive " + action); 
 				if (action.equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
 					if (isConnectedOrConnecting() || wifiDialogFrame.getVisibility() == View.VISIBLE) return;
-					Log.d("aaa", "listPane set visible");
 					listPane.setVisibility(View.VISIBLE);
 					TreeSet<ScanResult> sortedResults = new TreeSet<ScanResult>(
 							new Comparator<ScanResult>() {
@@ -315,7 +313,6 @@ public class PhotoActivity extends Activity implements Constants {
 					}
 				} else if (WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(action)) {
 					NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
-					Log.d("aaa", "NETWORK_STATE_CHANGED " + info.toString());
 					NetworkInfo.DetailedState details = info.getDetailedState();
 					boolean connected = info.getState() == NetworkInfo.State.CONNECTED;
 					boolean connecting = info.getState() == NetworkInfo.State.CONNECTING;
@@ -665,24 +662,24 @@ public class PhotoActivity extends Activity implements Constants {
 				}
 			}
 
-//			@Override
-//			public void onPageScrollStateChanged(int state) {
-//				if (state == 2 || state == 1) {
-//					seeNewPhoto.clearAnimation();
-//					if (getActionBar() != null && getActionBar().isShowing()) {
-//						getActionBar().hide();
-//					}
-//					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-//						seeNewPhoto.animate().cancel();
-//					}
-//					seeNewPhoto.setVisibility(View.GONE);
-//					pager.setAlpha(0);
-//				} else if (state == 0) {
-//					Animation animation = AnimationUtils.loadAnimation(PhotoActivity.this, R.anim.image_alpha);
-//					pager.startAnimation(animation);
-//					pager.setAlpha(1);
-//				}
-//			}
+			@Override
+			public void onPageScrollStateChanged(int state) {
+				if (state == 2 || state == 1) {
+					seeNewPhoto.clearAnimation();
+					if (getActionBar() != null && getActionBar().isShowing()) {
+						getActionBar().hide();
+					}
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+						seeNewPhoto.animate().cancel();
+					}
+					seeNewPhoto.setVisibility(View.GONE);
+					pager.setAlpha(0);
+				} else if (state == 0) {
+					Animation animation = AnimationUtils.loadAnimation(PhotoActivity.this, R.anim.image_alpha);
+					pager.startAnimation(animation);
+					pager.setAlpha(1);
+				}
+			}
 		});
 		gallery = (Gallery) findViewById(R.id.gallery1);
 		gallery.setOnItemClickListener(new OnItemClickListener() {

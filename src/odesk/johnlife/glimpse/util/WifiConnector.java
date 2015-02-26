@@ -73,18 +73,12 @@ public class WifiConnector {
 			config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
 			config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
 			config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP40);
-			config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP104);  
+			config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP104);
 			config.priority = 40;
 			if (isHexString(password)) {
 				config.wepKeys[0] = password;
-//				config.wepKeys[1] = password;
-//				config.wepKeys[2] = password;
-//				config.wepKeys[3] = password;
 			} else {
 				config.wepKeys[0] = "\"".concat(password).concat("\"");
-//				config.wepKeys[1] = "\"".concat(password).concat("\"");
-//				config.wepKeys[2] = "\"".concat(password).concat("\"");
-//				config.wepKeys[3] = "\"".concat(password).concat("\"");
 			}
 			config.wepTxKeyIndex = 0;
 			
