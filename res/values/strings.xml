@@ -45,5 +45,21 @@
 	
 	<string name="how_it_works_title">How It Works</string>
 	<string name="how_it_works_email">Your Glimpse email address is</string>
-	<string name="how_it_works_message">Very long text about how it works: as;dkj \nflas dfj;kl jas;dlkfj aslkdj f;akj \nsd;lkjfa;sl df;a jsd;lkfj a;ksl\n djfajs d;l fjkas;ldjfasdfasdfk  alsdj flaksjd flasj dlfkj ad \n dsaf asd fas df</string>	
+	<string name="how_it_works_message">Very long text about how it works</string>
+	
+	  <string-array name="animation_effects">
+        <item>Standard</item>
+        <item>Tablet</item>
+        <item>CubeIn</item>
+        <item>CubeOut</item>
+        <item>FlipVertical</item>
+        <item>FlipHorizontal</item>
+        <item>Stack</item>
+        <item>ZoomIn</item>
+        <item>ZoomOut</item>
+        <item>RotateUp</item>
+        <item>RotateDown</item>
+        <item>Accordion</item>
+    </string-array>
+    	
 </resources>

@@ -83,9 +83,9 @@ public class WifiConnector {
 			config.wepTxKeyIndex = 0;
 			
 			wifi.setWifiEnabled(true);
-		    int res = wifi.addNetwork(config);
+			connectionResult = wifi.addNetwork(config);
 		    wifi.saveConfiguration();
-		    wifi.enableNetwork(res, true);
+		    wifi.enableNetwork(connectionResult, true);
 		}
 		
 		@Override
@@ -120,6 +120,7 @@ public class WifiConnector {
 			config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
 			config.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
 			connectionResult = wifi.addNetwork(config);
+			int res = connectionResult;
 	        wifi.enableNetwork(connectionResult, true);
 	        wifi.setWifiEnabled(true);
 		}

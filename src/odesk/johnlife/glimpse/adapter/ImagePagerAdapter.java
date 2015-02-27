@@ -99,12 +99,12 @@ public class ImagePagerAdapter extends PagerAdapter {
 				fileHandler.delete(pictureData);
 			}
 			pictureData.viewCreated();
-			if (pictureData.createdToday()) {
-				ImageView poster = new ImageView(context);
-				poster.setImageResource(R.drawable.new_pane);
-				poster.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.TOP|Gravity.RIGHT));
-				frame.addView(poster);
-			}
+//			if (pictureData.createdToday()) {
+//				ImageView  poster = new ImageView(context);
+//				poster.setImageResource(R.drawable.new_pane);
+//				poster.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.TOP|Gravity.RIGHT));
+//				frame.addView(poster);
+//			}
 			if (pictureData.getSenderAddress() != null) {
 				frame.addView(createLikeButton(pictureData, position));
 			}
