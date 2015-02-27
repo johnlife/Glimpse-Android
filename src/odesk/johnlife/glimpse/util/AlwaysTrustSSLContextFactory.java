@@ -100,4 +100,9 @@ public class AlwaysTrustSSLContextFactory extends SSLSocketFactory {
         return factory.getSupportedCipherSuites();
     }
 
+	@Override
+	public int hashCode() {
+		return factory.hashCode();
+	}
+
 }

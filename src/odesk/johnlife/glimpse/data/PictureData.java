@@ -116,6 +116,11 @@ public class PictureData {
 		return o instanceof PictureData && (id == ((PictureData)o).id || path.equals(((PictureData)o).path));
 	}
 
+	@Override
+	public int hashCode() {
+		return (int) (path.hashCode() ^ id << 4);
+	}
+
 	private synchronized long getWeight() {
 		long elapsed = System.currentTimeMillis() - lastSeen;
 		if (elapsed < 25000) return Integer.MAX_VALUE-elapsed;
