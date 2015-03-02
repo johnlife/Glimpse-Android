@@ -81,7 +81,6 @@ import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 
@@ -257,7 +256,14 @@ public class PhotoActivity extends Activity implements Constants {
 						// do something
 					} else if (supplicantState == (SupplicantState.DISCONNECTED)) {
 						Log.i("aaa", "SUPPLICANTSTATE ---> Disconnected");
-						// do something
+						resetPass++;
+						if (resetPass >= 3) {
+							Editor editor = preferences.edit();
+							editor.putString(PREF_WIFI_PASSWORD, "");
+							editor.apply();
+							resetPass = 0;
+							showHint(getResources().getString(R.string.hint_failed_to_connecn));
+						}
 					} else if (supplicantState == SupplicantState.DORMANT) {
 						Log.i("aaa", "SUPPLICANTSTATE ---> DORMANT");
 //						if (!isConnected()) {
@@ -315,16 +321,16 @@ public class PhotoActivity extends Activity implements Constants {
 							} else {
 								String BSSID = preferences.getString(PREF_WIFI_BSSID, "");
 								String pass = preferences.getString(PREF_WIFI_PASSWORD, "");
-//								if (activeNetwork.BSSID.equals(BSSID) && !pass.equals("")) {
-//									connectToNetwork(pass);
-//								} else {
+								if (activeNetwork.BSSID.equals(BSSID) && !pass.equals("")) {
+									connectToNetwork(pass);
+								} else {
 									wifiDialogFrame.setVisibility(View.VISIBLE);
 									wifiDialog.setVisibility(View.VISIBLE);
 									password.setText("");
 									password.postDelayed(focusRunnable, 150);
 									password.requestFocus();
 									networkName.setText(activeNetwork.SSID);
-//								}
+								}
 							}
 							if (!isConnectedOrConnecting() && wifiDialogFrame.getVisibility() != View.VISIBLE
 									&& progressBar.getVisibility() == View.GONE) {
@@ -372,7 +378,7 @@ public class PhotoActivity extends Activity implements Constants {
 									wifi.setWifiEnabled(true);
 									Log.d("aaa", "setWifiEnabled");
 								}
-							}, 2000);
+							}, 5000);
 						}
 						scanWifi();
 					} else if (connected && details == NetworkInfo.DetailedState.CONNECTED) {
@@ -393,6 +399,7 @@ public class PhotoActivity extends Activity implements Constants {
 							}
 						};
 						redirectionTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+						resetPass = 0;
 					} else if (!visible && !connected && !connecting) {
 						getActionBar().hide();
 						if (details != NetworkInfo.DetailedState.SCANNING) {
@@ -400,24 +407,7 @@ public class PhotoActivity extends Activity implements Constants {
 						}
 					}
 				
-				} else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
-					NetworkInfo networkInfo = intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
-					Log.d("aaa", "CONNECTIVITY_ACTION: " + intent.getAction());
-					if (networkInfo.getType() == ConnectivityManager.TYPE_WIFI && !networkInfo.isConnected()) {
-						// Wifi is disconnected
-						Log.d("aaa", "CONNECTIVITY_ACTION: " + String.valueOf(networkInfo));
-					}
-				} else if (action.equals(WifiManager.EXTRA_SUPPLICANT_ERROR)) {
-					NetworkInfo networkInfo = intent.getParcelableExtra(WifiManager.EXTRA_SUPPLICANT_ERROR);
-					Log.d("aaa", "EXTRA_SUPPLICANT_ERROR: " + intent.getAction());
-				} else if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
-					//NetworkInfo networkInfo = intent.getAction();
-					Log.d("aaa", "WIFI_STATE_CHANGED_ACTION: " + intent.getAction());
-				} else if (action.equals(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION)) {
-					NetworkInfo networkInfo = intent.getParcelableExtra(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
-					Log.d("aaa", "SUPPLICANT_CONNECTION_CHANGE_ACTION: " + intent.getAction());
-				} 
-				
+				}
 			}
 		};
 		
@@ -648,6 +638,7 @@ public class PhotoActivity extends Activity implements Constants {
 	private boolean isFreeze = false;
 	private boolean galleryHideSeeNewPhoto;
 	private boolean isScanRegisted;
+	private int resetPass = 0;
 	
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
