@@ -81,11 +81,10 @@ public class WifiConnector {
 				config.wepKeys[0] = "\"".concat(password).concat("\"");
 			}
 			config.wepTxKeyIndex = 0;
-			
 			wifi.setWifiEnabled(true);
 			connectionResult = wifi.addNetwork(config);
-		    wifi.saveConfiguration();
-		    wifi.enableNetwork(connectionResult, true);
+			wifi.saveConfiguration();
+			wifi.enableNetwork(connectionResult, true);
 		}
 		
 		@Override
@@ -120,7 +119,6 @@ public class WifiConnector {
 			config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
 			config.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
 			connectionResult = wifi.addNetwork(config);
-			int res = connectionResult;
 	        wifi.enableNetwork(connectionResult, true);
 	        wifi.setWifiEnabled(true);
 		}
@@ -185,8 +183,13 @@ public class WifiConnector {
 	public void forgetCurrent() {
 		WifiInfo connection = wifi.getConnectionInfo();
 		if (null == connection) return; 
- 		wifi.disconnect();
-		wifi.removeNetwork(connection.getNetworkId());
-		wifi.startScan();
+		wifi.setWifiEnabled(false);
+ 		//wifi.disconnect();
+ 		
+//		wifi.disableNetwork(connection.getNetworkId());
+//		wifi.removeNetwork(connection.getNetworkId());
+//		wifi.setWifiEnabled(false);
+ 		//wifi.removeNetwork(connection.getNetworkId());
+		//wifi.startScan();
 	}
 }

@@ -11,6 +11,7 @@
 	<string name="hint_new_email">new_email</string>
 	<string name="hint_like_is_clicked">We’ve told %1$s that you liked this photo!</string>
 	<string name="hint_success">You successfully connected to wi-fi network.</string>
+	<string name="hint_failed_to_connecn">Connection to wi-fi network failed.</string>
 	<string name="hint_wifi_error">Sorry, we were not able to connect. Try again or email support@glimpseframe.com for 24/7 support.seframe.com</string>
 	<string name="hint_wifi_disconnected">Wifi is disconnected. Try again or choose other network</string>
 	
@@ -61,5 +62,5 @@
         <item>RotateDown</item>
         <item>Accordion</item>
     </string-array>
-    	
+
 </resources>
