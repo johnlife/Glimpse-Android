@@ -9,7 +9,6 @@ import java.net.URL;
 import java.util.Locale;
 
 import odesk.johnlife.glimpse.Constants;
-
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -21,37 +20,35 @@ public class WifiRedirectionTask extends AsyncTask<Object, Object, Boolean> impl
 		HttpURLConnection con;
 		try {
 			con = (HttpURLConnection) (new URL(WIFI_REDIRECT_URL).openConnection());
-			con.setInstanceFollowRedirects(false);
+			con.setInstanceFollowRedirects(true);
 			con.setUseCaches(false);
-			con.setRequestMethod("GET");
 			con.connect();
 			String location;
 			int status = con.getResponseCode();
 			if (status != HttpURLConnection.HTTP_OK) {
-				result = false;
 				location = con.getHeaderField("Location");
 				if (location != null && location.equals(WIFI_REDIRECT_URL)) {
 					result = true;
-				}                 
+				}
 				Log.d("aaa", status + "");				
 			} else {
 				location = con.getURL().toString();
-				BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-				String inputLine;
-				StringBuffer html = new StringBuffer();
-				while ((inputLine = in.readLine()) != null) {
-					html.append(inputLine);
+				Log.d("aaa", "URL: " + location);
+				result = location.contains(GOOGLE);
+				if (result) {
+					BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+					String inputLine;
+					StringBuffer html = new StringBuffer();
+					while ((inputLine = in.readLine()) != null) {
+						html.append(inputLine);
+					}
+					in.close();
+					String htmlString = html.toString();
+					result = !htmlString.toUpperCase(Locale.ENGLISH).contains(REFRESH_STRING);
+					Log.d("aaa", "URL Content... \n" + html.toString());
+					Log.d("aaa", "Done");
+					Log.d("aaa", "redirected url: " + con.getURL().toString());
 				}
-				in.close();
-				String htmlString = html.toString();
-				if (htmlString.toUpperCase(Locale.ENGLISH).contains("META HTTP-EQUIV=\"REFRESH\"") ) {
-					result = false;
-				} else {
-					result = true;
-				}
-				Log.d("aaa", "URL Content... \n" + html.toString());
-				Log.d("aaa", "Done");
-				Log.d("aaa", "redirected url: " + con.getURL().toString());
 			}
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
@@ -64,5 +61,4 @@ public class WifiRedirectionTask extends AsyncTask<Object, Object, Boolean> impl
 		}
 		return result;
 	}
-
 }

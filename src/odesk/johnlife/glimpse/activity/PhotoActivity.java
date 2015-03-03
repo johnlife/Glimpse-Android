@@ -29,6 +29,7 @@ import odesk.johnlife.glimpse.util.WifiConnector;
 import odesk.johnlife.glimpse.util.WifiRedirectionTask;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -90,6 +91,8 @@ import com.crashlytics.android.Crashlytics;
  * 
  * @see SystemUiHider
  */
+@SuppressLint({ "ClickableViewAccessibility", "InflateParams" })
+@SuppressWarnings("deprecation")
 public class PhotoActivity extends Activity implements Constants {
 
 	private class NewEmailWizard {
@@ -110,6 +113,7 @@ public class PhotoActivity extends Activity implements Constants {
 			}
 		};
 		
+		@SuppressLint("ClickableViewAccessibility")
 		public NewEmailWizard() {
 			frame = findViewById(R.id.new_email_frame);
 			dialog = findViewById(R.id.new_email_dialog);
@@ -165,6 +169,7 @@ public class PhotoActivity extends Activity implements Constants {
 			});
 		}
 
+		@SuppressWarnings("unused")
 		public void show() {
 			frame.setVisibility(View.VISIBLE);
 			dialog.setVisibility(View.VISIBLE);
@@ -248,8 +253,7 @@ public class PhotoActivity extends Activity implements Constants {
 				if (action.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)) {
 					boolean connected = intent.getBooleanExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED, false);
 					Log.d("aaa", "SUPPLICANT_STATE_CHANGED_ACTION: " + connected);
-					SupplicantState supplicantState = (SupplicantState) intent
-							.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
+					SupplicantState supplicantState = (SupplicantState) intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
 					Log.i("aaa", supplicantState.name());
 					if (supplicantState == (SupplicantState.COMPLETED)) {
 						Log.i("aaa", "SUPPLICANTSTATE ---> Connected");
@@ -264,11 +268,6 @@ public class PhotoActivity extends Activity implements Constants {
 							resetPass = 0;
 							showHint(getResources().getString(R.string.hint_failed_to_connecn));
 						}
-					} else if (supplicantState == SupplicantState.DORMANT) {
-						Log.i("aaa", "SUPPLICANTSTATE ---> DORMANT");
-//						if (!isConnected()) {
-//							scanWifi();
-//						}
 					}
 				}
 			}
@@ -350,7 +349,7 @@ public class PhotoActivity extends Activity implements Constants {
 						isAnimationNeeded = false;
 					}
 				} else if (WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(action)) {
-					NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+					final NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
 					Log.d("aaa", "NETWORK_STATE_CHANGED " + info.toString());
 					NetworkInfo.DetailedState details = info.getDetailedState();
 					boolean connected = info.getState() == NetworkInfo.State.CONNECTED;
@@ -364,23 +363,27 @@ public class PhotoActivity extends Activity implements Constants {
 				//		hideErrorPane();
 						registerScanReciver();
 						getActionBar().hide();
-						if (wifi.isWifiEnabled()) {
-							if (info.getExtraInfo() != null && info.getExtraInfo().equals("<unknown ssid>")) {
-								new WifiConnector(context).forgetCurrent();
-							}
-							if (isDisconnectionHintNeeded) {
-								showHint(getResources().getString(R.string.hint_wifi_disconnected));
-							}
-						} else {
-							wifiDialog.postDelayed(new Runnable() {
-								@Override
-								public void run() {
+						wifiDialog.postDelayed(new Runnable() {
+							@Override
+							public void run() {
+								if (wifi.isWifiEnabled()) {
+									Log.d("aaa", "wifi is enabled");
+									if (info.getExtraInfo() != null && info.getExtraInfo().equals("<unknown ssid>")) {
+										new WifiConnector(context).forgetCurrent();
+									}
+									if (isDisconnectionHintNeeded) {
+										showHint(getResources().getString(R.string.hint_wifi_disconnected));
+									}
+								} else {
+									Log.d("aaa", "setWifiEnabled in post delayed");
 									wifi.setWifiEnabled(true);
 									Log.d("aaa", "setWifiEnabled");
 								}
-							}, 5000);
-						}
-						scanWifi();
+								scanWifi();
+							}
+
+						}, 1000);
+						
 					} else if (connected && details == NetworkInfo.DetailedState.CONNECTED) {
 						WifiRedirectionTask redirectionTask = new WifiRedirectionTask() {
 
@@ -625,6 +628,7 @@ public class PhotoActivity extends Activity implements Constants {
 	private Timer mailTimer = new Timer();
 	private View deleteDialog;
 	private FrameLayout deleteFrame;
+	@SuppressWarnings("unused")
 	private NewEmailWizard newEmail;
 	private HowItWorks howItWorks;
 	private View seeNewPhoto;
@@ -1010,7 +1014,7 @@ public class PhotoActivity extends Activity implements Constants {
 //		popupMenu.setOnDismissListener(new PopupMenu.OnDismissListener() {
 //			@Override
 //			public void onDismiss(PopupMenu menu) {
-//				// TODO Auto-generated method stub
+//
 //			}
 //		});
 //		popupMenu.show();
