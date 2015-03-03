@@ -182,7 +182,8 @@ public class WifiConnector {
 
 	public void forgetCurrent() {
 		WifiInfo connection = wifi.getConnectionInfo();
-		if (null == connection) return; 
+		if (null == connection) return;
+		wifi.removeNetwork(connection.getNetworkId());
 		wifi.setWifiEnabled(false);
  		//wifi.disconnect();
  		
