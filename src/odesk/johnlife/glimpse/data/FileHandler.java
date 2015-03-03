@@ -166,6 +166,15 @@ public class FileHandler {
 		return value;
 	}
 	
+	public boolean haveNeverSeen() {
+		for (PictureData data : files) {
+			if (data.isNeverSeen()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public synchronized void cleanup(long size) {
 		locked = true;
 		while (GlimpseApp.getPicturesDir().getUsableSpace() < size) {

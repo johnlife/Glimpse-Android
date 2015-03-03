@@ -144,6 +144,10 @@ public class PictureData {
 		lastSeen = System.currentTimeMillis();
 		weight = Integer.MAX_VALUE;
 	}
+	
+	public boolean isNeverSeen() {
+		return lastSeen == -1;
+	}
 
 	@Override
 	public String toString() {

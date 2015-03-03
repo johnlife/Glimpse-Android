@@ -224,8 +224,11 @@ public class ImagePagerAdapter extends PagerAdapter {
 		if (!new File(pictureData.getPath()).exists()) {
 			fileHandler.delete(pictureData);
 		}
-		if (pictureData.createdToday()) {
+		if (fileHandler.haveNeverSeen()) {
 			hasNewPhotos = true;
 		}
+//		if (pictureData.createdToday()) {
+//			hasNewPhotos = true;
+//		}
 	}
 }
