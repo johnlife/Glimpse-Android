@@ -1,0 +1,206 @@
+package odesk.johnlife.glimpse.util;
+
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.ScanResult;
+import android.net.wifi.SupplicantState;
+import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
+import android.preference.PreferenceManager;
+import android.util.Log;
+
+import java.util.List;
+
+import odesk.johnlife.glimpse.Constants;
+import odesk.johnlife.glimpse.activity.PhotoActivity;
+
+public class WifiReceiver implements Constants {
+
+    public enum WifiError {NEED_PASSWORD, CONNECT_ERROR, UNKNOWN_ERROR }
+
+    public interface OnWifiConnectionListener {
+        void connecting();
+        void connected();
+        void disconnected(WifiError error);
+        void onScanning();
+        void onScansResultReceive(List<ScanResult> scanResults);
+        void onWifiReset();
+    }
+
+    public static WifiReceiver getInstance(PhotoActivity activity, OnWifiConnectionListener listener) {
+        if (instance == null) {
+            instance = new WifiReceiver(activity, listener);
+        } else {
+            instance.updateFields(activity, listener);
+        }
+        return instance;
+    }
+
+    private WifiReceiver(PhotoActivity activity, OnWifiConnectionListener listener) {
+        updateFields(activity, listener);
+    }
+
+    private void updateFields(PhotoActivity activity, OnWifiConnectionListener listener) {
+        this.activity = activity;
+        this.prefs = PreferenceManager.getDefaultSharedPreferences(activity);
+        this.listener = listener;
+        wifi = (WifiManager) activity.getSystemService(Context.WIFI_SERVICE);
+        if (!isWifiEnabled()) {
+            wifi.setWifiEnabled(true);
+            scanWifi();
+        }
+    }
+
+    private static WifiReceiver instance;
+    private WifiManager wifi;
+    private PhotoActivity activity;
+    private OnWifiConnectionListener listener;
+    private SharedPreferences prefs;
+    private int resetPass = 0;
+
+    private final BroadcastReceiver supplicantStateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            Log.d("aaa", "onReceive " + action);
+            if (action.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)) {
+                Log.d("aaa", "SUPPLICANT_STATE_CHANGED_ACTION: " + intent.getBooleanExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED, false));
+                SupplicantState supplicantState = intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
+                Log.i("aaa", supplicantState.name());
+                if (supplicantState == SupplicantState.COMPLETED) {
+                    Log.i("aaa", "SUPPLICANTSTATE ---> Connected");
+                    // do something
+                } else if (supplicantState == SupplicantState.DISCONNECTED) {
+                    Log.i("aaa", "SUPPLICANTSTATE ---> Disconnected");
+                    resetPass++;
+                    if (resetPass >= 3) {
+                        prefs.edit().putString(PREF_WIFI_PASSWORD, "").apply();
+                        resetPass = 0;
+                        listener.disconnected(WifiError.CONNECT_ERROR);
+                    }
+                }
+            }
+        }
+    };
+
+    private final BroadcastReceiver wifiScanReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context c, Intent intent) {
+            String action = intent.getAction();
+            Log.d("aaa", "onReceive " + action);
+            if (WifiManager.SCAN_RESULTS_AVAILABLE_ACTION.equals(action)) {
+                listener.onScansResultReceive(wifi.getScanResults());
+            } else if (WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(action)) {
+                final NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+                Log.d("aaa", "NETWORK_STATE_CHANGED " + info.toString());
+                NetworkInfo.DetailedState details = info.getDetailedState();
+                boolean connected = info.getState() == NetworkInfo.State.CONNECTED;
+                boolean connecting = info.getState() == NetworkInfo.State.CONNECTING;
+                boolean isSuspended = info.getState() == NetworkInfo.State.SUSPENDED;
+                boolean unknown = info.getState() == NetworkInfo.State.UNKNOWN;
+                if (isSuspended || unknown) {
+                    listener.disconnected(WifiError.UNKNOWN_ERROR);
+                } else if (details == NetworkInfo.DetailedState.DISCONNECTED) {
+                    if (info.getExtraInfo() != null && info.getExtraInfo().equals("<unknown ssid>")) {
+                        new WifiConnector(activity).forgetCurrent();
+                    }
+                    listener.disconnected(WifiError.CONNECT_ERROR);
+                } else if (connected && details == NetworkInfo.DetailedState.CONNECTED) {
+                    WifiRedirectionTask redirectionTask = new WifiRedirectionTask() {
+                        @Override
+                        protected void onPostExecute(Boolean result) {
+                            if (result) {
+                                listener.connected();
+                            } else {
+                                listener.disconnected(WifiError.CONNECT_ERROR);
+                                listener.onWifiReset();
+                            }
+                        }
+                    };
+                    redirectionTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    resetPass = 0;
+                } else if (!connected && !connecting) {
+                    listener.onScanning();
+                    if (details != NetworkInfo.DetailedState.SCANNING) {
+                        scanWifi();
+                    }
+                }
+
+            }
+        }
+    };
+
+    public void registerWifiBroadcast(boolean isNeed) {
+        if (isNeed) {
+            activity.registerReceiver(wifiScanReceiver, new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
+            activity.registerReceiver(supplicantStateReceiver, new IntentFilter(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION));
+        } else {
+            activity.unregisterReceiver(wifiScanReceiver);
+            activity.unregisterReceiver(supplicantStateReceiver);
+        }
+    }
+
+    public void connectToNetwork(ScanResult activeNetwork) {
+        String pass = prefs.getString(PREF_WIFI_PASSWORD, "");
+        connectToNetwork(activeNetwork, activeNetwork.BSSID.equals(prefs.getString(PREF_WIFI_BSSID, "")) && !pass.isEmpty() ? pass : null);
+    }
+
+    public void connectToNetwork(ScanResult activeNetwork, String pass) {
+        listener.connecting();
+        String cap = activeNetwork.capabilities;
+        if (cap.isEmpty() || cap.startsWith("[ESS")) {
+            new WifiConnector(activity).connectTo(activeNetwork);
+        } else{
+            if (pass == null) {
+                listener.disconnected(WifiError.NEED_PASSWORD);
+            } else {
+                WifiConnector wifiConnector = new WifiConnector(activity);
+                new WifiConnector(activity).connectTo(activeNetwork, pass);
+                if (wifiConnector.getConnectionResult() != -1) {
+                    prefs.edit().putString(PREF_WIFI_BSSID, activeNetwork.BSSID)
+                            .putString(PREF_WIFI_PASSWORD, pass).apply();
+                } else {
+                    listener.disconnected(WifiError.UNKNOWN_ERROR);
+                    scanWifi();
+                }
+            }
+        }
+    }
+
+    public void scanWifi() {
+        wifi.startScan();
+    }
+
+    public boolean isWifiEnabled() {
+        return wifi.isWifiEnabled();
+    }
+
+    public void setWifiEnabled() {
+        wifi.setWifiEnabled(true);
+    }
+
+    public boolean isConnectedOrConnecting() {
+        return getNetworkInfo().isConnectedOrConnecting();
+    }
+
+    public boolean isConnected() {
+        return getNetworkInfo().isConnected();
+    }
+
+    public void resetWifi() {
+        if (isConnected()) {
+            new WifiConnector(activity).forgetCurrent();
+        }
+    }
+
+    private NetworkInfo getNetworkInfo() {
+        ConnectivityManager connectionManager = (ConnectivityManager) activity.getSystemService(Context.CONNECTIVITY_SERVICE);
+        return connectionManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+    }
+
+}
