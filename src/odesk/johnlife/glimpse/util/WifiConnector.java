@@ -29,11 +29,9 @@ public class WifiConnector {
 			config.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
 			config.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.SHARED);
 			connectionResult = wifi.addNetwork(config);
-			Log.d("wifi", "Network added");
 			wifi.disconnect();
 			wifi.enableNetwork(connectionResult, false);
 			wifi.reconnect();
-			Log.d("wifi", "Connecting..");
 		}
 		
 		protected boolean isHexString(String s) {
@@ -61,8 +59,7 @@ public class WifiConnector {
 		}
 
 		public void connect() {
-			WifiConfiguration config;
-			config = new WifiConfiguration();
+			WifiConfiguration config = new WifiConfiguration();
 			config.SSID = addQuotes(net.SSID);
 			config.status = WifiConfiguration.Status.DISABLED;
 			config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
@@ -185,12 +182,5 @@ public class WifiConnector {
 		if (null == connection) return;
 		wifi.removeNetwork(connection.getNetworkId());
 		wifi.setWifiEnabled(false);
- 		//wifi.disconnect();
- 		
-//		wifi.disableNetwork(connection.getNetworkId());
-//		wifi.removeNetwork(connection.getNetworkId());
-//		wifi.setWifiEnabled(false);
- 		//wifi.removeNetwork(connection.getNetworkId());
-		//wifi.startScan();
 	}
 }
