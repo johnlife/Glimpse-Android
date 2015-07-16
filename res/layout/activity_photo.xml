@@ -8,18 +8,6 @@
         android:id="@+id/pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-<!--
-    <ProgressBar
-        android:id="@+id/progress"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="350dp"
-        android:layout_height="350dp"
-        android:indeterminate="false"
-        android:max="50"
-        android:progress="0"
-        android:progressDrawable="@drawable/progress"
-        android:visibility="gone" />
- -->
  
     <ProgressBar
         android:id="@+id/progressLoading"
@@ -465,15 +453,6 @@
             android:textColor="@color/text"
             android:textSize="@dimen/error_pane" />
     </odesk.johnlife.glimpse.ui.BlurLayout>
-    <!--
-        TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="fastupdate. replace me"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textSize="92sp" /
-    -->
 
 	<Gallery
         android:id="@+id/gallery1"
