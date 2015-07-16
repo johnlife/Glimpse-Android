@@ -397,15 +397,11 @@ public class PhotoActivity extends Activity implements Constants {
 					wifiDialog.postDelayed(new Runnable() {
 						@Override
 						public void run() {
-							if (wifi.isWifiEnabled() && !wifi.isConnectedOrConnecting()) {
+							if (!wifi.isConnectedOrConnecting()) {
 								Log.d("aaa", "wifi is enabled");
 								if (isDisconnectionHintNeeded) showHint(getResources().getString(R.string.hint_wifi_disconnected));
-							} else {
-								Log.d("aaa", "setWifiEnabled in post delayed");
-								wifi.setWifiEnabled();
-								Log.d("aaa", "setWifiEnabled");
+								scanWifi();
 							}
-							scanWifi();
 						}
 					}, 1000);
 					break;
@@ -458,15 +454,6 @@ public class PhotoActivity extends Activity implements Constants {
 				listPane.animate().translationX(0).alpha(1).start();
 				isAnimationNeeded = false;
 			}
-		}
-
-		@Override
-		public void onWifiReset() {
-				isDisconnectionHintNeeded = false;
-				hideErrorPane();
-				progressBar.setVisibility(View.VISIBLE);
-				registerWifiBroadcast(true);
-				//	registerReceiver(wifiConnectionHandler.getReceiver(), new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 		}
 	}
 

@@ -12,7 +12,6 @@ import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import java.util.List;
 
@@ -29,7 +28,6 @@ public class WifiReceiver implements Constants {
         void disconnected(WifiError error);
         void onScanning();
         void onScansResultReceive(List<ScanResult> scanResults);
-        void onWifiReset();
     }
 
     public static WifiReceiver getInstance(PhotoActivity activity, OnWifiConnectionListener listener) {
@@ -43,17 +41,17 @@ public class WifiReceiver implements Constants {
 
     private WifiReceiver(PhotoActivity activity, OnWifiConnectionListener listener) {
         updateFields(activity, listener);
+        this.prefs = PreferenceManager.getDefaultSharedPreferences(activity);
+        wifi = (WifiManager) activity.getSystemService(Context.WIFI_SERVICE);
+        if (!wifi.isWifiEnabled()) {
+            wifi.setWifiEnabled(true);
+            scanWifi();
+        }
     }
 
     private void updateFields(PhotoActivity activity, OnWifiConnectionListener listener) {
         this.activity = activity;
-        this.prefs = PreferenceManager.getDefaultSharedPreferences(activity);
         this.listener = listener;
-        wifi = (WifiManager) activity.getSystemService(Context.WIFI_SERVICE);
-        if (!isWifiEnabled()) {
-            wifi.setWifiEnabled(true);
-            scanWifi();
-        }
     }
 
     private static WifiReceiver instance;
@@ -67,18 +65,13 @@ public class WifiReceiver implements Constants {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            Log.d("aaa", "onReceive " + action);
             if (action.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)) {
-                Log.d("aaa", "SUPPLICANT_STATE_CHANGED_ACTION: " + intent.getBooleanExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED, false));
                 SupplicantState supplicantState = intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
-                Log.i("aaa", supplicantState.name());
                 if (supplicantState == SupplicantState.COMPLETED) {
-                    Log.i("aaa", "SUPPLICANTSTATE ---> Connected");
                     // do something
                 } else if (supplicantState == SupplicantState.DISCONNECTED) {
-                    Log.i("aaa", "SUPPLICANTSTATE ---> Disconnected");
                     resetPass++;
-                    if (resetPass >= 3) {
+                    if (resetPass >= WIFI_TRY_COUNT) {
                         prefs.edit().putString(PREF_WIFI_PASSWORD, "").apply();
                         resetPass = 0;
                         listener.disconnected(WifiError.CONNECT_ERROR);
@@ -92,12 +85,10 @@ public class WifiReceiver implements Constants {
         @Override
         public void onReceive(Context c, Intent intent) {
             String action = intent.getAction();
-            Log.d("aaa", "onReceive " + action);
             if (WifiManager.SCAN_RESULTS_AVAILABLE_ACTION.equals(action)) {
                 listener.onScansResultReceive(wifi.getScanResults());
             } else if (WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(action)) {
                 final NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
-                Log.d("aaa", "NETWORK_STATE_CHANGED " + info.toString());
                 NetworkInfo.DetailedState details = info.getDetailedState();
                 boolean connected = info.getState() == NetworkInfo.State.CONNECTED;
                 boolean connecting = info.getState() == NetworkInfo.State.CONNECTING;
@@ -118,7 +109,6 @@ public class WifiReceiver implements Constants {
                                 listener.connected();
                             } else {
                                 listener.disconnected(WifiError.CONNECT_ERROR);
-                                listener.onWifiReset();
                             }
                         }
                     };
@@ -174,14 +164,6 @@ public class WifiReceiver implements Constants {
 
     public void scanWifi() {
         wifi.startScan();
-    }
-
-    public boolean isWifiEnabled() {
-        return wifi.isWifiEnabled();
-    }
-
-    public void setWifiEnabled() {
-        wifi.setWifiEnabled(true);
     }
 
     public boolean isConnectedOrConnecting() {
