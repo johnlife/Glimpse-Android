@@ -22,6 +22,7 @@ import odesk.johnlife.glimpse.data.PictureData;
 import odesk.johnlife.glimpse.ui.BlurActionBar;
 import odesk.johnlife.glimpse.ui.BlurActionBar.OnActionClick;
 import odesk.johnlife.glimpse.ui.BlurLayout;
+import odesk.johnlife.glimpse.ui.BlurListView;
 import odesk.johnlife.glimpse.ui.FreezeViewPager;
 import odesk.johnlife.glimpse.util.MailConnector;
 import odesk.johnlife.glimpse.util.MailConnector.OnItemDownloadListener;
@@ -228,7 +229,6 @@ public class PhotoActivity extends Activity implements Constants {
 	}
 
 	private class WifiConnectionHandler {
-		private ListView list;
 		private View wifiDialog;
 		private View wifiDialogFrame;
 		private TextView password;
@@ -244,22 +244,18 @@ public class PhotoActivity extends Activity implements Constants {
 				imm.showSoftInput(password, InputMethodManager.SHOW_IMPLICIT);
 			}
 		};
+
 		private final BroadcastReceiver supplicantStateReceiver = new BroadcastReceiver() {
 
 			@Override
 			public void onReceive(Context context, Intent intent) {
 				String action = intent.getAction();
-				Log.d("aaa", "onReceive " + action);
 				if (action.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)) {
 					boolean connected = intent.getBooleanExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED, false);
-					Log.d("aaa", "SUPPLICANT_STATE_CHANGED_ACTION: " + connected);
 					SupplicantState supplicantState = (SupplicantState) intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
-					Log.i("aaa", supplicantState.name());
 					if (supplicantState == (SupplicantState.COMPLETED)) {
-						Log.i("aaa", "SUPPLICANTSTATE ---> Connected");
 						// do something
 					} else if (supplicantState == (SupplicantState.DISCONNECTED)) {
-						Log.i("aaa", "SUPPLICANTSTATE ---> Disconnected");
 						resetPass++;
 						if (resetPass >= 3) {
 							Editor editor = preferences.edit();
@@ -276,85 +272,28 @@ public class PhotoActivity extends Activity implements Constants {
 			@Override
 			public void onReceive(Context c, Intent intent) {
 				progressBar.setVisibility(View.GONE);
-				listPane.setVisibility(View.GONE);
+				wifiList.hide(false);
 				String action = intent.getAction();
-				Log.d("aaa", "onReceive " + action);
 				if (action.equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
 					if (isConnectedOrConnecting() || wifiDialogFrame.getVisibility() == View.VISIBLE) return;
-					Log.d("aaa", "listPane set visible");
-					listPane.setVisibility(View.VISIBLE);
-					TreeSet<ScanResult> sortedResults = new TreeSet<ScanResult>(
-							new Comparator<ScanResult>() {
-								@Override
-								public int compare(ScanResult lhs, ScanResult rhs) {
-									return -WifiManager.compareSignalLevel(lhs.level, rhs.level);
-								}
-							});
-					sortedResults.addAll(wifi.getScanResults());
-					ArrayList<ScanResult> scanResults = new ArrayList<ScanResult>(sortedResults.size());
-					TreeSet<String> nameLans = new TreeSet<String>();
-					for (ScanResult net : sortedResults) {
-						if (!net.SSID.trim().isEmpty() && nameLans.add(net.SSID)) {
-							scanResults.add(net);
-						}
-					}
-					final ArrayAdapter<ScanResult> adapter = new ArrayAdapter<ScanResult>(
-							context, R.layout.wifi_list_item, scanResults) {
-						@Override
-						public View getView(int position, View convertView, ViewGroup parent) {
-							TextView view = (TextView) super.getView(position, convertView, parent);
-							view.setText(getItem(position).SSID);
-							return view;
-						}
-					};
-					list.setAdapter(adapter);
-					list.setOnItemClickListener(new OnItemClickListener() {
-						@Override
-						public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-							listPane.setVisibility(View.GONE);
-							activeNetwork = adapter.getItem(position);
-							String cap = activeNetwork.capabilities;
-							if (cap.isEmpty() || cap.startsWith("[ESS")) {
-								progressBar.setVisibility(View.VISIBLE);
-								new WifiConnector(PhotoActivity.this).connectTo(activeNetwork);
-							} else {
-								String BSSID = preferences.getString(PREF_WIFI_BSSID, "");
-								String pass = preferences.getString(PREF_WIFI_PASSWORD, "");
-								if (activeNetwork.BSSID.equals(BSSID) && !pass.equals("")) {
-									connectToNetwork(pass);
-								} else {
-									wifiDialogFrame.setVisibility(View.VISIBLE);
-									wifiDialog.setVisibility(View.VISIBLE);
-									password.setText("");
-									password.postDelayed(focusRunnable, 150);
-									password.requestFocus();
-									networkName.setText(activeNetwork.SSID);
-								}
-							}
-							if (!isConnectedOrConnecting() && wifiDialogFrame.getVisibility() != View.VISIBLE
-									&& progressBar.getVisibility() == View.GONE) {
-								showHint(getResources().getString(R.string.hint_wifi_error));
-							}
-							view.setClickable(true);
-						}
-					});
+					wifiList.update(wifi.getScanResults());
 					if (!isConnectedOrConnecting()) return;
 					progressBar.setVisibility(View.GONE);
 					errorPane.setVisibility(View.GONE);
-					listPane.setVisibility(View.GONE);
+					wifiList.hide(false);
+					//TODO
 					if (isAnimationNeeded) {
-						listPane.setAlpha(0);
-						listPane.setTranslationX(listPane.getWidth());
-						listPane.animate().translationX(0).alpha(1).start();
+						wifiList.setAlpha(0);
+						wifiList.setTranslationX(wifiList.getWidth());
+						wifiList.animate().translationX(0).alpha(1).start();
 						isAnimationNeeded = false;
 					}
 				} else if (WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(action)) {
 					final NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
-					Log.d("aaa", "NETWORK_STATE_CHANGED " + info.toString());
 					NetworkInfo.DetailedState details = info.getDetailedState();
 					boolean connected = info.getState() == NetworkInfo.State.CONNECTED;
 					boolean connecting = info.getState() == NetworkInfo.State.CONNECTING;
-					boolean visible = listPane.getVisibility() == View.VISIBLE;
+					boolean visible = wifiList.getVisibility() == View.VISIBLE;
 					boolean isSuspended = info.getState() == NetworkInfo.State.SUSPENDED;
 					boolean unknown = info.getState() == NetworkInfo.State.UNKNOWN;
 					if (isSuspended || unknown) {
@@ -367,7 +306,6 @@ public class PhotoActivity extends Activity implements Constants {
 							@Override
 							public void run() {
 								if (wifi.isWifiEnabled()) {
-									Log.d("aaa", "wifi is enabled");
 									if (info.getExtraInfo() != null && info.getExtraInfo().equals("<unknown ssid>")) {
 										new WifiConnector(context).forgetCurrent();
 									}
@@ -375,9 +313,7 @@ public class PhotoActivity extends Activity implements Constants {
 										showHint(getResources().getString(R.string.hint_wifi_disconnected));
 									}
 								} else {
-									Log.d("aaa", "setWifiEnabled in post delayed");
 									wifi.setWifiEnabled(true);
-									Log.d("aaa", "setWifiEnabled");
 								}
 								scanWifi();
 							}
@@ -418,31 +354,15 @@ public class PhotoActivity extends Activity implements Constants {
 			return wifiScanReceiver;
 		}
 
-		private void hideListPane() {
-			listPane.animate()
-					.translationX(listPane.getWidth()).alpha(0)
-					.setListener(new AnimatorListenerAdapter() {
-						@Override
-						public void onAnimationEnd(Animator animation) {
-							listPane.setVisibility(View.GONE);
-							listPane.setTranslationX(0);
-							listPane.setAlpha(1);
-							listPane.animate().setListener(null).start();
-						}
-					}).start();
-			isAnimationNeeded = true;
-		}
-
 		public void createUi(Bundle savedInstanceState) {
-			list = (ListView) findViewById(R.id.list);
-			listPane = findViewById(R.id.list_container);
+			wifiList = (BlurListView) findViewById(R.id.wifi_list);
 			wifiDialog = findViewById(R.id.wifi_pane);
 			wifiDialogFrame = findViewById(R.id.wifi_pane_frame);
 			wifiDialogFrame.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
 					hideConnectionDialog();
-					listPane.setVisibility(View.VISIBLE);
+					wifiList.show();
 					scanWifi();
 				}
 			});
@@ -496,7 +416,7 @@ public class PhotoActivity extends Activity implements Constants {
 				scanWifi();
 			}
 			if (isConnectedOrConnecting()) {
-				listPane.setVisibility(View.GONE);
+				wifiList.hide(false);
 			} else {
 				registerScanReciver();
 				//registerReceiver(wifiScanReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
@@ -512,7 +432,7 @@ public class PhotoActivity extends Activity implements Constants {
 		}
 
 		public void connectToNetwork(String pass) {
-			listPane.setVisibility(View.GONE);
+			wifiList.hide(false);
 			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 			imm.hideSoftInputFromWindow(password.getWindowToken(), 0);
 			if (activeNetwork != null) {
@@ -528,7 +448,7 @@ public class PhotoActivity extends Activity implements Constants {
 					progressBar.setVisibility(View.GONE);
 					showHint(getResources().getString(R.string.hint_wifi_error));
 					isConnectErrorVisible = true;
-					listPane.setVisibility(View.VISIBLE);
+					wifiList.show();
 					wifi.startScan();
 				}
 			}
@@ -539,7 +459,7 @@ public class PhotoActivity extends Activity implements Constants {
 		}
 
 		public View getView() {
-			return listPane;
+			return wifiList;
 		}
 
 		public boolean isConnectionDialogVisible() {
@@ -587,7 +507,6 @@ public class PhotoActivity extends Activity implements Constants {
 		private final static String tag = "MailPolling";
 		@Override
 		public void run() {
-			Log.w(tag, "Polling mail server");
 			String user = getUser();
 			if (isConnected() && null != user) {
 				MailConnector mailer = new MailConnector(user, "HPgqL2658P", new OnItemDownloadListener() {
@@ -607,14 +526,12 @@ public class PhotoActivity extends Activity implements Constants {
 				if (!GlimpseApp.getFileHandler().isEmpty()) {
 					hideErrorPane();
 				}
-			} else {
-				Log.w(tag, "Mail server poll canceled - not connected or user is null");
 			}
 		}
 	};
 
 	private ProgressBar progressBar;
-	private View listPane;
+	private BlurListView wifiList;
 	private View errorPane;
 	private TextView errorText;
 	private WifiManager wifi;
@@ -674,24 +591,19 @@ public class PhotoActivity extends Activity implements Constants {
 		seeNewPhotoBtn =  (TextView) findViewById(R.id.see_new_photos);
 		boolean sdcardReady = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED) && GlimpseApp.getPicturesDir().canWrite();
 		if (!sdcardReady) {
-			Log.w(tag, "SDcard isn't ready, scheduling restart");
 			progressBar.setVisibility(View.VISIBLE);
 			IntentFilter filter = new IntentFilter(Intent.ACTION_MEDIA_MOUNTED);
 			filter.addDataScheme("file");
 			registerReceiver(new BroadcastReceiver() {
 				@Override
 				public void onReceive(Context context, Intent intent) {
-					Log.w(tag, "Restarting");
 					restart();
 				}
 			}, filter);
 			return;
-		} else {
-			Log.d(tag, "SDCard is ready");
 		}
 		createActionBar();
 		getActionBar().hide();
-		Log.w(tag, "Actionbar created");
 		context = this;
 		howItWorks = new HowItWorks();
 		databaseHelper = DatabaseHelper.getInstance(getApplicationContext());
@@ -769,7 +681,6 @@ public class PhotoActivity extends Activity implements Constants {
 		hintText = ((TextView) messagePane.findViewById(R.id.hint_text));
 		errorText = ((TextView) errorPane.findViewById(R.id.error_text));
 		wifiConnectionHandler.createUi(savedInstanceState);
-		Log.w(tag, "Wifi ui created");
 		deleteFrame = (FrameLayout) findViewById(R.id.delete_frame);
 		deleteFrame.setOnTouchListener(new OnTouchListener() {
 			@Override
@@ -798,7 +709,6 @@ public class PhotoActivity extends Activity implements Constants {
 		});
 		final String user = getUser();
 		mailTimer.scheduleAtFixedRate(mailPollTask, 0, REFRESH_RATE);
-		Log.w(tag, "Got user "+user);
 		if (user == null) {
 			showPaneError(R.string.error_no_user_data);
 			return;
@@ -864,13 +774,13 @@ public class PhotoActivity extends Activity implements Constants {
 	}
 
 	private void onConnected() {
-		Log.d("ConnectedListener", "Connected");
 		progressBar.setVisibility(View.GONE);
-		wifiConnectionHandler.hideListPane();
+		wifiList.hide(true);
+		isAnimationNeeded = true;
 		if (GlimpseApp.getFileHandler().isEmpty() && getUser() != null) {
 			showPaneError(getString(R.string.error_no_foto, getUser()));
 		}
-	};
+	}
 
 	private void showNewPhotos() {
 		runOnUiThread(new Runnable() {
@@ -1120,7 +1030,7 @@ public class PhotoActivity extends Activity implements Constants {
 	}
 	
 	/*
-	
+	//TODO
 	private interface ConnectedListener {
 		public void onConnected();
 	}

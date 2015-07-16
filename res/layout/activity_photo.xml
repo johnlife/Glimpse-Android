@@ -50,39 +50,13 @@
             android:textColor="@color/text"
             android:textSize="@dimen/see_new_photos_pane" />
     </odesk.johnlife.glimpse.ui.BlurLayout>
-    
-    <!-- wifi list -->
 
-    <odesk.johnlife.glimpse.ui.BlurLayout
-        android:id="@+id/list_container"
+    <odesk.johnlife.glimpse.ui.BlurListView
+        android:id="@+id/wifi_list"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:layout_gravity="right"
-        android:visibility="gone">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/background_shade"
-            android:divider="@drawable/layout_divider"
-            android:orientation="vertical"
-            android:padding="8dp"
-            android:showDividers="middle" >
-
-            <TextView
-                android:id="@+id/title_list"
-                style="@style/title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/title_wifi_list" />
-
-            <ListView
-                android:id="@+id/list"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:divider="@drawable/list_divider" />
-        </LinearLayout>
-    </odesk.johnlife.glimpse.ui.BlurLayout>
+        android:visibility="gone" />
 
     <!-- wifi connection dialog -->
 
