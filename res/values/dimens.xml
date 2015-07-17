@@ -8,5 +8,8 @@
     <dimen name="heart_padding">32dp</dimen>
     <dimen name="see_new_photos_pane">24sp</dimen>
     <dimen name="see_new_photos_layout_hight">48sp</dimen>
+
+    <dimen name="xsmall_padding">4dp</dimen>
+    <dimen name="small_padding">8dp</dimen>
     
 </resources>

@@ -1,36 +1,5 @@
 package odesk.johnlife.glimpse.activity;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.text.Normalizer;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.TreeSet;
-
-import odesk.johnlife.glimpse.Constants;
-import odesk.johnlife.glimpse.R;
-import odesk.johnlife.glimpse.adapter.ImagePagerAdapter;
-import odesk.johnlife.glimpse.adapter.ImagesGalleryAdapter;
-import odesk.johnlife.glimpse.app.GlimpseApp;
-import odesk.johnlife.glimpse.data.DatabaseHelper;
-import odesk.johnlife.glimpse.data.PictureData;
-import odesk.johnlife.glimpse.ui.BlurActionBar;
-import odesk.johnlife.glimpse.ui.BlurActionBar.OnActionClick;
-import odesk.johnlife.glimpse.ui.BlurLayout;
-import odesk.johnlife.glimpse.ui.BlurListView;
-import odesk.johnlife.glimpse.ui.FreezeViewPager;
-import odesk.johnlife.glimpse.util.MailConnector;
-import odesk.johnlife.glimpse.util.MailConnector.OnItemDownloadListener;
-import odesk.johnlife.glimpse.util.WifiConnector;
-import odesk.johnlife.glimpse.util.WifiRedirectionTask;
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -39,7 +8,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.content.res.Configuration;
 import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -47,17 +15,13 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.v4.view.ViewPager;
 import android.text.InputType;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
 import android.util.Log;
 import android.view.Display;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -72,22 +36,44 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.Gallery;
-import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
 
-@SuppressLint({ "ClickableViewAccessibility", "InflateParams" })
-@SuppressWarnings("deprecation")
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.Normalizer;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import odesk.johnlife.glimpse.Constants;
+import odesk.johnlife.glimpse.R;
+import odesk.johnlife.glimpse.adapter.ImagePagerAdapter;
+import odesk.johnlife.glimpse.adapter.ImagesGalleryAdapter;
+import odesk.johnlife.glimpse.app.GlimpseApp;
+import odesk.johnlife.glimpse.data.DatabaseHelper;
+import odesk.johnlife.glimpse.data.PictureData;
+import odesk.johnlife.glimpse.dialog.DeletingDialog;
+import odesk.johnlife.glimpse.dialog.HelpDialog;
+import odesk.johnlife.glimpse.ui.BlurActionBar;
+import odesk.johnlife.glimpse.ui.BlurActionBar.OnActionClick;
+import odesk.johnlife.glimpse.ui.BlurListView;
+import odesk.johnlife.glimpse.ui.FreezeViewPager;
+import odesk.johnlife.glimpse.util.MailConnector;
+import odesk.johnlife.glimpse.util.MailConnector.OnItemDownloadListener;
+import odesk.johnlife.glimpse.util.WifiConnector;
+import odesk.johnlife.glimpse.util.WifiRedirectionTask;
+
 public class PhotoActivity extends Activity implements Constants {
 
 	private class NewEmailWizard {
@@ -108,7 +94,6 @@ public class PhotoActivity extends Activity implements Constants {
 			}
 		};
 
-		@SuppressLint("ClickableViewAccessibility")
 		public NewEmailWizard() {
 			frame = findViewById(R.id.new_email_frame);
 			dialog = findViewById(R.id.new_email_dialog);
@@ -142,7 +127,7 @@ public class PhotoActivity extends Activity implements Constants {
 						showError(R.string.error_email_empty);
 						return;
 					}
-					String fullEmail = email+"@glimpseframe.com";
+					String fullEmail = email + "@glimpseframe.com";
 					if (!android.util.Patterns.EMAIL_ADDRESS.matcher(fullEmail).matches()) {
 						showError(R.string.error_email_invalid);
 						return;
@@ -175,50 +160,6 @@ public class PhotoActivity extends Activity implements Constants {
 		public void hide(){
 			frame.setVisibility(View.GONE);
 			dialog.setVisibility(View.GONE);
-		}
-	}
-
-	private class HowItWorks {
-		View frame;
-		View dialog;
-
-		public HowItWorks() {
-			frame = findViewById(R.id.how_it_works_frame);
-			dialog = (BlurLayout) findViewById(R.id.how_it_works);
-			FrameLayout.LayoutParams tvp1 = new FrameLayout.LayoutParams(getScreenWidth(0.75), getScreenHeight(0.75), Gravity.CENTER);
-			dialog.setLayoutParams(tvp1);
-			frame.setOnTouchListener(new OnTouchListener() {
-				@Override
-				public boolean onTouch(View view, MotionEvent motionEvent) {
-					hide();
-					return true;
-				}
-			});
-			findViewById(R.id.dialogButtonOK).setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					hide();
-				}
-			});
-			TextView textEmail = (TextView) findViewById(R.id.textEmail);
-			SpannableStringBuilder string = new SpannableStringBuilder(getString(R.string.how_it_works_email) + " " + getUser());
-			string.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD), getString(R.string.how_it_works_email).length(), string.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-			textEmail.setText(string);
-
-		}
-
-		public void show() {
-			frame.setVisibility(View.VISIBLE);
-			dialog.setVisibility(View.VISIBLE);
-		}
-
-		public void hide() {
-			frame.setVisibility(View.GONE);
-			dialog.setVisibility(View.GONE);
-		}
-
-		public View getFrame() {
-			return frame;
 		}
 	}
 
@@ -537,11 +478,10 @@ public class PhotoActivity extends Activity implements Constants {
 	private BlurActionBar actionBar;
 	private boolean isConnectErrorVisible = false;
 	private Timer mailTimer = new Timer();
-	private View deleteDialog;
-	private FrameLayout deleteFrame;
+	private DeletingDialog deletingDialog;
+	private HelpDialog helpDialog;
 	@SuppressWarnings("unused")
 	private NewEmailWizard newEmail;
-	private HowItWorks howItWorks;
 	private View seeNewPhoto;
 	private TextView seeNewPhotoBtn;
 	private View messagePane;
@@ -554,12 +494,6 @@ public class PhotoActivity extends Activity implements Constants {
 	private boolean galleryHideSeeNewPhoto;
 	private boolean isScanRegisted;
 	private int resetPass = 0;
-
-	@Override
-	public void onConfigurationChanged(Configuration newConfig) {
-		howItWorks = new HowItWorks();
-		super.onConfigurationChanged(newConfig);
-	}
 
 	@Override
 	public void onBackPressed() {
@@ -599,7 +533,7 @@ public class PhotoActivity extends Activity implements Constants {
 		createActionBar();
 		getActionBar().hide();
 		context = this;
-		howItWorks = new HowItWorks();
+		helpDialog = (HelpDialog) findViewById(R.id.dialog_help);
 		databaseHelper = DatabaseHelper.getInstance(getApplicationContext());
 		pager = (ViewPager) findViewById(R.id.pager);
 		pagerAdapter = createAdapter();
@@ -672,30 +606,15 @@ public class PhotoActivity extends Activity implements Constants {
 		hintText = ((TextView) messagePane.findViewById(R.id.hint_text));
 		errorText = ((TextView) errorPane.findViewById(R.id.error_text));
 		wifiConnectionHandler.createUi(savedInstanceState);
-		deleteFrame = (FrameLayout) findViewById(R.id.delete_frame);
-		deleteFrame.setOnTouchListener(new OnTouchListener() {
-			@Override
-			public boolean onTouch(View view, MotionEvent motionEvent) {
-				deleteFrame.setVisibility(View.GONE);
-				deleteDialog.setVisibility(View.GONE);
-				return true;
-			}
-		});
-		deleteDialog = findViewById(R.id.delete_confirm);
-		deleteDialog.findViewById(R.id.delete).setOnClickListener(new View.OnClickListener() {
+		deletingDialog = (DeletingDialog) findViewById(R.id.dialog_deleting);
+		deletingDialog.setPositiveButtonListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				pagerAdapter.deleteCurrentItem(pager);
-				deleteDialog.setVisibility(View.GONE);
+				deletingDialog.hide();
 				if (GlimpseApp.getFileHandler().isEmpty() && getUser() != null) {
 					showPaneError(getString(R.string.error_no_foto, getUser()));
 				}
-			}
-		});
-		deleteDialog.findViewById(R.id.cancel).setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				deleteDialog.setVisibility(View.GONE);
 			}
 		});
 		final String user = getUser();
@@ -790,11 +709,11 @@ public class PhotoActivity extends Activity implements Constants {
 		View[] swipeBlockers = {
 				wifiConnectionHandler.getView(),
 				errorPane,
-				deleteDialog,
+				deletingDialog,
 				messagePane,
 				/** uncomment if newEmail is needing*/
 //			newEmail.dialog,
-				howItWorks.getFrame(),
+				helpDialog,
 				progressBar
 		};
 		if (!isConnectedOrConnecting()) return true;
@@ -821,8 +740,7 @@ public class PhotoActivity extends Activity implements Constants {
 			public void onClick(View v) {
 				switch (v.getId()) {
 					case R.id.action_delete:
-						deleteFrame.setVisibility(View.VISIBLE);
-						deleteDialog.setVisibility(View.VISIBLE);
+						deletingDialog.show();
 						break;
 					case R.id.action_setting:
 						showPopupMenu(v);
@@ -878,7 +796,7 @@ public class PhotoActivity extends Activity implements Constants {
 				public void onClick(View v) {
 					popupWindow.dismiss();
 					getActionBar().hide();
-					howItWorks.show();
+					helpDialog.show();
 				}
 			});
 			popupWindow.showAsDropDown(view, 5, 5);
@@ -1019,12 +937,12 @@ public class PhotoActivity extends Activity implements Constants {
 	private int getScreenHeight(double coefficient) {
 		return (int) (getScreenSize().y * coefficient);
 	}
-	
+
 	/*
 	//TODO
 	private interface ConnectedListener {
 		public void onConnected();
 	}
-	
+
 	*/
 }
