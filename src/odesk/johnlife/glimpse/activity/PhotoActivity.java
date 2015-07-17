@@ -86,12 +86,6 @@ import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
 
-/**
- * An example full-screen activity that shows and hides the system UI (i.e.
- * status bar and navigation/system bar) with user interaction.
- *
- * @see SystemUiHider
- */
 @SuppressLint({ "ClickableViewAccessibility", "InflateParams" })
 @SuppressWarnings("deprecation")
 public class PhotoActivity extends Activity implements Constants {
@@ -650,9 +644,6 @@ public class PhotoActivity extends Activity implements Constants {
 					seeNewPhoto.clearAnimation();
 					if (getActionBar() != null && getActionBar().isShowing()) {
 						getActionBar().hide();
-					}
-					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-						seeNewPhoto.animate().cancel();
 					}
 					seeNewPhoto.setVisibility(View.GONE);
 					pager.setAlpha(0);

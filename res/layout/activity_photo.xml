@@ -46,6 +46,13 @@
         android:layout_gravity="right"
         android:visibility="gone" />
 
+    <odesk.johnlife.glimpse.dialog.BlurDialog
+        android:id="@+id/dialog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone" />
+
     <!-- wifi connection dialog -->
 
 	<FrameLayout

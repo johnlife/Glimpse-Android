@@ -150,7 +150,7 @@ public class WifiReceiver implements Constants {
                 listener.disconnected(WifiError.NEED_PASSWORD);
             } else {
                 WifiConnector wifiConnector = new WifiConnector(activity);
-                new WifiConnector(activity).connectTo(activeNetwork, pass);
+                wifiConnector.connectTo(activeNetwork, pass);
                 if (wifiConnector.getConnectionResult() != -1) {
                     prefs.edit().putString(PREF_WIFI_BSSID, activeNetwork.BSSID)
                             .putString(PREF_WIFI_PASSWORD, pass).apply();
