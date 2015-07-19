@@ -16,7 +16,7 @@ public abstract class BlurDialog extends BlurLayout {
     protected TextView title;
     protected View buttons;
     protected FrameLayout container;
-    protected View dialogFrame, content;
+    protected View content;
     protected Button positiveButton, negativeButton;
 
     public BlurDialog(Context context, AttributeSet attrs, int defStyle) {
@@ -40,18 +40,17 @@ public abstract class BlurDialog extends BlurLayout {
 
     protected void createView(Context context) {
         inflate(context, R.layout.dialog, this);
-        dialogFrame = findViewById(R.id.frame);
-        dialogFrame.setOnTouchListener(new OnTouchListener() {
+        setOnTouchListener(new OnTouchListener() {
             @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
+            public boolean onTouch(View v, MotionEvent event) {
                 hide();
                 return true;
             }
         });
         content = findViewById(R.id.content);
-        container = (FrameLayout) dialogFrame.findViewById(R.id.container);
-        title = (TextView) dialogFrame.findViewById(R.id.title);
-        buttons = dialogFrame.findViewById(R.id.buttons);
+        container = (FrameLayout) content.findViewById(R.id.container);
+        title = (TextView) content.findViewById(R.id.title);
+        buttons = content.findViewById(R.id.buttons);
         positiveButton = (Button) buttons.findViewById(R.id.ok);
         negativeButton = (Button) buttons.findViewById(R.id.cancel);
         negativeButton.setOnClickListener(new OnClickListener() {
@@ -60,6 +59,10 @@ public abstract class BlurDialog extends BlurLayout {
                 hide();
             }
         });
+    }
+
+    protected void setTitle(String text) {
+        title.setText(text);
     }
 
     protected void setTitle(int stringId) {
