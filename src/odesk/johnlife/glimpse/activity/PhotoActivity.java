@@ -7,22 +7,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.wifi.ScanResult;
-import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.v4.view.ViewPager;
-import android.text.InputType;
 import android.util.Log;
 import android.view.Display;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -32,14 +26,8 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
-import android.widget.EditText;
 import android.widget.Gallery;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
@@ -65,6 +53,7 @@ import odesk.johnlife.glimpse.data.DatabaseHelper;
 import odesk.johnlife.glimpse.data.PictureData;
 import odesk.johnlife.glimpse.dialog.DeletingDialog;
 import odesk.johnlife.glimpse.dialog.HelpDialog;
+import odesk.johnlife.glimpse.dialog.WifiDialog;
 import odesk.johnlife.glimpse.ui.BlurActionBar;
 import odesk.johnlife.glimpse.ui.BlurActionBar.OnActionClick;
 import odesk.johnlife.glimpse.ui.BlurListView;
@@ -72,7 +61,6 @@ import odesk.johnlife.glimpse.ui.FreezeViewPager;
 import odesk.johnlife.glimpse.util.MailConnector;
 import odesk.johnlife.glimpse.util.MailConnector.OnItemDownloadListener;
 import odesk.johnlife.glimpse.util.WifiConnector;
-import odesk.johnlife.glimpse.util.WifiRedirectionTask;
 
 public class PhotoActivity extends Activity implements Constants {
 
@@ -163,251 +151,165 @@ public class PhotoActivity extends Activity implements Constants {
 		}
 	}
 
-	private class WifiConnectionHandler {
-		private View wifiDialog;
-		private View wifiDialogFrame;
-		private TextView password;
-		private CheckBox showPassword;
-		private TextView networkName;
-		private ScanResult activeNetwork;
-
-		private final Runnable focusRunnable = new Runnable() {
-			@Override
-			public void run() {
-				password.requestFocus();
-				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-				imm.showSoftInput(password, InputMethodManager.SHOW_IMPLICIT);
-			}
-		};
-
-		private final BroadcastReceiver supplicantStateReceiver = new BroadcastReceiver() {
-
-			@Override
-			public void onReceive(Context context, Intent intent) {
-				String action = intent.getAction();
-				if (action.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)) {
-					boolean connected = intent.getBooleanExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED, false);
-					SupplicantState supplicantState = (SupplicantState) intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
-					if (supplicantState == (SupplicantState.COMPLETED)) {
-						// do something
-					} else if (supplicantState == (SupplicantState.DISCONNECTED)) {
-						resetPass++;
-						if (resetPass >= 3) {
-							Editor editor = preferences.edit();
-							editor.putString(PREF_WIFI_PASSWORD, "");
-							editor.apply();
-							resetPass = 0;
-							showHint(getResources().getString(R.string.hint_failed_to_connecn));
-						}
-					}
-				}
-			}
-		};
-		private final BroadcastReceiver wifiScanReceiver = new BroadcastReceiver() {
-			@Override
-			public void onReceive(Context c, Intent intent) {
-				progressBar.setVisibility(View.GONE);
-				wifiList.hide(false);
-				String action = intent.getAction();
-				if (action.equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
-					if (isConnectedOrConnecting() || wifiDialogFrame.getVisibility() == View.VISIBLE) return;
-					wifiList.update(wifi.getScanResults());
-					if (!isConnectedOrConnecting()) return;
-					progressBar.setVisibility(View.GONE);
-					errorPane.setVisibility(View.GONE);
-					wifiList.hide(false);
-					//TODO
-					if (isAnimationNeeded) {
-						wifiList.setAlpha(0);
-						wifiList.setTranslationX(wifiList.getWidth());
-						wifiList.animate().translationX(0).alpha(1).start();
-						isAnimationNeeded = false;
-					}
-				} else if (WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(action)) {
-					final NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
-					NetworkInfo.DetailedState details = info.getDetailedState();
-					boolean connected = info.getState() == NetworkInfo.State.CONNECTED;
-					boolean connecting = info.getState() == NetworkInfo.State.CONNECTING;
-					boolean visible = wifiList.getVisibility() == View.VISIBLE;
-					boolean isSuspended = info.getState() == NetworkInfo.State.SUSPENDED;
-					boolean unknown = info.getState() == NetworkInfo.State.UNKNOWN;
-					if (isSuspended || unknown) {
-						showHint(getResources().getString(R.string.hint_wifi_error));
-					} else if (details == NetworkInfo.DetailedState.DISCONNECTED) {
-						//		hideErrorPane();
-						registerScanReciver();
-						getActionBar().hide();
-						wifiDialog.postDelayed(new Runnable() {
-							@Override
-							public void run() {
-								if (wifi.isWifiEnabled()) {
-									if (info.getExtraInfo() != null && info.getExtraInfo().equals("<unknown ssid>")) {
-										new WifiConnector(context).forgetCurrent();
-									}
-									if (isDisconnectionHintNeeded) {
-										showHint(getResources().getString(R.string.hint_wifi_disconnected));
-									}
-								} else {
-									wifi.setWifiEnabled(true);
-								}
-								scanWifi();
-							}
-
-						}, 1000);
-
-					} else if (connected && details == NetworkInfo.DetailedState.CONNECTED) {
-						WifiRedirectionTask redirectionTask = new WifiRedirectionTask() {
-
-							@Override
-							protected void onPostExecute(Boolean result) {
-								if (result) {
-									onConnected();
-									hideConnectionDialog();
-									isDisconnectionHintNeeded = true;
-									showHint(getResources().getString(R.string.hint_success));
-								} else {
+//	private class WifiConnectionHandler {
+//		private ScanResult activeNetwork;
+//
+//		private final BroadcastReceiver supplicantStateReceiver = new BroadcastReceiver() {
+//
+//			@Override
+//			public void onReceive(Context context, Intent intent) {
+//				String action = intent.getAction();
+//				if (action.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)) {
+//					boolean connected = intent.getBooleanExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED, false);
+//					SupplicantState supplicantState = (SupplicantState) intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
+//					if (supplicantState == (SupplicantState.COMPLETED)) {
+//						// do something
+//					} else if (supplicantState == (SupplicantState.DISCONNECTED)) {
+//						resetPass++;
+//						if (resetPass >= 3) {
+//							Editor editor = preferences.edit();
+//							editor.putString(PREF_WIFI_PASSWORD, "");
+//							editor.apply();
+//							resetPass = 0;
+//							showHint(getResources().getString(R.string.hint_failed_to_connecn));
+//						}
+//					}
+//				}
+//			}
+//		};
+//		private final BroadcastReceiver wifiScanReceiver = new BroadcastReceiver() {
+//			@Override
+//			public void onReceive(Context c, Intent intent) {
+//				progressBar.setVisibility(View.GONE);
+//				wifiList.hide(false);
+//				String action = intent.getAction();
+//				if (action.equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
+//					if (isConnectedOrConnecting() /* TODO || wifiDialogFrame.getVisibility() == View.VISIBLE*/) return;
+//					wifiList.update(wifi.getScanResults());
+//					if (!isConnectedOrConnecting()) return;
+//					progressBar.setVisibility(View.GONE);
+//					errorPane.setVisibility(View.GONE);
+//					wifiList.hide(false);
+//					//TODO
+//					if (isAnimationNeeded) {
+//						wifiList.setAlpha(0);
+//						wifiList.setTranslationX(wifiList.getWidth());
+//						wifiList.animate().translationX(0).alpha(1).start();
+//						isAnimationNeeded = false;
+//					}
+//				} else if (WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(action)) {
+//					final NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+//					NetworkInfo.DetailedState details = info.getDetailedState();
+//					boolean connected = info.getState() == NetworkInfo.State.CONNECTED;
+//					boolean connecting = info.getState() == NetworkInfo.State.CONNECTING;
+//					boolean visible = wifiList.getVisibility() == View.VISIBLE;
+//					boolean isSuspended = info.getState() == NetworkInfo.State.SUSPENDED;
+//					boolean unknown = info.getState() == NetworkInfo.State.UNKNOWN;
+//					if (isSuspended || unknown) {
+//						showHint(getResources().getString(R.string.hint_wifi_error));
+//					} else if (details == NetworkInfo.DetailedState.DISCONNECTED) {
+//						//		hideErrorPane();
+//						registerScanReciver();
+//						getActionBar().hide();
+//						wifiDialog.postDelayed(new Runnable() {
+//							@Override
+//							public void run() {
+//								if (wifi.isWifiEnabled()) {
+//									if (info.getExtraInfo() != null && info.getExtraInfo().equals("<unknown ssid>")) {
+//										new WifiConnector(context).forgetCurrent();
+//									}
+//									if (isDisconnectionHintNeeded) {
+//										showHint(getResources().getString(R.string.hint_wifi_disconnected));
+//									}
+//								} else {
+//									wifi.setWifiEnabled(true);
+//								}
+//								scanWifi();
+//							}
+//
+//						}, 1000);
+//					} else if (connected && details == NetworkInfo.DetailedState.CONNECTED) {
+//						WifiRedirectionTask redirectionTask = new WifiRedirectionTask() {
+//							@Override
+//							protected void onPostExecute(Boolean result) {
+//								if (result) {
+//									onConnected();
+//									wifiDialog.hide();;
 //									isDisconnectionHintNeeded = true;
-									showHint(getResources().getString(R.string.hint_failed_to_connecn));
-									resetWifi();
-								}
-							}
-						};
-						redirectionTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-						resetPass = 0;
-					} else if (!visible && !connected && !connecting) {
-						getActionBar().hide();
-						if (details != NetworkInfo.DetailedState.SCANNING) {
-							scanWifi();
-						}
-					}
-
-				}
-			}
-		};
-
-		public  BroadcastReceiver getReceiver() {
-			return wifiScanReceiver;
-		}
-
-		public void createUi(Bundle savedInstanceState) {
-			wifiList = (BlurListView) findViewById(R.id.wifi_list);
-			wifiDialog = findViewById(R.id.wifi_pane);
-			wifiDialogFrame = findViewById(R.id.wifi_pane_frame);
-			wifiDialogFrame.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					hideConnectionDialog();
-					wifiList.show();
-					scanWifi();
-				}
-			});
-			password = (TextView) wifiDialog.findViewById(R.id.password);
-			showPassword = (CheckBox) wifiDialog.findViewById(R.id.is_password_vivsible);
-			password.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-				@Override
-				public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-					if (actionId == EditorInfo.IME_ACTION_DONE) {
-						connectToNetwork(password.getText().toString());
-						hideConnectionDialog();
-						if (!isConnectedOrConnecting()) {
-							showHint(getResources().getString(R.string.hint_wifi_error));
-						}
-						return true;
-					}
-					return false;
-				}
-			});
-			//((EditText)password).setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-			showPassword.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-				@Override
-				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-					if (isChecked) {
-						((EditText)password).setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-					} else {
-						((EditText)password).setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-					}
-
-				}
-			});
-			((EditText)password).setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-			showPassword.setVisibility(View.INVISIBLE);
-			networkName = (TextView) wifiDialog.findViewById(R.id.title);
-			wifiDialog.findViewById(R.id.connect).setOnClickListener(
-					new View.OnClickListener() {
-						@Override
-						public void onClick(View v) {
-							hideConnectionDialog();
-							connectToNetwork(password.getText().toString());
-							if (!isConnectedOrConnecting() && progressBar.getVisibility() == View.GONE) {
-								showHint(getResources().getString(R.string.hint_wifi_error));
-							}
-						}
-					});
-			wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-			if (!wifi.isWifiEnabled()) {
-				wifi.setWifiEnabled(true);
-				registerScanReciver();
-				//registerReceiver(wifiScanReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
-				scanWifi();
-			}
-			if (isConnectedOrConnecting()) {
-				wifiList.hide(false);
-			} else {
-				registerScanReciver();
-				//registerReceiver(wifiScanReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
-				scanWifi();
-			}
-			registerReceiver(wifiScanReceiver, new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
-			registerReceiver(supplicantStateReceiver, new IntentFilter(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION));
-		}
-
-		public void unregisterBroadcast() {
-			unregisterReceiver(wifiScanReceiver);
-			unregisterReceiver(supplicantStateReceiver);
-		}
-
-		public void connectToNetwork(String pass) {
-			wifiList.hide(false);
-			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-			imm.hideSoftInputFromWindow(password.getWindowToken(), 0);
-			if (activeNetwork != null) {
-				progressBar.setVisibility(View.VISIBLE);
-				WifiConnector wifiConnector = new WifiConnector(PhotoActivity.this);
-				wifiConnector.connectTo(activeNetwork, pass); //password.getText().toString()
-				if (wifiConnector.getConnectionResult() != -1) {
-					Editor editor = preferences.edit();
-					editor.putString(PREF_WIFI_BSSID, activeNetwork.BSSID);
-					editor.putString(PREF_WIFI_PASSWORD, pass);
-					editor.apply();
-				} else {
-					progressBar.setVisibility(View.GONE);
-					showHint(getResources().getString(R.string.hint_wifi_error));
-					isConnectErrorVisible = true;
-					wifiList.show();
-					wifi.startScan();
-				}
-			}
-		}
-
-		public void scanWifi() {
-			wifi.startScan();
-		}
-
-		public View getView() {
-			return wifiList;
-		}
-
-		public boolean isConnectionDialogVisible() {
-			return (wifiDialogFrame != null && wifiDialogFrame.getVisibility() == View.VISIBLE);
-		}
-
-		public void hideConnectionDialog() {
-			wifiDialog.setVisibility(View.GONE);
-			wifiDialogFrame.setVisibility(View.GONE);
-			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-			imm.hideSoftInputFromWindow(password.getWindowToken(), 0);
-		}
-	}
+//									showHint(getResources().getString(R.string.hint_success));
+//								} else {
+////									isDisconnectionHintNeeded = true;
+//									showHint(getResources().getString(R.string.hint_failed_to_connecn));
+//									resetWifi();
+//								}
+//							}
+//						};
+//						redirectionTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+//						resetPass = 0;
+//					} else if (!visible && !connected && !connecting) {
+//						getActionBar().hide();
+//						if (details != NetworkInfo.DetailedState.SCANNING) {
+//							scanWifi();
+//						}
+//					}
+//
+//				}
+//			}
+//		};
+//
+//		public  BroadcastReceiver getReceiver() {
+//			return wifiScanReceiver;
+//		}
+//
+//		public void createUi(Bundle savedInstanceState) {
+//			wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+//			if (!wifi.isWifiEnabled()) {
+//				wifi.setWifiEnabled(true);
+//				registerScanReciver();
+//				//registerReceiver(wifiScanReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+//				scanWifi();
+//			}
+//			if (isConnectedOrConnecting()) {
+//				wifiList.hide(false);
+//			} else {
+//				registerScanReciver();
+//				//registerReceiver(wifiScanReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+//				scanWifi();
+//			}
+//			registerReceiver(wifiScanReceiver, new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
+//			registerReceiver(supplicantStateReceiver, new IntentFilter(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION));
+//		}
+//
+//		public void unregisterBroadcast() {
+//			unregisterReceiver(wifiScanReceiver);
+//			unregisterReceiver(supplicantStateReceiver);
+//		}
+//
+//		public void connectToNetwork(String pass) {
+//			wifiList.hide(false);
+//			if (activeNetwork != null) {
+//				progressBar.setVisibility(View.VISIBLE);
+//				WifiConnector wifiConnector = new WifiConnector(PhotoActivity.this);
+//				wifiConnector.connectTo(activeNetwork, pass); //password.getText().toString()
+//				if (wifiConnector.getConnectionResult() != -1) {
+//					Editor editor = preferences.edit();
+//					editor.putString(PREF_WIFI_BSSID, activeNetwork.BSSID);
+//					editor.putString(PREF_WIFI_PASSWORD, pass);
+//					editor.apply();
+//				} else {
+//					progressBar.setVisibility(View.GONE);
+//					showHint(getResources().getString(R.string.hint_wifi_error));
+//					isConnectErrorVisible = true;
+//					wifiList.show();
+//					wifi.startScan();
+//				}
+//			}
+//		}
+//
+//		public void scanWifi() {
+//			wifi.startScan();
+//		}
+//	}
 
 	private Runnable swipeRunnable = new Runnable() {
 		@Override
@@ -433,7 +335,7 @@ public class PhotoActivity extends Activity implements Constants {
 			errorPane.setVisibility(View.GONE);
 			if (isConnectErrorVisible == true) {
 				isConnectErrorVisible = false;
-				wifiConnectionHandler.scanWifi();
+//				wifiConnectionHandler.scanWifi();
 			}
 		}
 	};
@@ -470,7 +372,6 @@ public class PhotoActivity extends Activity implements Constants {
 	private View errorPane;
 	private TextView errorText;
 	private WifiManager wifi;
-	private WifiConnectionHandler wifiConnectionHandler = new WifiConnectionHandler();
 	private Context context;
 	private DatabaseHelper databaseHelper;
 	private ViewPager pager;
@@ -480,6 +381,7 @@ public class PhotoActivity extends Activity implements Constants {
 	private Timer mailTimer = new Timer();
 	private DeletingDialog deletingDialog;
 	private HelpDialog helpDialog;
+	private WifiDialog wifiDialog;
 	@SuppressWarnings("unused")
 	private NewEmailWizard newEmail;
 	private View seeNewPhoto;
@@ -497,11 +399,12 @@ public class PhotoActivity extends Activity implements Constants {
 
 	@Override
 	public void onBackPressed() {
-		if (wifiConnectionHandler.isConnectionDialogVisible()) {
-			wifiConnectionHandler.hideConnectionDialog();
-		} else {
-			super.onBackPressed();
-		}
+		//TODO
+//		if (wifiConnectionHandler.isConnectionDialogVisible()) {
+//			wifiConnectionHandler.hideConnectionDialog();
+//		} else {
+		super.onBackPressed();
+//		}
 	}
 
 	@Override
@@ -605,7 +508,6 @@ public class PhotoActivity extends Activity implements Constants {
 		messagePane = findViewById(R.id.message_pane);
 		hintText = ((TextView) messagePane.findViewById(R.id.hint_text));
 		errorText = ((TextView) errorPane.findViewById(R.id.error_text));
-		wifiConnectionHandler.createUi(savedInstanceState);
 		deletingDialog = (DeletingDialog) findViewById(R.id.dialog_deleting);
 		deletingDialog.setPositiveButtonListener(new View.OnClickListener() {
 			@Override
@@ -617,6 +519,13 @@ public class PhotoActivity extends Activity implements Constants {
 				}
 			}
 		});
+		wifiDialog = (WifiDialog) findViewById(R.id.dialog_wifi);
+		wifiDialog.setPositiveButtonListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				//TODO
+			}
+		});
 		final String user = getUser();
 		mailTimer.scheduleAtFixedRate(mailPollTask, 0, REFRESH_RATE);
 		if (user == null) {
@@ -624,14 +533,6 @@ public class PhotoActivity extends Activity implements Constants {
 			return;
 		}
 		if (pagerAdapter.getCount() >= SCREEN_PAGE_LIMIT) rescheduleImageSwipe();
-	}
-
-
-	private void registerScanReciver() {
-		if (!isScanRegisted) {
-			registerReceiver(wifiConnectionHandler.getReceiver(), new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
-			isScanRegisted = true;
-		}
 	}
 
 	private void recreateSeeNewPhoto() {
@@ -651,7 +552,7 @@ public class PhotoActivity extends Activity implements Constants {
 
 	@Override
 	protected void onDestroy() {
-		wifiConnectionHandler.unregisterBroadcast();
+//		wifiConnectionHandler.unregisterBroadcast();
 		mailTimer.cancel();
 		super.onDestroy();
 	}
@@ -707,13 +608,13 @@ public class PhotoActivity extends Activity implements Constants {
 
 	private boolean isBlocked() {
 		View[] swipeBlockers = {
-				wifiConnectionHandler.getView(),
 				errorPane,
-				deletingDialog,
 				messagePane,
 				/** uncomment if newEmail is needing*/
 //			newEmail.dialog,
 				helpDialog,
+				deletingDialog,
+				wifiDialog,
 				progressBar
 		};
 		if (!isConnectedOrConnecting()) return true;
@@ -849,7 +750,7 @@ public class PhotoActivity extends Activity implements Constants {
 			new WifiConnector(context).forgetCurrent();
 			hideErrorPane();
 			progressBar.setVisibility(View.VISIBLE);
-			registerScanReciver();
+//			registerScanReciver();
 			//	registerReceiver(wifiConnectionHandler.getReceiver(), new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 		}
 	}
