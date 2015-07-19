@@ -24,7 +24,7 @@ public class DeletingDialog extends BlurDialog {
         super.createView(context);
         setTitle(R.string.dialog_delete);
         setPositiveButtonText(R.string.button_delete);
-        positiveButton.setCompoundDrawables(context.getResources().getDrawable(android.R.drawable.ic_menu_delete), null, null, null);
-        positiveButton.setCompoundDrawables(context.getResources().getDrawable(android.R.drawable.ic_menu_revert), null, null, null);
+        positiveButton.setCompoundDrawablesWithIntrinsicBounds(android.R.drawable.ic_menu_delete, 0, 0, 0);
+        negativeButton.setCompoundDrawablesWithIntrinsicBounds(android.R.drawable.ic_menu_revert, 0, 0, 0);
     }
 }
