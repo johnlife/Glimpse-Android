@@ -27,7 +27,8 @@ public class BlurTextView extends BlurLayout {
     }
 
     private void createView(Context context) {
-        textView = (TextView) inflate(context, R.layout.text_view, this);
+        inflate(getContext(), R.layout.text_view, this);
+        textView = (TextView)findViewById(R.id.text_view);
     }
 
     public void show(String text) {
