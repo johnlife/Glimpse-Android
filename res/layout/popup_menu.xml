@@ -31,7 +31,7 @@
             android:minHeight="?android:attr/listPreferredItemHeightLarge"
             android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
             android:paddingStart="?android:attr/listPreferredItemPaddingStart"
-            android:text="Reset Wi-Fi"
+            android:text="@string/action_reset"
             android:textAppearance="?android:attr/textAppearanceListItemSmall" />
 
         <TextView
@@ -42,7 +42,7 @@
             android:minHeight="?android:attr/listPreferredItemHeightLarge"
             android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
             android:paddingStart="?android:attr/listPreferredItemPaddingStart"
-            android:text="How it works"
+            android:text="@string/how_it_works"
             android:textAppearance="?android:attr/textAppearanceListItemSmall" />
     </LinearLayout>
 

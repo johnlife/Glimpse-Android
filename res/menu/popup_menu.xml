@@ -5,13 +5,13 @@
         <item
             android:id="@+id/menu1"
             android:icon="@drawable/ic_launcher"
-            android:title="Change email"/>
+            android:title="@string/action_new_email"/>
         <item
             android:id="@+id/menu2"
-            android:title="Reset Wi-Fi"/>
+            android:title="@string/action_reset"/>
         <item
             android:id="@+id/menu3"
-            android:title="How it works">            
+            android:title="@string/how_it_works">
         </item>
     </group>
 </menu>
