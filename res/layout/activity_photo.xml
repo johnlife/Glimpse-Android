@@ -24,6 +24,21 @@
         android:layout_gravity="center_horizontal|bottom"
         android:visibility="gone" />
 
+    <odesk.johnlife.glimpse.ui.BlurTextView
+        android:id="@+id/error_pane"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone" />
+
+    <odesk.johnlife.glimpse.ui.BlurTextView
+        android:id="@+id/hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|bottom"
+        android:layout_marginBottom="48dp"
+        android:visibility="gone" />
+
     <odesk.johnlife.glimpse.ui.BlurListView
         android:id="@+id/wifi_list"
         android:layout_width="300dp"
@@ -404,21 +419,6 @@
         </odesk.johnlife.glimpse.ui.BlurLayout>
 
     </FrameLayout>
-
-    <odesk.johnlife.glimpse.ui.BlurTextView
-        android:id="@+id/error_pane"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:visibility="gone" />
-
-    <odesk.johnlife.glimpse.ui.BlurTextView
-        android:id="@+id/hint"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal|bottom"
-        android:layout_marginBottom="48dp"
-        android:visibility="gone" />
 
 	<Gallery
         android:id="@+id/gallery1"

@@ -9,7 +9,7 @@ import odesk.johnlife.glimpse.R;
 
 public class BlurTextView extends BlurLayout {
 
-    protected TextView textView;
+    private TextView textView;
 
     public BlurTextView(Context context) {
         super(context);
@@ -33,6 +33,10 @@ public class BlurTextView extends BlurLayout {
     public void show(String text) {
         textView.setText(text);
         setVisibility(View.VISIBLE);
+    }
+
+    public void show(int res) {
+        show(getContext().getString(res));
     }
 
     public void hide() {
