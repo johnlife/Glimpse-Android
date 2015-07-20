@@ -7,6 +7,7 @@ import android.view.View;
 import odesk.johnlife.glimpse.R;
 
 public class HelpDialog extends BlurDialog {
+
     public HelpDialog(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
     }
