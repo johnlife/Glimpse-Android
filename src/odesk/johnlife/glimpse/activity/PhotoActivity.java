@@ -789,6 +789,10 @@ public class PhotoActivity extends Activity implements Constants {
 		return size;
 	}
 
+	public void showHint(String text) {
+		hint.show(text);
+	}
+
 	private int getScreenWidth(double coefficient) {
 		return (int) (getScreenSize().x * coefficient);
 	}
