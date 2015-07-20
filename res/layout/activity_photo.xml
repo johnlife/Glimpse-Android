@@ -8,13 +8,13 @@
         android:id="@+id/pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
- 
+
     <ProgressBar
         android:id="@+id/progressLoading"
         style="?android:attr/progressBarStyleLarge"
-        android:layout_width="@dimen/progressbar_size"
-        android:layout_height="@dimen/progressbar_size"
-        android:layout_gravity="center_horizontal|center_vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:visibility="gone" />
 
     <odesk.johnlife.glimpse.ui.BlurTextView
@@ -41,389 +41,38 @@
 
     <odesk.johnlife.glimpse.ui.BlurListView
         android:id="@+id/wifi_list"
-        android:layout_width="@dimen/window_width"
+        android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:layout_gravity="right"
         android:visibility="gone" />
 
-    <odesk.johnlife.glimpse.dialog.BlurDialog
-        android:id="@+id/dialog"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
+    <odesk.johnlife.glimpse.dialog.DeletingDialog
+        android:id="@+id/dialog_deleting"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:visibility="gone" />
 
-    <!-- wifi connection dialog -->
-
-	<FrameLayout
-	    android:id="@+id/wifi_pane_frame"
-	    android:layout_width="match_parent"
-	    android:layout_height="match_parent"
-	    android:visibility="gone" >
-
-	    <odesk.johnlife.glimpse.ui.BlurLayout
-	        android:id="@+id/wifi_pane"
-	        android:layout_width="@dimen/window_width"
-	        android:layout_height="wrap_content"
-	        android:layout_gravity="center"
-	        android:visibility="gone" >
-
-	        <LinearLayout
-	            android:layout_width="match_parent"
-	            android:layout_height="wrap_content"
-	            android:background="@color/background_shade"
-	            android:divider="@drawable/layout_divider"
-	            android:dividerPadding="0dp"
-	            android:orientation="vertical"
-	            android:showDividers="middle" >
-
-	            <TextView
-	                android:id="@+id/title"
-	                style="@style/title"
-	                android:layout_width="match_parent"
-	                android:layout_height="wrap_content" />
-
-	            <LinearLayout
-	                android:layout_width="match_parent"
-	                android:layout_height="wrap_content"
-	                android:divider="@drawable/layout_divider"
-	                android:dividerPadding="0dp"
-	                android:orientation="horizontal"
-	                android:padding="@dimen/xsmall_padding"
-	                android:showDividers="middle" >
-
-	                <EditText
-	                    android:id="@+id/password"
-	                    android:layout_width="0dp"
-	                    android:layout_height="wrap_content"
-	                    android:layout_marginRight="@dimen/small_margin"
-	                    android:layout_weight="1"
-	                    android:hint="@string/hint_password"
-	                    android:inputType="textPassword"
-	                    android:textSize="@dimen/text_size" />
-
-	                <Button
-	                    android:id="@+id/connect"
-	                    style="@style/btnStyle"
-	                    android:layout_width="wrap_content"
-	                    android:layout_height="wrap_content"
-	                    android:layout_marginLeft="@dimen/small_margin"
-	                    android:text="@string/button_connect" />
-	            </LinearLayout>
-
-	            <CheckBox
-	                android:id="@+id/is_password_vivsible"
-	                android:layout_width="wrap_content"
-	                android:layout_height="wrap_content"
-	                android:checked="false"
-	                android:text="@string/text_show_pass_checkbox"
-	                android:textSize="@dimen/text_size"
-	                android:visibility="visible" />
-	        </LinearLayout>
-	    </odesk.johnlife.glimpse.ui.BlurLayout>
-	</FrameLayout>
-
-    <!-- change email dialog -->
-
-    <FrameLayout
-        android:id="@+id/new_email_frame"
+    <odesk.johnlife.glimpse.dialog.HelpDialog
+        android:id="@+id/dialog_help"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone" >
+        android:visibility="gone" />
 
-        <odesk.johnlife.glimpse.ui.BlurLayout
-            android:id="@+id/new_email_dialog"
-            android:layout_width="@dimen/email_dialog_width"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:clickable="false"
-            android:visibility="gone" >
-
-            <LinearLayout
-                android:id="@+id/step1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@color/background_shade"
-                android:divider="@drawable/layout_divider"
-                android:dividerPadding="0dp"
-                android:orientation="vertical"
-                android:showDividers="middle"
-                android:visibility="visible" >
-
-                <TextView
-                    style="@style/title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/title_email_step1"
-                    android:textSize="@dimen/text_size" />
-
-                <TextView
-                    style="@style/txtViewStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:padding="@dimen/small_padding"
-                    android:text="@string/text_new_email" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:divider="@drawable/layout_divider"
-                    android:dividerPadding="0dp"
-                    android:orientation="horizontal"
-                    android:padding="@dimen/xsmall_padding"
-                    android:showDividers="middle" >
-
-                    <Button
-                        android:id="@+id/received"
-                        style="@style/btnStyle"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="@dimen/small_margin"
-                        android:layout_weight="1"
-                        android:text="@string/button_received" />
-
-                    <Button
-                        android:id="@+id/cancel"
-                        style="@style/btnStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="@dimen/small_margin"
-                        android:text="@android:string/cancel" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/step2"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@color/background_shade"
-                android:divider="@drawable/layout_divider"
-                android:dividerPadding="0dp"
-                android:orientation="vertical"
-                android:showDividers="middle"
-                android:visibility="gone" >
-
-                <TextView
-                    style="@style/title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/title_email_step2" />
-
-                <TextView
-                    style="@style/txtViewStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:padding="@dimen/small_padding"
-                    android:text="@string/text_new_email_step2" />
-
-                <TextView
-                    android:id="@+id/error"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="@dimen/small_padding"
-                    android:textColor="#f00"
-                    android:textSize="@dimen/text_size"
-                    android:visibility="gone" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="@dimen/small_margin"
-                    android:gravity="center_vertical" >
-
-                    <EditText
-                        android:id="@+id/email"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:hint="@string/hint_new_email"
-                        android:inputType="textEmailAddress"
-                        android:textSize="@dimen/text_size" />
-
-                    <TextView
-                        style="@style/txtViewStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/text_at_glimpseframe" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:divider="@drawable/layout_divider"
-                    android:dividerPadding="0dp"
-                    android:orientation="horizontal"
-                    android:padding="@dimen/xsmall_padding"
-                    android:showDividers="middle" >
-
-                    <Button
-                        android:id="@+id/ok"
-                        style="@style/btnStyle"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="@dimen/small_margin"
-                        android:layout_weight="1"
-                        android:text="@android:string/ok" />
-
-                    <Button
-                        android:id="@+id/cancel"
-                        style="@style/btnStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="@dimen/small_margin"
-                        android:text="@android:string/cancel" />
-                </LinearLayout>
-            </LinearLayout>
-        </odesk.johnlife.glimpse.ui.BlurLayout>
-    </FrameLayout>
-    
-    <!-- delete confirmation dialog -->
-
-    <FrameLayout
-        android:id="@+id/delete_frame"
+    <odesk.johnlife.glimpse.dialog.WifiDialog
+        android:id="@+id/dialog_wifi"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone" >
+        android:visibility="gone" />
 
-        <odesk.johnlife.glimpse.ui.BlurLayout
-            android:id="@+id/delete_confirm"
-            android:layout_width="@dimen/window_width"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="@dimen/delete_confirm_margin_top"
-            android:visibility="gone" >
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@color/background_shade"
-                android:divider="@drawable/layout_divider"
-                android:dividerPadding="0dp"
-                android:orientation="vertical"
-                android:showDividers="middle" >
-
-                <TextView
-                    style="@style/title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/dialog_delete" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:divider="@drawable/layout_divider"
-                    android:dividerPadding="0dp"
-                    android:orientation="horizontal"
-                    android:padding="@dimen/xsmall_padding"
-                    android:showDividers="middle" >
-
-                    <Button
-                        android:id="@+id/cancel"
-                        style="@style/btnStyle"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:drawableLeft="@android:drawable/ic_menu_revert"
-                        android:padding="@dimen/small_padding"
-                        android:text="@android:string/cancel" />
-
-                    <Button
-                        android:id="@+id/delete"
-                        style="@style/btnStyle"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:drawableLeft="@android:drawable/ic_menu_delete"
-                        android:padding="@dimen/small_padding"
-                        android:text="@string/button_delete" />
-                </LinearLayout>
-            </LinearLayout>
-        </odesk.johnlife.glimpse.ui.BlurLayout>
-    </FrameLayout>
-
-    <!-- How it works dialog -->
-
-    <FrameLayout
-        android:id="@+id/how_it_works_frame"
+    <odesk.johnlife.glimpse.dialog.EmailChangeDialog
+        android:id="@+id/dialog_change_email"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone" >
+        android:layout_height="match_parent" />
 
-        <odesk.johnlife.glimpse.ui.BlurLayout
-            android:id="@+id/how_it_works"
-            android:layout_width="@dimen/window_width"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-        	android:visibility="gone" >
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@color/background_shade"
-                android:divider="@drawable/layout_divider"
-                android:dividerPadding="0dp"
-                android:orientation="vertical"
-                android:padding="@dimen/xsmall_padding"
-                android:showDividers="middle" >
-
-                <TextView
-                    style="@style/title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/how_it_works" />
-
-                <ScrollView 
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1">
-                
-	                <LinearLayout
-	                    android:layout_width="match_parent"
-	                    android:layout_height="wrap_content"
-	                    android:orientation="vertical"
-	                    android:showDividers="middle" >
-	
-	                    <ImageView
-	                        android:id="@+id/imageHowItWork"
-	                        android:layout_width="wrap_content"
-	                        android:layout_height="wrap_content"
-	                        android:layout_gravity="center"
-	                        android:padding="@dimen/small_padding"
-	                        android:src="@drawable/ic_launcher" />
-	
-	                    <TextView
-	                        android:id="@+id/textEmail"
-	                        style="@style/txtViewStyle"
-	                        android:layout_width="wrap_content"
-	                        android:layout_height="wrap_content"
-	                        android:padding="@dimen/small_padding" />
-	
-	                    <TextView
-	                        style="@style/txtViewStyle"
-	                        android:layout_width="wrap_content"
-	                        android:layout_height="wrap_content"
-	                        android:padding="@dimen/small_padding"
-	                        android:text="@string/how_it_works_message" />
-	                </LinearLayout>
-                </ScrollView>
-                
-                <Button
-                    android:id="@+id/dialogButtonOK"
-                    style="@style/btnStyle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="@dimen/small_padding"
-                    android:text="@android:string/ok" />
-            </LinearLayout>
-        </odesk.johnlife.glimpse.ui.BlurLayout>
-
-    </FrameLayout>
-
-	<Gallery
+    <Gallery
         android:id="@+id/gallery1"
         android:layout_width="match_parent"
-        android:visibility="gone"
+        android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:layout_height="wrap_content" />
-
+        android:visibility="gone" />
 </FrameLayout>

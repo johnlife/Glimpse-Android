@@ -52,6 +52,7 @@ import odesk.johnlife.glimpse.app.GlimpseApp;
 import odesk.johnlife.glimpse.data.DatabaseHelper;
 import odesk.johnlife.glimpse.data.PictureData;
 import odesk.johnlife.glimpse.dialog.DeletingDialog;
+import odesk.johnlife.glimpse.dialog.EmailChangeDialog;
 import odesk.johnlife.glimpse.dialog.HelpDialog;
 import odesk.johnlife.glimpse.dialog.WifiDialog;
 import odesk.johnlife.glimpse.ui.BlurActionBar;
@@ -65,93 +66,6 @@ import odesk.johnlife.glimpse.util.MailConnector.OnItemDownloadListener;
 import odesk.johnlife.glimpse.util.WifiConnector;
 
 public class PhotoActivity extends Activity implements Constants {
-
-	private class NewEmailWizard {
-		View frame;
-		View dialog;
-		View step1;
-		View step2;
-		TextView emailView;
-		TextView error;
-
-		OnClickListener closeListener = new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (null == dialog) return;
-				dialog.setVisibility(View.GONE);
-				step1.setVisibility(View.VISIBLE);
-				step2.setVisibility(View.GONE);
-			}
-		};
-
-		public NewEmailWizard() {
-			frame = findViewById(R.id.new_email_frame);
-			dialog = findViewById(R.id.new_email_dialog);
-			dialog.setClickable(false);
-			step1 = dialog.findViewById(R.id.step1);
-			step2 = dialog.findViewById(R.id.step2);
-			emailView = (TextView) step2.findViewById(R.id.email);
-			error = (TextView) step2.findViewById(R.id.error);
-			step1.findViewById(R.id.cancel).setOnClickListener(closeListener);
-			step2.findViewById(R.id.cancel).setOnClickListener(closeListener);
-			frame.setOnTouchListener(new OnTouchListener() {
-				@Override
-				public boolean onTouch(View view, MotionEvent motionEvent) {
-					hide();
-					return true;
-				}
-			});
-			step1.findViewById(R.id.received).setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					step1.setVisibility(View.GONE);
-					step2.setVisibility(View.VISIBLE);
-					error.setVisibility(View.GONE);
-				}
-			});
-			step2.findViewById(R.id.ok).setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					String email = emailView.getText().toString();
-					if (email.isEmpty()) {
-						showError(R.string.error_email_empty);
-						return;
-					}
-					String fullEmail = email + "@glimpseframe.com";
-					if (!android.util.Patterns.EMAIL_ADDRESS.matcher(fullEmail).matches()) {
-						showError(R.string.error_email_invalid);
-						return;
-					}
-					try {
-						FileWriter out = new FileWriter(getUserDataFile());
-						out.write(fullEmail);
-						out.close();
-						restart();
-					} catch (IOException e) {
-//						PushLink.sendAsyncException(e);
-					}
-				}
-
-				void showError(int errorId) {
-					error.setText(errorId);
-					error.setVisibility(View.VISIBLE);
-				}
-			});
-		}
-
-		@SuppressWarnings("unused")
-		public void show() {
-			frame.setVisibility(View.VISIBLE);
-			dialog.setVisibility(View.VISIBLE);
-			step1.setVisibility(View.VISIBLE);
-			step2.setVisibility(View.GONE);
-		}
-
-		public void hide(){
-			frame.setVisibility(View.GONE);
-			dialog.setVisibility(View.GONE);
-		}
-	}
 
 //	private class WifiConnectionHandler {
 //		private ScanResult activeNetwork;
@@ -328,11 +242,7 @@ public class PhotoActivity extends Activity implements Constants {
 				rescheduleImageSwipe();
 			}
 		}
-
 	};
-
-
-
 
 	private TimerTask mailPollTask = new TimerTask() {
 		private final static String tag = "MailPolling";
@@ -375,8 +285,8 @@ public class PhotoActivity extends Activity implements Constants {
 	private DeletingDialog deletingDialog;
 	private HelpDialog helpDialog;
 	private WifiDialog wifiDialog;
+	private EmailChangeDialog emailChangeDialog;
 	@SuppressWarnings("unused")
-	private NewEmailWizard newEmail;
 	private BlurTextView seeNewPhoto;
 	private BlurTextView error;
 	private HintTextView hint;
@@ -428,6 +338,7 @@ public class PhotoActivity extends Activity implements Constants {
 		getActionBar().hide();
 		context = this;
 		helpDialog = (HelpDialog) findViewById(R.id.dialog_help);
+		emailChangeDialog = (EmailChangeDialog) findViewById(R.id.dialog_change_email);
 		databaseHelper = DatabaseHelper.getInstance(getApplicationContext());
 		pager = (ViewPager) findViewById(R.id.pager);
 		pagerAdapter = createAdapter();
@@ -668,9 +579,9 @@ public class PhotoActivity extends Activity implements Constants {
 //			layout.findViewById(R.id.change_email).setOnClickListener(new OnClickListener() {
 //				@Override
 //				public void onClick(View v) {
-//					getActionBar().hide();
 //					popupWindow.dismiss();
-//					newEmail.show();
+//					getActionBar().hide();
+//					emailChangeDialog.show();
 //				}
 //			});
 			layout.findViewById(R.id.reset_wifi).setOnClickListener(new OnClickListener() {
