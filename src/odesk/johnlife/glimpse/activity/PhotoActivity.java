@@ -57,7 +57,9 @@ import odesk.johnlife.glimpse.dialog.WifiDialog;
 import odesk.johnlife.glimpse.ui.BlurActionBar;
 import odesk.johnlife.glimpse.ui.BlurActionBar.OnActionClick;
 import odesk.johnlife.glimpse.ui.BlurListView;
+import odesk.johnlife.glimpse.ui.BlurTextView;
 import odesk.johnlife.glimpse.ui.FreezeViewPager;
+import odesk.johnlife.glimpse.ui.HintTextView;
 import odesk.johnlife.glimpse.util.MailConnector;
 import odesk.johnlife.glimpse.util.MailConnector.OnItemDownloadListener;
 import odesk.johnlife.glimpse.util.WifiConnector;
@@ -329,16 +331,8 @@ public class PhotoActivity extends Activity implements Constants {
 
 	};
 
-	private Runnable hideErrorPane = new Runnable() {
-		@Override
-		public void run() {
-			errorPane.setVisibility(View.GONE);
-			if (isConnectErrorVisible == true) {
-				isConnectErrorVisible = false;
-//				wifiConnectionHandler.scanWifi();
-			}
-		}
-	};
+
+
 
 	private TimerTask mailPollTask = new TimerTask() {
 		private final static String tag = "MailPolling";
@@ -361,7 +355,8 @@ public class PhotoActivity extends Activity implements Constants {
 				});
 				mailer.connect();
 				if (!GlimpseApp.getFileHandler().isEmpty()) {
-					hideErrorPane();
+					//TODO runOnUiThread, scanWifi
+					error.hide();
 				}
 			}
 		}
@@ -369,8 +364,6 @@ public class PhotoActivity extends Activity implements Constants {
 
 	private ProgressBar progressBar;
 	private BlurListView wifiList;
-	private View errorPane;
-	private TextView errorText;
 	private WifiManager wifi;
 	private Context context;
 	private DatabaseHelper databaseHelper;
@@ -384,10 +377,9 @@ public class PhotoActivity extends Activity implements Constants {
 	private WifiDialog wifiDialog;
 	@SuppressWarnings("unused")
 	private NewEmailWizard newEmail;
-	private View seeNewPhoto;
-	private TextView seeNewPhotoBtn;
-	private View messagePane;
-	private TextView hintText;
+	private BlurTextView seeNewPhoto;
+	private BlurTextView error;
+	private HintTextView hint;
 	private Gallery gallery;
 	private SharedPreferences preferences;
 	private boolean isAnimationNeeded = true;
@@ -418,8 +410,7 @@ public class PhotoActivity extends Activity implements Constants {
 		/** uncomment if newEmailWizard is needed*/
 //		newEmail = new NewEmailWizard();
 		progressBar = (ProgressBar) findViewById(R.id.progressLoading);
-		seeNewPhoto = findViewById(R.id.see_new_photos_layout);
-		seeNewPhotoBtn =  (TextView) findViewById(R.id.see_new_photos);
+		seeNewPhoto = (BlurTextView) findViewById(R.id.see_new_photos);
 		boolean sdcardReady = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED) && GlimpseApp.getPicturesDir().canWrite();
 		if (!sdcardReady) {
 			progressBar.setVisibility(View.VISIBLE);
@@ -450,12 +441,10 @@ public class PhotoActivity extends Activity implements Constants {
 		if (pagerAdapter.hasNewPhotos() && isConnected()) {
 			recreateSeeNewPhoto();
 		}
-		seeNewPhotoBtn.setOnClickListener(new OnClickListener() {
-
+		seeNewPhoto.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				seeNewPhoto.setVisibility(View.GONE);
-				seeNewPhotoBtn.setVisibility(View.GONE);
+				seeNewPhoto.hide();
 				pagerAdapter.setHasNewPhotos(false);
 				showNewPhotos();
 			}
@@ -504,10 +493,8 @@ public class PhotoActivity extends Activity implements Constants {
 			}
 		});
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-		errorPane = findViewById(R.id.error_pane);
-		messagePane = findViewById(R.id.message_pane);
-		hintText = ((TextView) messagePane.findViewById(R.id.hint_text));
-		errorText = ((TextView) errorPane.findViewById(R.id.error_text));
+		error = (BlurTextView) findViewById(R.id.error_pane);
+		hint = (HintTextView) findViewById(R.id.hint);
 		deletingDialog = (DeletingDialog) findViewById(R.id.dialog_deleting);
 		deletingDialog.setPositiveButtonListener(new View.OnClickListener() {
 			@Override
@@ -515,7 +502,7 @@ public class PhotoActivity extends Activity implements Constants {
 				pagerAdapter.deleteCurrentItem(pager);
 				deletingDialog.hide();
 				if (GlimpseApp.getFileHandler().isEmpty() && getUser() != null) {
-					showPaneError(getString(R.string.error_no_foto, getUser()));
+					error.show(getString(R.string.error_no_foto, getUser()));
 				}
 			}
 		});
@@ -529,22 +516,23 @@ public class PhotoActivity extends Activity implements Constants {
 		final String user = getUser();
 		mailTimer.scheduleAtFixedRate(mailPollTask, 0, REFRESH_RATE);
 		if (user == null) {
-			showPaneError(R.string.error_no_user_data);
+			error.show(R.string.error_no_user_data);
 			return;
 		}
 		if (pagerAdapter.getCount() >= SCREEN_PAGE_LIMIT) rescheduleImageSwipe();
 	}
 
+	//TODO
 	private void recreateSeeNewPhoto() {
 		if (gallery != null && gallery.getVisibility() == View.VISIBLE) return;
-		seeNewPhotoBtn.setVisibility(View.VISIBLE);
+		seeNewPhoto.setVisibility(View.VISIBLE);
 		final Animation animation = AnimationUtils.loadAnimation(PhotoActivity.this, R.anim.image_alpha);
 		seeNewPhoto.postDelayed(new Runnable() {
 			@Override
 			public void run() {
 				seeNewPhoto.setVisibility(View.VISIBLE); // need to invalidate background
 				Animation anim = animation;
-				anim.setDuration(anim.getDuration()/2);
+				anim.setDuration(anim.getDuration() / 2);
 				seeNewPhoto.startAnimation(anim);
 			}
 		}, animation.getDuration());
@@ -589,7 +577,7 @@ public class PhotoActivity extends Activity implements Constants {
 		wifiList.hide(true);
 		isAnimationNeeded = true;
 		if (GlimpseApp.getFileHandler().isEmpty() && getUser() != null) {
-			showPaneError(getString(R.string.error_no_foto, getUser()));
+			error.show(getString(R.string.error_no_foto, getUser()));
 		}
 	}
 
@@ -608,8 +596,8 @@ public class PhotoActivity extends Activity implements Constants {
 
 	private boolean isBlocked() {
 		View[] swipeBlockers = {
-				errorPane,
-				messagePane,
+				error,
+				hint,
 				/** uncomment if newEmail is needing*/
 //			newEmail.dialog,
 				helpDialog,
@@ -740,30 +728,15 @@ public class PhotoActivity extends Activity implements Constants {
 //		popupMenu.show();
 	}
 
-	public void showHint(int resId) {
-		showHint(getResources().getString(resId));
-	}
-
 	public void resetWifi() {
 		if (isConnected()) {
 			isDisconnectionHintNeeded = false;
 			new WifiConnector(context).forgetCurrent();
-			hideErrorPane();
+			error.hide();
 			progressBar.setVisibility(View.VISIBLE);
 //			registerScanReciver();
 			//	registerReceiver(wifiConnectionHandler.getReceiver(), new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 		}
-	}
-
-	public void showHint(String hint) {
-		hintText.setText(hint);
-		messagePane.setVisibility(View.VISIBLE);
-		messagePane.postDelayed(new Runnable() {
-			@Override
-			public void run() {
-				messagePane.setVisibility(View.GONE);
-			}
-		}, HINT_TIME);
 	}
 
 	public String getUser() {
@@ -791,24 +764,9 @@ public class PhotoActivity extends Activity implements Constants {
 		return dataFile;
 	}
 
-	private void hideErrorPane() {
-		if (errorPane.getVisibility() == View.VISIBLE) {
-			runOnUiThread(hideErrorPane);
-		}
-	}
-
 	private void rescheduleImageSwipe() {
 		pager.removeCallbacks(swipeRunnable);
 		pager.postDelayed(swipeRunnable, RESCHEDULE_REFRESH_RATE);
-	}
-
-	private void showPaneError(String text) {
-		errorText.setText(text);
-		errorPane.setVisibility(View.VISIBLE);
-	}
-
-	private void showPaneError(int resId) {
-		showPaneError(context.getString(resId));
 	}
 
 	private boolean isConnectedOrConnecting() {
@@ -829,6 +787,10 @@ public class PhotoActivity extends Activity implements Constants {
 		Point size = new Point();
 		display.getSize(size);
 		return size;
+	}
+
+	public void showHint(String text) {
+		hint.show(text);
 	}
 
 	private int getScreenWidth(double coefficient) {
