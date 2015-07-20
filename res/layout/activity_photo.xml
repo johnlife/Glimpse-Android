@@ -12,8 +12,8 @@
     <ProgressBar
         android:id="@+id/progressLoading"
         style="?android:attr/progressBarStyleLarge"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="@dimen/progressbar_size"
+        android:layout_height="@dimen/progressbar_size"
         android:layout_gravity="center_horizontal|center_vertical"
         android:visibility="gone" />
 
@@ -36,12 +36,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal|bottom"
-        android:layout_marginBottom="48dp"
+        android:layout_marginBottom="@dimen/hint_margin_bottom"
         android:visibility="gone" />
 
     <odesk.johnlife.glimpse.ui.BlurListView
         android:id="@+id/wifi_list"
-        android:layout_width="300dp"
+        android:layout_width="@dimen/window_width"
         android:layout_height="wrap_content"
         android:layout_gravity="right"
         android:visibility="gone" />
@@ -63,7 +63,7 @@
 
 	    <odesk.johnlife.glimpse.ui.BlurLayout
 	        android:id="@+id/wifi_pane"
-	        android:layout_width="300dp"
+	        android:layout_width="@dimen/window_width"
 	        android:layout_height="wrap_content"
 	        android:layout_gravity="center"
 	        android:visibility="gone" >
@@ -89,14 +89,14 @@
 	                android:divider="@drawable/layout_divider"
 	                android:dividerPadding="0dp"
 	                android:orientation="horizontal"
-	                android:padding="4dp"
+	                android:padding="@dimen/xsmall_padding"
 	                android:showDividers="middle" >
 
 	                <EditText
 	                    android:id="@+id/password"
 	                    android:layout_width="0dp"
 	                    android:layout_height="wrap_content"
-	                    android:layout_marginRight="8dp"
+	                    android:layout_marginRight="@dimen/small_margin"
 	                    android:layout_weight="1"
 	                    android:hint="@string/hint_password"
 	                    android:inputType="textPassword"
@@ -107,7 +107,7 @@
 	                    style="@style/btnStyle"
 	                    android:layout_width="wrap_content"
 	                    android:layout_height="wrap_content"
-	                    android:layout_marginLeft="8dp"
+	                    android:layout_marginLeft="@dimen/small_margin"
 	                    android:text="@string/button_connect" />
 	            </LinearLayout>
 
@@ -133,7 +133,7 @@
 
         <odesk.johnlife.glimpse.ui.BlurLayout
             android:id="@+id/new_email_dialog"
-            android:layout_width="400dp"
+            android:layout_width="@dimen/email_dialog_width"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:clickable="false"
@@ -161,7 +161,7 @@
                     style="@style/txtViewStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:padding="8dp"
+                    android:padding="@dimen/small_padding"
                     android:text="@string/text_new_email" />
 
                 <LinearLayout
@@ -170,7 +170,7 @@
                     android:divider="@drawable/layout_divider"
                     android:dividerPadding="0dp"
                     android:orientation="horizontal"
-                    android:padding="4dp"
+                    android:padding="@dimen/xsmall_padding"
                     android:showDividers="middle" >
 
                     <Button
@@ -178,7 +178,7 @@
                         style="@style/btnStyle"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="8dp"
+                        android:layout_marginLeft="@dimen/small_margin"
                         android:layout_weight="1"
                         android:text="@string/button_received" />
 
@@ -187,7 +187,7 @@
                         style="@style/btnStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="8dp"
+                        android:layout_marginLeft="@dimen/small_margin"
                         android:text="@android:string/cancel" />
                 </LinearLayout>
             </LinearLayout>
@@ -213,14 +213,14 @@
                     style="@style/txtViewStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:padding="8dp"
+                    android:padding="@dimen/small_padding"
                     android:text="@string/text_new_email_step2" />
 
                 <TextView
                     android:id="@+id/error"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="8dp"
+                    android:padding="@dimen/small_padding"
                     android:textColor="#f00"
                     android:textSize="@dimen/text_size"
                     android:visibility="gone" />
@@ -228,7 +228,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginRight="8dp"
+                    android:layout_marginRight="@dimen/small_margin"
                     android:gravity="center_vertical" >
 
                     <EditText
@@ -253,7 +253,7 @@
                     android:divider="@drawable/layout_divider"
                     android:dividerPadding="0dp"
                     android:orientation="horizontal"
-                    android:padding="4dp"
+                    android:padding="@dimen/xsmall_padding"
                     android:showDividers="middle" >
 
                     <Button
@@ -261,7 +261,7 @@
                         style="@style/btnStyle"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="8dp"
+                        android:layout_marginLeft="@dimen/small_margin"
                         android:layout_weight="1"
                         android:text="@android:string/ok" />
 
@@ -270,7 +270,7 @@
                         style="@style/btnStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="8dp"
+                        android:layout_marginLeft="@dimen/small_margin"
                         android:text="@android:string/cancel" />
                 </LinearLayout>
             </LinearLayout>
@@ -287,10 +287,10 @@
 
         <odesk.johnlife.glimpse.ui.BlurLayout
             android:id="@+id/delete_confirm"
-            android:layout_width="300dp"
+            android:layout_width="@dimen/window_width"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginTop="64dp"
+            android:layout_marginTop="@dimen/delete_confirm_margin_top"
             android:visibility="gone" >
 
             <LinearLayout
@@ -314,7 +314,7 @@
                     android:divider="@drawable/layout_divider"
                     android:dividerPadding="0dp"
                     android:orientation="horizontal"
-                    android:padding="4dp"
+                    android:padding="@dimen/xsmall_padding"
                     android:showDividers="middle" >
 
                     <Button
@@ -324,7 +324,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:drawableLeft="@android:drawable/ic_menu_revert"
-                        android:padding="8dp"
+                        android:padding="@dimen/small_padding"
                         android:text="@android:string/cancel" />
 
                     <Button
@@ -334,7 +334,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:drawableLeft="@android:drawable/ic_menu_delete"
-                        android:padding="8dp"
+                        android:padding="@dimen/small_padding"
                         android:text="@string/button_delete" />
                 </LinearLayout>
             </LinearLayout>
@@ -351,7 +351,7 @@
 
         <odesk.johnlife.glimpse.ui.BlurLayout
             android:id="@+id/how_it_works"
-            android:layout_width="300dp"
+            android:layout_width="@dimen/window_width"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
         	android:visibility="gone" >
@@ -363,7 +363,7 @@
                 android:divider="@drawable/layout_divider"
                 android:dividerPadding="0dp"
                 android:orientation="vertical"
-                android:padding="4dp"
+                android:padding="@dimen/xsmall_padding"
                 android:showDividers="middle" >
 
                 <TextView
@@ -388,7 +388,7 @@
 	                        android:layout_width="wrap_content"
 	                        android:layout_height="wrap_content"
 	                        android:layout_gravity="center"
-	                        android:padding="8dp"
+	                        android:padding="@dimen/small_padding"
 	                        android:src="@drawable/ic_launcher" />
 	
 	                    <TextView
@@ -396,13 +396,13 @@
 	                        style="@style/txtViewStyle"
 	                        android:layout_width="wrap_content"
 	                        android:layout_height="wrap_content"
-	                        android:padding="8dp" />
+	                        android:padding="@dimen/small_padding" />
 	
 	                    <TextView
 	                        style="@style/txtViewStyle"
 	                        android:layout_width="wrap_content"
 	                        android:layout_height="wrap_content"
-	                        android:padding="8dp"
+	                        android:padding="@dimen/small_padding"
 	                        android:text="@string/how_it_works_message" />
 	                </LinearLayout>
                 </ScrollView>
@@ -412,7 +412,7 @@
                     style="@style/btnStyle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="8dp"
+                    android:padding="@dimen/small_padding"
                     android:text="@android:string/ok" />
             </LinearLayout>
         </odesk.johnlife.glimpse.ui.BlurLayout>

@@ -5,6 +5,6 @@
     android:background="@color/background_shade"
     android:fontFamily="sans-serif-thin"
     android:gravity="center"
-    android:padding="8dp"
+    android:padding="@dimen/small_padding"
     android:textColor="@color/text"
     android:textSize="@dimen/error_pane" />
