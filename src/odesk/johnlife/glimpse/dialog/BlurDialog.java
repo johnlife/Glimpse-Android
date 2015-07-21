@@ -6,17 +6,17 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import odesk.johnlife.glimpse.R;
-import odesk.johnlife.glimpse.ui.BlurLayout;
 
-public abstract class BlurDialog extends BlurLayout {
+public abstract class BlurDialog extends FrameLayout {
 
     protected TextView title;
     protected View buttons;
     protected FrameLayout container;
-    protected View content;
+    protected LinearLayout content;
     protected Button positiveButton, negativeButton;
 
     public BlurDialog(Context context, AttributeSet attrs, int defStyle) {
@@ -47,7 +47,7 @@ public abstract class BlurDialog extends BlurLayout {
                 return true;
             }
         });
-        content = findViewById(R.id.content);
+        content = (LinearLayout) findViewById(R.id.content);
         container = (FrameLayout) content.findViewById(R.id.container);
         title = (TextView) content.findViewById(R.id.title);
         buttons = content.findViewById(R.id.buttons);
