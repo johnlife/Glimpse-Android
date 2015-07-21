@@ -31,12 +31,12 @@
         <item name="android:focusable">true</item>
         <item name="android:singleLine">true</item>
         <item name="android:ellipsize">none</item>
-        <item name="android:padding">@dimen/xsmall_padding</item>
+        <item name="android:padding">@dimen/custom_action_button_padding</item>
         <item name="android:textColor">@color/text</item>
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:gravity">center_vertical</item>
-        <item name="android:drawablePadding">@dimen/small_padding</item>
-        <item name="android:textSize">@dimen/text_size</item>
+        <item name="android:drawablePadding">@dimen/custom_action_button_drawable_padding</item>
+        <item name="android:textSize">@dimen/custom_action_button_text_size</item>
     </style>
 
     <style name="ActionButtonText">
