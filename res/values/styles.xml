@@ -31,11 +31,11 @@
         <item name="android:focusable">true</item>
         <item name="android:singleLine">true</item>
         <item name="android:ellipsize">none</item>
-        <item name="android:padding">4dp</item>
+        <item name="android:padding">@dimen/xsmall_padding</item>
         <item name="android:textColor">@color/text</item>
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:gravity">center_vertical</item>
-        <item name="android:drawablePadding">8dp</item>
+        <item name="android:drawablePadding">@dimen/small_padding</item>
         <item name="android:textSize">@dimen/text_size</item>
     </style>
 
@@ -50,7 +50,7 @@
     <style name="title" parent="android:Widget.Holo.TextView">
         <item name="android:fontFamily">sans-serif-thin</item>
         <item name="android:gravity">center</item>
-        <item name="android:padding">4dp</item>
+        <item name="android:padding">@dimen/xsmall_padding</item>
         <item name="android:textColor">@color/text</item>
         <item name="android:textSize">@dimen/title</item>
     </style>
