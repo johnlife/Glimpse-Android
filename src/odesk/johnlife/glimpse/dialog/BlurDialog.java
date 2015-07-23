@@ -13,10 +13,9 @@ import odesk.johnlife.glimpse.R;
 
 public abstract class BlurDialog extends FrameLayout {
 
-    protected TextView title;
-    protected View buttons;
+    private TextView title;
+    private LinearLayout content;
     protected FrameLayout container;
-    protected LinearLayout content;
     protected Button positiveButton, negativeButton;
 
     public BlurDialog(Context context, AttributeSet attrs, int defStyle) {
@@ -34,25 +33,14 @@ public abstract class BlurDialog extends FrameLayout {
         createView(context);
     }
 
-    public void setPositiveButtonListener(OnClickListener listener) {
-        positiveButton.setOnClickListener(listener);
-    }
-
     protected void createView(Context context) {
         inflate(context, R.layout.dialog, this);
-        setOnTouchListener(new OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                hide();
-                return true;
-            }
-        });
+        setOutsideListener();
         content = (LinearLayout) findViewById(R.id.content);
-        container = (FrameLayout) content.findViewById(R.id.container);
         title = (TextView) content.findViewById(R.id.title);
-        buttons = content.findViewById(R.id.buttons);
-        positiveButton = (Button) buttons.findViewById(R.id.ok);
-        negativeButton = (Button) buttons.findViewById(R.id.cancel);
+        container = (FrameLayout) content.findViewById(R.id.container);
+        positiveButton = (Button) content.findViewById(R.id.ok);
+        negativeButton = (Button) content.findViewById(R.id.cancel);
         negativeButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -61,20 +49,34 @@ public abstract class BlurDialog extends FrameLayout {
         });
     }
 
+    private void setOutsideListener() {
+        setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                hide();
+                return true;
+            }
+        });
+    }
+
     protected void setTitle(String text) {
         title.setText(text);
     }
 
-    protected void setTitle(int stringId) {
-        title.setText(stringId);
+    protected void setTitle(int res) {
+        title.setText(res);
+    }
+
+    public void setPositiveButtonListener(OnClickListener listener) {
+        positiveButton.setOnClickListener(listener);
     }
 
     protected void setPositiveButtonText(int stringId) {
         positiveButton.setText(stringId);
     }
 
-    protected void setNegativeButtonText(int stringId) {
-        negativeButton.setText(stringId);
+    protected void setDrawable(Button button, int res) {
+        button.setCompoundDrawablesWithIntrinsicBounds(res, 0, 0, 0);
     }
 
     public void show() {
@@ -86,4 +88,5 @@ public abstract class BlurDialog extends FrameLayout {
         setVisibility(View.GONE);
         content.setVisibility(View.GONE);
     }
+
 }

@@ -16,17 +16,7 @@ import odesk.johnlife.glimpse.R;
 
 public class WifiDialog extends BlurDialog {
 
-    private Context context;
     private EditText password;
-
-    private final Runnable focusRunnable = new Runnable() {
-        @Override
-        public void run() {
-            password.requestFocus();
-            InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.showSoftInput(password, InputMethodManager.SHOW_IMPLICIT);
-        }
-    };
 
     public WifiDialog(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
@@ -43,8 +33,6 @@ public class WifiDialog extends BlurDialog {
     @Override
     protected void createView(Context context) {
         super.createView(context);
-        this.context = context;
-        //TODO setTitle(networkName);
         View view = inflate(context, R.layout.wifi_dialog, container);
         password = (EditText) view.findViewById(R.id.password);
         CheckBox showPassword = (CheckBox) view.findViewById(R.id.is_password_visible);
@@ -86,4 +74,10 @@ public class WifiDialog extends BlurDialog {
                 }
         );
     }
+
+    public void show(String networkName) {
+        setTitle(networkName);
+        show();
+    }
+
 }

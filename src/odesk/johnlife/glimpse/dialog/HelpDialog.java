@@ -23,11 +23,11 @@ public class HelpDialog extends BlurDialog {
     @Override
     protected void createView(Context context) {
         super.createView(context);
-        setTitle(R.string.how_it_works);
         //TODO
 //        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(getScreenWidth(0.75), getScreenHeight(0.75), Gravity.CENTER);
 //        content.setLayoutParams(params);
-        container.addView(inflate(context, R.layout.dialog_help, null));
+        setTitle(R.string.how_it_works);
+        inflate(context, R.layout.dialog_help, container);
         negativeButton.setVisibility(View.GONE);
         setPositiveButtonListener(new OnClickListener() {
             @Override
@@ -42,4 +42,5 @@ public class HelpDialog extends BlurDialog {
 //        textEmail.setText(string);
 
     }
+
 }
