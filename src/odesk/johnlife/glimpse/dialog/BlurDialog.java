@@ -14,7 +14,7 @@ import odesk.johnlife.glimpse.R;
 public abstract class BlurDialog extends FrameLayout {
 
     private TextView title;
-    private LinearLayout content;
+    protected LinearLayout content;
     protected FrameLayout container;
     protected Button positiveButton, negativeButton;
 
