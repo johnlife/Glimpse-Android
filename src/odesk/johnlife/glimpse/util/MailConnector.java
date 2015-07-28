@@ -28,7 +28,7 @@ import android.util.Log;
 public class MailConnector implements Constants {
 	
 	public interface OnItemDownloadListener {
-		public void onItemDownload();
+		void onItemDownload();
 	}
 	
 	private static final String LOG_TAG = MailConnector.class.getSimpleName();
@@ -56,8 +56,7 @@ public class MailConnector implements Constants {
 	        Store store = session.getStore("imaps");
 		    store.connect(server, user, pass);
 			Log.d(LOG_TAG, "Connected to store");
-			Folder folder = null;
-			folder = store.getDefaultFolder().getFolder("INBOX");
+			Folder folder = store.getDefaultFolder().getFolder("INBOX");
 			folder.open(Folder.READ_WRITE);
 			Log.d(LOG_TAG, "Opened inbox");
 			FileHandler fileHandler = GlimpseApp.getFileHandler();

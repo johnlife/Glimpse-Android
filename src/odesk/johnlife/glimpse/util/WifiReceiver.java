@@ -20,12 +20,36 @@ import odesk.johnlife.glimpse.activity.PhotoActivity;
 
 public class WifiReceiver implements Constants {
 
-    public enum WifiError {NEED_PASSWORD, CONNECT_ERROR, UNKNOWN_ERROR }
+    public class WifiErrorData {
+
+        private WifiError type;
+        private Object data;
+
+        public WifiErrorData(WifiError type) {
+            this.type = type;
+            this.data = null;
+        }
+
+        public WifiErrorData(WifiError type, Object data) {
+            this.type = type;
+            this.data = data;
+        }
+
+        public WifiError getType() {
+            return type;
+        }
+
+        public Object getData() {
+            return data;
+        }
+    }
+
+    public enum WifiError {NEED_PASSWORD, CONNECT_ERROR, DISCONNECTED, UNKNOWN_ERROR }
 
     public interface OnWifiConnectionListener {
         void connecting();
         void connected();
-        void disconnected(WifiError error);
+        void disconnected(WifiErrorData error);
         void onScanning();
         void onScansResultReceive(List<ScanResult> scanResults);
     }
@@ -52,6 +76,7 @@ public class WifiReceiver implements Constants {
     private void updateFields(PhotoActivity activity, OnWifiConnectionListener listener) {
         this.activity = activity;
         this.listener = listener;
+        registerWifiBroadcast(true);
     }
 
     private static WifiReceiver instance;
@@ -74,7 +99,7 @@ public class WifiReceiver implements Constants {
                     if (resetPass >= WIFI_TRY_COUNT) {
                         prefs.edit().putString(PREF_WIFI_PASSWORD, "").apply();
                         resetPass = 0;
-                        listener.disconnected(WifiError.CONNECT_ERROR);
+                        listener.disconnected(new WifiErrorData(WifiError.CONNECT_ERROR));
                     }
                 }
             }
@@ -95,12 +120,12 @@ public class WifiReceiver implements Constants {
                 boolean isSuspended = info.getState() == NetworkInfo.State.SUSPENDED;
                 boolean unknown = info.getState() == NetworkInfo.State.UNKNOWN;
                 if (isSuspended || unknown) {
-                    listener.disconnected(WifiError.UNKNOWN_ERROR);
+                    listener.disconnected(new WifiErrorData(WifiError.UNKNOWN_ERROR));
                 } else if (details == NetworkInfo.DetailedState.DISCONNECTED) {
                     if (info.getExtraInfo() != null && info.getExtraInfo().equals("<unknown ssid>")) {
                         new WifiConnector(activity).forgetCurrent();
                     }
-                    listener.disconnected(WifiError.CONNECT_ERROR);
+                    listener.disconnected(new WifiErrorData(WifiError.CONNECT_ERROR));
                 } else if (connected && details == NetworkInfo.DetailedState.CONNECTED) {
                     WifiRedirectionTask redirectionTask = new WifiRedirectionTask() {
                         @Override
@@ -108,7 +133,7 @@ public class WifiReceiver implements Constants {
                             if (result) {
                                 listener.connected();
                             } else {
-                                listener.disconnected(WifiError.CONNECT_ERROR);
+                                listener.disconnected(new WifiErrorData(WifiError.CONNECT_ERROR));
                             }
                         }
                     };
@@ -127,7 +152,9 @@ public class WifiReceiver implements Constants {
 
     public void registerWifiBroadcast(boolean isNeed) {
         if (isNeed) {
-            activity.registerReceiver(wifiScanReceiver, new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
+            IntentFilter filter = new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+            filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+            activity.registerReceiver(wifiScanReceiver, new IntentFilter(filter));
             activity.registerReceiver(supplicantStateReceiver, new IntentFilter(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION));
         } else {
             activity.unregisterReceiver(wifiScanReceiver);
@@ -147,7 +174,7 @@ public class WifiReceiver implements Constants {
             new WifiConnector(activity).connectTo(activeNetwork);
         } else{
             if (pass == null) {
-                listener.disconnected(WifiError.NEED_PASSWORD);
+                listener.disconnected(new WifiErrorData(WifiError.NEED_PASSWORD, activeNetwork.SSID));
             } else {
                 WifiConnector wifiConnector = new WifiConnector(activity);
                 wifiConnector.connectTo(activeNetwork, pass);
@@ -155,7 +182,7 @@ public class WifiReceiver implements Constants {
                     prefs.edit().putString(PREF_WIFI_BSSID, activeNetwork.BSSID)
                             .putString(PREF_WIFI_PASSWORD, pass).apply();
                 } else {
-                    listener.disconnected(WifiError.UNKNOWN_ERROR);
+                    listener.disconnected(new WifiErrorData(WifiError.UNKNOWN_ERROR));
                     scanWifi();
                 }
             }
