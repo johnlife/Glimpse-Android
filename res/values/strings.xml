@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Glimpse Frame</string>
+    <string name="app_name">Skylight</string>
     
 	<string name="button_connect">Connect</string>
 	<string name="button_delete">Delete</string>
@@ -45,7 +45,7 @@
 	<string name="title_email_step2">New email address confirmed</string>
 	
 	<string name="how_it_works_title">How It Works</string>
-	<string name="how_it_works_email">Your Glimpse email address is</string>
+	<string name="how_it_works_email">Your Skylight email address is</string>
 	<string name="how_it_works_message">Very long text about how it works</string>
 	
 	  <string-array name="animation_effects">
