@@ -143,7 +143,7 @@ public class PhotoActivity extends Activity implements Constants, WifiReceiver.O
 //									onConnected();
 //									wifiDialog.hide();;
 //									isDisconnectionHintNeeded = true;
-//									showHint(getResources().getString(R.string.hint_success));
+//									showHint(getResources().getString(R.string.hint_wifi_connected));
 //								} else {
 ////									isDisconnectionHintNeeded = true;
 //									showHint(getResources().getString(R.string.hint_failed_to_connecn));
@@ -431,7 +431,7 @@ public class PhotoActivity extends Activity implements Constants, WifiReceiver.O
 
 	private void checkForNoPhotos() {
 		if (GlimpseApp.getFileHandler().isEmpty() && getUser() != null) {
-			error.show(getString(R.string.error_no_foto, getUser()));
+			error.show(getString(R.string.error_no_photo, getUser()));
 		}
 	}
 
@@ -694,7 +694,7 @@ public class PhotoActivity extends Activity implements Constants, WifiReceiver.O
 		wifiList.hide(false);
 		wifiDialog.hide();
 		error.hide();
-		hint.show(R.string.hint_success);
+		hint.show(R.string.hint_wifi_connected);
 		checkForNoPhotos();
 	}
 

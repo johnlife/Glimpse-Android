@@ -9,7 +9,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="@dimen/small_padding"
-        android:text="@string/text_new_email" />
+        android:visibility="gone"
+        android:text="@string/new_email_step1" />
 
     <LinearLayout
         android:id="@+id/step2"
@@ -18,14 +19,14 @@
         android:orientation="vertical"
         android:divider="@drawable/layout_divider"
         android:showDividers="middle"
-        android:visibility="gone" >
+         >
 
         <TextView
             style="@style/txtViewStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="@dimen/small_padding"
-            android:text="@string/text_new_email_step2" />
+            android:text="@string/new_email_step2" />
 
         <TextView
             android:id="@+id/error"
@@ -56,7 +57,7 @@
                 style="@style/txtViewStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/text_at_glimpseframe" />
+                android:text="@string/domain" />
         </LinearLayout>
     </LinearLayout>
 </FrameLayout>

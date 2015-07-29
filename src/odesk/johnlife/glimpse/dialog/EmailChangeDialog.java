@@ -33,7 +33,7 @@ public class EmailChangeDialog extends BlurDialog {
     }
 
     private void goToFirstStep() {
-        setTitle(R.string.title_email_step1);
+        setTitle(R.string.title_new_email_step1);
         step1.setVisibility(View.VISIBLE);
         step2.setVisibility(View.GONE);
         positiveButton.setOnClickListener(new View.OnClickListener() {
@@ -45,7 +45,7 @@ public class EmailChangeDialog extends BlurDialog {
     }
 
     private void goToSecondStep() {
-        setTitle(R.string.title_email_step2);
+        setTitle(R.string.title_new_email_step2);
         step1.setVisibility(View.GONE);
         step2.setVisibility(View.VISIBLE);
         error.setVisibility(View.GONE);

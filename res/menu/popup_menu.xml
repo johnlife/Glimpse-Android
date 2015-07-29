@@ -5,10 +5,10 @@
         <item
             android:id="@+id/menu1"
             android:icon="@drawable/ic_launcher"
-            android:title="@string/action_new_email"/>
+            android:title="@string/change_email"/>
         <item
             android:id="@+id/menu2"
-            android:title="@string/action_reset"/>
+            android:title="@string/reset_wifi"/>
         <item
             android:id="@+id/menu3"
             android:title="@string/how_it_works">

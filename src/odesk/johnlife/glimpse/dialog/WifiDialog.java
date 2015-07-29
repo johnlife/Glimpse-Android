@@ -75,7 +75,7 @@ public class WifiDialog extends BlurDialog {
                 connect();
             }
         });
-        setPositiveButtonText(R.string.button_connect);
+        setPositiveButtonText(R.string.connect);
     }
 
     @Override

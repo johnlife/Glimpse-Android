@@ -31,7 +31,7 @@
             android:minHeight="?android:attr/listPreferredItemHeightLarge"
             android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
             android:paddingStart="?android:attr/listPreferredItemPaddingStart"
-            android:text="@string/action_reset"
+            android:text="@string/reset_wifi"
             android:textAppearance="?android:attr/textAppearanceListItemSmall" />
 
         <TextView

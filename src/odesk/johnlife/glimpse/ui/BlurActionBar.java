@@ -60,7 +60,7 @@ public class BlurActionBar {
 	private void chageFreezeState(boolean isFreeze, View view) {
 		this.isFreeze = isFreeze;
 		TextView action = (TextView) view.findViewById(R.id.action_freeze);
-		action.setText(isFreeze ? R.string.action_unfreeze : R.string.action_freeze);
+		action.setText(isFreeze ? R.string.resume : R.string.pause);
 		action.setCompoundDrawablesWithIntrinsicBounds((isFreeze ? android.R.drawable.ic_media_play : android.R.drawable.ic_media_pause), 0,0,0);
 	}
 	
