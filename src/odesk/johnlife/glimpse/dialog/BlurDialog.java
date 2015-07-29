@@ -35,7 +35,7 @@ public abstract class BlurDialog extends FrameLayout {
 
     protected void createView(Context context) {
         inflate(context, R.layout.dialog, this);
-        setOutsideListener();
+        setOnTouchListener(getOutsideListener());
         content = (LinearLayout) findViewById(R.id.content);
         title = (TextView) content.findViewById(R.id.title);
         container = (FrameLayout) content.findViewById(R.id.container);
@@ -49,14 +49,14 @@ public abstract class BlurDialog extends FrameLayout {
         });
     }
 
-    private void setOutsideListener() {
-        setOnTouchListener(new OnTouchListener() {
+    protected OnTouchListener getOutsideListener() {
+        return new OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 hide();
                 return true;
             }
-        });
+        };
     }
 
     protected void setTitle(String text) {

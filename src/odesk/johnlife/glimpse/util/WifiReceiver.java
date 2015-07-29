@@ -8,9 +8,7 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
-import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiManager;
-import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 
 import java.util.List;
@@ -84,34 +82,29 @@ public class WifiReceiver implements Constants {
     private PhotoActivity activity;
     private OnWifiConnectionListener listener;
     private SharedPreferences prefs;
-    private int resetPass = 0;
+    private boolean isConnecting;
 
-    private final BroadcastReceiver supplicantStateReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)) {
-                SupplicantState supplicantState = intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
-                if (supplicantState == SupplicantState.COMPLETED) {
-                    // do something
-                } else if (supplicantState == SupplicantState.DISCONNECTED) {
-                    resetPass++;
-                    if (resetPass >= WIFI_TRY_COUNT) {
-                        prefs.edit().putString(PREF_WIFI_PASSWORD, "").apply();
-                        resetPass = 0;
-                        listener.disconnected(new WifiErrorData(WifiError.CONNECT_ERROR));
-                    }
-                }
-            }
-        }
-    };
+//    private final BroadcastReceiver supplicantStateReceiver = new BroadcastReceiver() {
+//        @Override
+//        public void onReceive(Context context, Intent intent) {
+//            String action = intent.getAction();
+//            if (action.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)) {
+//                SupplicantState supplicantState = intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
+//                if (supplicantState == SupplicantState.COMPLETED) {
+//                    // do something
+//                } else if (supplicantState == SupplicantState.DISCONNECTED) {
+//
+//                }
+//            }
+//        }
+//    };
 
     private final BroadcastReceiver wifiScanReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context c, Intent intent) {
             String action = intent.getAction();
             if (WifiManager.SCAN_RESULTS_AVAILABLE_ACTION.equals(action)) {
-                listener.onScansResultReceive(wifi.getScanResults());
+                if (!isConnecting) listener.onScansResultReceive(wifi.getScanResults());
             } else if (WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(action)) {
                 final NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
                 NetworkInfo.DetailedState details = info.getDetailedState();
@@ -120,28 +113,19 @@ public class WifiReceiver implements Constants {
                 boolean isSuspended = info.getState() == NetworkInfo.State.SUSPENDED;
                 boolean unknown = info.getState() == NetworkInfo.State.UNKNOWN;
                 if (isSuspended || unknown) {
+                    isConnecting = false;
                     listener.disconnected(new WifiErrorData(WifiError.UNKNOWN_ERROR));
                 } else if (details == NetworkInfo.DetailedState.DISCONNECTED) {
-                    if (info.getExtraInfo() != null && info.getExtraInfo().equals("<unknown ssid>")) {
-                        new WifiConnector(activity).forgetCurrent();
-                    }
-                    listener.disconnected(new WifiErrorData(WifiError.CONNECT_ERROR));
+                    isConnecting = false;
+                    resetCurrentWifi();
+                    prefs.edit().putString(PREF_WIFI_PASSWORD, "").apply();
+                    listener.disconnected(new WifiErrorData(WifiError.DISCONNECTED));
                 } else if (connected && details == NetworkInfo.DetailedState.CONNECTED) {
-                    WifiRedirectionTask redirectionTask = new WifiRedirectionTask() {
-                        @Override
-                        protected void onPostExecute(Boolean result) {
-                            if (result) {
-                                listener.connected();
-                            } else {
-                                listener.disconnected(new WifiErrorData(WifiError.CONNECT_ERROR));
-                            }
-                        }
-                    };
-                    redirectionTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                    resetPass = 0;
+                    isConnecting = false;
+                    listener.connected();
                 } else if (!connected && !connecting) {
-                    listener.onScanning();
                     if (details != NetworkInfo.DetailedState.SCANNING) {
+                        listener.onScanning();
                         scanWifi();
                     }
                 }
@@ -151,14 +135,18 @@ public class WifiReceiver implements Constants {
     };
 
     public void registerWifiBroadcast(boolean isNeed) {
-        if (isNeed) {
-            IntentFilter filter = new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-            filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
-            activity.registerReceiver(wifiScanReceiver, new IntentFilter(filter));
-            activity.registerReceiver(supplicantStateReceiver, new IntentFilter(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION));
-        } else {
-            activity.unregisterReceiver(wifiScanReceiver);
-            activity.unregisterReceiver(supplicantStateReceiver);
+        try {
+            if (isNeed) {
+                IntentFilter filter = new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+                filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+                activity.registerReceiver(wifiScanReceiver, new IntentFilter(filter));
+//                activity.registerReceiver(supplicantStateReceiver, new IntentFilter(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION));
+            } else {
+                activity.unregisterReceiver(wifiScanReceiver);
+//                activity.unregisterReceiver(supplicantStateReceiver);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -171,21 +159,33 @@ public class WifiReceiver implements Constants {
         listener.connecting();
         String cap = activeNetwork.capabilities;
         if (cap.isEmpty() || cap.startsWith("[ESS")) {
-            new WifiConnector(activity).connectTo(activeNetwork);
+            checkConnectionResult(activeNetwork, pass);
         } else{
             if (pass == null) {
-                listener.disconnected(new WifiErrorData(WifiError.NEED_PASSWORD, activeNetwork.SSID));
+                isConnecting = false;
+                listener.disconnected(new WifiErrorData(WifiError.NEED_PASSWORD, activeNetwork));
             } else {
-                WifiConnector wifiConnector = new WifiConnector(activity);
-                wifiConnector.connectTo(activeNetwork, pass);
-                if (wifiConnector.getConnectionResult() != -1) {
-                    prefs.edit().putString(PREF_WIFI_BSSID, activeNetwork.BSSID)
-                            .putString(PREF_WIFI_PASSWORD, pass).apply();
-                } else {
-                    listener.disconnected(new WifiErrorData(WifiError.UNKNOWN_ERROR));
-                    scanWifi();
-                }
+                checkConnectionResult(activeNetwork, pass);
             }
+        }
+    }
+
+    private void checkConnectionResult(ScanResult activeNetwork, String pass) {
+        isConnecting = true;
+        WifiConnector wifiConnector = new WifiConnector(activity);
+        if (pass == null) {
+            wifiConnector.connectTo(activeNetwork);
+        } else {
+            wifiConnector.connectTo(activeNetwork, pass);
+        }
+        if (wifiConnector.getConnectionResult() != -1) {
+            isConnecting = true;
+            if (pass != null) prefs.edit().putString(PREF_WIFI_BSSID, activeNetwork.BSSID).putString(PREF_WIFI_PASSWORD, pass).apply();
+        } else {
+            isConnecting = false;
+            listener.disconnected(new WifiErrorData(WifiError.UNKNOWN_ERROR));
+            resetCurrentWifi();
+            scanWifi();
         }
     }
 
@@ -201,10 +201,8 @@ public class WifiReceiver implements Constants {
         return getNetworkInfo().isConnected();
     }
 
-    public void resetWifi() {
-        if (isConnected()) {
-            new WifiConnector(activity).forgetCurrent();
-        }
+    public void resetCurrentWifi() {
+        new WifiConnector(activity).forgetCurrent();
     }
 
     private NetworkInfo getNetworkInfo() {

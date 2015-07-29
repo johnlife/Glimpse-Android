@@ -7,14 +7,14 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import odesk.johnlife.glimpse.R;
 
 public class ScanResultAdapter extends ArrayAdapter<ScanResult> {
 
-    public ScanResultAdapter(Context context, List<ScanResult> list) {
-        super(context, R.layout.wifi_list_item, list);
+    public ScanResultAdapter(Context context) {
+        super(context, R.layout.wifi_list_item, new ArrayList<ScanResult>());
     }
 
     @Override

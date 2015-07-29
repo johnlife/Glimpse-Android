@@ -7,11 +7,8 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -19,12 +16,16 @@ import java.util.List;
 import java.util.TreeSet;
 
 import odesk.johnlife.glimpse.R;
-import odesk.johnlife.glimpse.activity.PhotoActivity;
-import odesk.johnlife.glimpse.util.WifiConnector;
+import odesk.johnlife.glimpse.adapter.ScanResultAdapter;
 
 public class BlurListView extends BlurLayout {
 
-    private ArrayAdapter<ScanResult> adapter;
+    public interface OnItemClickListener {
+        void onItemClick(ScanResult item);
+    }
+
+    private ScanResultAdapter adapter;
+    private ListView list;
 
     public BlurListView(Context context) {
         super(context);
@@ -43,49 +44,9 @@ public class BlurListView extends BlurLayout {
 
     private void createView(Context context) {
         inflate(context, R.layout.list_view, this);
-        ListView list = (ListView) findViewById(R.id.list);
-        adapter = new ArrayAdapter<ScanResult>(context, R.layout.wifi_list_item, new ArrayList<ScanResult>()) {
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                TextView view = (TextView) super.getView(position, convertView, parent);
-                view.setText(getItem(position).SSID);
-                return view;
-            }
-        };
+        list = (ListView) findViewById(R.id.list);
+        adapter = new ScanResultAdapter(context);
         list.setAdapter(adapter);
-        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                hide(false);
-                //TODO
-//                activeNetwork = adapter.getItem(position);
-//                String cap = activeNetwork.capabilities;
-//                if (cap.isEmpty() || cap.startsWith("[ESS")) {
-//                    progressBar.setVisibility(View.VISIBLE);
-//                    new WifiConnector(PhotoActivity.this).connectTo(activeNetwork);
-//                } else {
-//                    String BSSID = preferences.getString(PREF_WIFI_BSSID, "");
-//                    String pass = preferences.getString(PREF_WIFI_PASSWORD, "");
-//                    if (activeNetwork.BSSID.equals(BSSID) && !pass.equals("")) {
-//                        connectToNetwork(pass);
-//                    } else {
-//                        wifiDialogFrame.setVisibility(View.VISIBLE);
-//                        wifiDialog.setVisibility(View.VISIBLE);
-//                        password.setText("");
-//                        password.postDelayed(focusRunnable, 150);
-//                        password.requestFocus();
-//                        networkName.setText(activeNetwork.SSID);
-//                    }
-//                }
-//                if (!isConnectedOrConnecting() && wifiDialogFrame.getVisibility() != View.VISIBLE
-//                        && progressBar.getVisibility() == View.GONE) {
-//                    showHint(getResources().getString(R.string.hint_wifi_error));
-//                }
-//                view.setClickable(true);
-                //or
-                //WifiReceiver.getInstance().connectToNetwork(adapter.getItem(position));
-            }
-        });
     }
 
     public void update(List<ScanResult> result) {
@@ -104,7 +65,15 @@ public class BlurListView extends BlurLayout {
         }
         adapter.clear();
         adapter.addAll(scanResults);
-        show();
+    }
+
+    public void setOnItemClickListener(final OnItemClickListener listener) {
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                listener.onItemClick(adapter.getItem(position));
+            }
+        });
     }
 
     public void show() {

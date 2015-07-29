@@ -6,17 +6,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
 import android.os.Bundle;
 import android.os.Environment;
-import android.preference.PreferenceManager;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -58,7 +54,6 @@ import odesk.johnlife.glimpse.ui.FreezeViewPager;
 import odesk.johnlife.glimpse.ui.HintTextView;
 import odesk.johnlife.glimpse.util.MailConnector;
 import odesk.johnlife.glimpse.util.MailConnector.OnItemDownloadListener;
-import odesk.johnlife.glimpse.util.WifiConnector;
 import odesk.johnlife.glimpse.util.WifiReceiver;
 
 public class PhotoActivity extends Activity implements Constants, WifiReceiver.OnWifiConnectionListener {
@@ -283,15 +278,9 @@ public class PhotoActivity extends Activity implements Constants, WifiReceiver.O
 	private DatabaseHelper databaseHelper;
 	private WifiReceiver wifi;
 	private ImagePagerAdapter pagerAdapter;
-	private boolean isConnectErrorVisible = false;
 	private Timer mailTimer = new Timer();
-	private SharedPreferences preferences;
-	private boolean isAnimationNeeded = true;
-	private boolean isDisconnectionHintNeeded = false;
 	private boolean isFreeze = false;
 	private boolean galleryHideSeeNewPhoto;
-	private boolean isScanRegisted;
-	private int resetPass = 0;
 
 	@Override
 	public void onBackPressed() {
@@ -320,7 +309,6 @@ public class PhotoActivity extends Activity implements Constants, WifiReceiver.O
 
 	private void init() {
 		context = this;
-		preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 		getActionBar().hide();
 		mailTimer.scheduleAtFixedRate(mailPollTask, 0, REFRESH_RATE);
 		databaseHelper = DatabaseHelper.getInstance(getApplicationContext());
@@ -364,6 +352,12 @@ public class PhotoActivity extends Activity implements Constants, WifiReceiver.O
 				return isBlocked();
 			}
 		});
+		wifiList.setOnItemClickListener(new BlurListView.OnItemClickListener() {
+			@Override
+			public void onItemClick(ScanResult item) {
+				wifi.connectToNetwork(item);
+			}
+		});
 		gallery.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
@@ -380,15 +374,19 @@ public class PhotoActivity extends Activity implements Constants, WifiReceiver.O
 			public void onClick(View v) {
 				pagerAdapter.deleteCurrentItem(pager);
 				deletingDialog.hide();
-				if (GlimpseApp.getFileHandler().isEmpty() && getUser() != null) {
-					error.show(getString(R.string.error_no_foto, getUser()));
-				}
+				checkForNoPhotos();
 			}
 		});
-		wifiDialog.setPositiveButtonListener(new OnClickListener() {
+		wifiDialog.setOnConnectClickListener(new WifiDialog.OnButtonsClickListener() {
 			@Override
-			public void onClick(View v) {
-				//TODO
+			public void onConnect(ScanResult network, String password) {
+				wifi.connectToNetwork(network, password);
+			}
+
+			@Override
+			public void onCancel() {
+				wifiList.show();
+				wifi.scanWifi();
 			}
 		});
 		seeNewPhoto.setOnClickListener(new OnClickListener() {
@@ -423,15 +421,18 @@ public class PhotoActivity extends Activity implements Constants, WifiReceiver.O
 		}
 		init();
 		pagerAdapter.checkNewPhotos();
-		if (pagerAdapter.hasNewPhotos() && isConnected()) {
-			recreateSeeNewPhoto();
-		}
-		final String user = getUser();
-		if (user == null) {
+		if (pagerAdapter.hasNewPhotos() && isConnected()) recreateSeeNewPhoto();
+		if (getUser() == null) {
 			error.show(R.string.error_no_user_data);
 			return;
 		}
 		if (pagerAdapter.getCount() >= SCREEN_PAGE_LIMIT) rescheduleImageSwipe();
+	}
+
+	private void checkForNoPhotos() {
+		if (GlimpseApp.getFileHandler().isEmpty() && getUser() != null) {
+			error.show(getString(R.string.error_no_foto, getUser()));
+		}
 	}
 
 	//TODO
@@ -452,7 +453,7 @@ public class PhotoActivity extends Activity implements Constants, WifiReceiver.O
 
 	@Override
 	protected void onDestroy() {
-//		wifiConnectionHandler.unregisterBroadcast();
+		wifi.registerWifiBroadcast(false);
 		mailTimer.cancel();
 		super.onDestroy();
 	}
@@ -482,15 +483,6 @@ public class PhotoActivity extends Activity implements Constants, WifiReceiver.O
 				}
 			}
 		};
-	}
-
-	private void onConnected() {
-		progressBar.setVisibility(View.GONE);
-		wifiList.hide(true);
-		isAnimationNeeded = true;
-		if (GlimpseApp.getFileHandler().isEmpty() && getUser() != null) {
-			error.show(getString(R.string.error_no_foto, getUser()));
-		}
 	}
 
 	private void showNewPhotos() {
@@ -589,7 +581,7 @@ public class PhotoActivity extends Activity implements Constants, WifiReceiver.O
 				@Override
 				public void onClick(View v) {
 					popupWindow.dismiss();
-					resetWifi();
+					wifi.resetCurrentWifi();
 				}
 			});
 			layout.findViewById(R.id.how_it_works).setOnClickListener(new OnClickListener() {
@@ -640,17 +632,6 @@ public class PhotoActivity extends Activity implements Constants, WifiReceiver.O
 //		popupMenu.show();
 	}
 
-	public void resetWifi() {
-		if (isConnected()) {
-			isDisconnectionHintNeeded = false;
-			new WifiConnector(context).forgetCurrent();
-			error.hide();
-			progressBar.setVisibility(View.VISIBLE);
-//			registerScanReciver();
-			//	registerReceiver(wifiConnectionHandler.getReceiver(), new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
-		}
-	}
-
 	public String getUser() {
 		String user = null;
 		try {
@@ -694,23 +675,8 @@ public class PhotoActivity extends Activity implements Constants, WifiReceiver.O
 		return connectionManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 	}
 
-	private Point getScreenSize() {
-		Display display = getWindowManager().getDefaultDisplay();
-		Point size = new Point();
-		display.getSize(size);
-		return size;
-	}
-
 	public void showHint(String text) {
 		hint.show(text);
-	}
-
-	private int getScreenWidth(double coefficient) {
-		return (int) (getScreenSize().x * coefficient);
-	}
-
-	private int getScreenHeight(double coefficient) {
-		return (int) (getScreenSize().y * coefficient);
 	}
 
 	@Override
@@ -729,6 +695,7 @@ public class PhotoActivity extends Activity implements Constants, WifiReceiver.O
 		wifiDialog.hide();
 		error.hide();
 		hint.show(R.string.hint_success);
+		checkForNoPhotos();
 	}
 
 	@Override
@@ -736,21 +703,21 @@ public class PhotoActivity extends Activity implements Constants, WifiReceiver.O
 		progressBar.setVisibility(View.GONE);
 		error.hide();
 		hint.hide();
+		getActionBar().hide();
 		WifiReceiver.WifiError type = errorData.getType();
 		if (WifiReceiver.WifiError.NEED_PASSWORD.equals(type)) {
-			wifiDialog.show((String) errorData.getData());
+			wifiDialog.show((ScanResult) errorData.getData());
 		} else {
 			wifiList.show();
 			wifi.scanWifi();
 			if (WifiReceiver.WifiError.CONNECT_ERROR.equals(type)) {
 				hint.show(R.string.hint_failed_to_connect);
-			} else if (WifiReceiver.WifiError.DISCONNECTED.equals(type)){
+			} else if (WifiReceiver.WifiError.DISCONNECTED.equals(type)) {
 				hint.show(R.string.hint_wifi_disconnected);
 			} else {
 				hint.show(R.string.hint_wifi_error);
 			}
 		}
-
 	}
 
 	@Override
@@ -761,12 +728,12 @@ public class PhotoActivity extends Activity implements Constants, WifiReceiver.O
 
 	@Override
 	public void onScansResultReceive(List<ScanResult> scanResults) {
-		if (wifi.isConnectedOrConnecting() || wifi.isConnected()) return;
-		progressBar.setVisibility(View.GONE);
-		hint.hide();
-		error.hide();
-		wifiList.show();
 		wifiList.update(scanResults);
+		if (wifi.isConnectedOrConnecting() || wifi.isConnected() || wifiDialog.getVisibility() == View.VISIBLE) return;
+		progressBar.setVisibility(View.GONE);
+//		hint.hide();
+//		error.hide();
+		wifiList.show();
 	}
 
 }

@@ -101,4 +101,20 @@ public class EmailChangeDialog extends BlurDialog {
 //            }
 //        });
     }
+
+//    private int getScreenWidth(double coefficient) {
+//        return (int) (getScreenSize().x * coefficient);
+//    }
+//
+//    private int getScreenHeight(double coefficient) {
+//        return (int) (getScreenSize().y * coefficient);
+//    }
+//
+//    private Point getScreenSize() {
+//        Display display = getWindowManager().getDefaultDisplay();
+//        Point size = new Point();
+//        display.getSize(size);
+//        return size;
+//    }
+
 }

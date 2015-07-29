@@ -6,35 +6,16 @@
     android:orientation="vertical"
     android:showDividers="middle">
 
-    <LinearLayout
+    <EditText
+        android:id="@+id/password"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:divider="@drawable/layout_divider"
-        android:orientation="horizontal"
-        android:padding="@dimen/xsmall_padding"
-        android:showDividers="middle">
+        android:hint="@string/hint_password"
+        android:inputType="textPassword"
+        android:textSize="@dimen/text_size">
 
-        <EditText
-            android:id="@+id/password"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="@dimen/small_margin"
-            android:layout_weight="1"
-            android:hint="@string/hint_password"
-            android:inputType="textPassword"
-            android:textSize="@dimen/text_size">
-
-            <requestFocus />
-        </EditText>
-
-        <Button
-            android:id="@+id/connect"
-            style="@style/btnStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/small_margin"
-            android:text="@string/button_connect" />
-    </LinearLayout>
+        <requestFocus />
+    </EditText>
 
     <CheckBox
         android:id="@+id/is_password_visible"
