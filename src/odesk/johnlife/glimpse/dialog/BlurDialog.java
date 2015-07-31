@@ -49,11 +49,11 @@ public abstract class BlurDialog extends FrameLayout {
         });
     }
 
-    protected OnTouchListener getOutsideListener() {
+    private OnTouchListener getOutsideListener() {
         return new OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                hide();
+                cancel();
                 return true;
             }
         };
@@ -87,6 +87,10 @@ public abstract class BlurDialog extends FrameLayout {
     public void hide() {
         setVisibility(View.GONE);
         content.setVisibility(View.GONE);
+    }
+
+    protected void cancel() {
+        hide();
     }
 
 }

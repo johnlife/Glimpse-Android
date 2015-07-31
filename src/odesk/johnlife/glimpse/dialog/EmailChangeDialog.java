@@ -6,9 +6,10 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import odesk.johnlife.glimpse.Constants;
 import odesk.johnlife.glimpse.R;
 
-public class EmailChangeDialog extends BlurDialog {
+public class EmailChangeDialog extends BlurDialog implements Constants{
 
     private View step1, step2;
     private EditText emailView;
@@ -53,11 +54,17 @@ public class EmailChangeDialog extends BlurDialog {
     }
 
     @Override
+    public void show() {
+        super.show();
+        goToFirstStep();
+    }
+
+    @Override
     protected void createView(Context context) {
         super.createView(context);
-        View view = inflate(context, R.layout.dialog_change_email, container);
-        step1 = content.findViewById(R.id.step1);
-        step2 = content.findViewById(R.id.step2);
+        inflate(context, R.layout.dialog_change_email, container);
+        step1 = findViewById(R.id.step1);
+        step2 = findViewById(R.id.step2);
         emailView = (EditText) step2.findViewById(R.id.email);
         error = (TextView) step2.findViewById(R.id.error);
         negativeButton.setOnClickListener(new OnClickListener() {
@@ -70,38 +77,46 @@ public class EmailChangeDialog extends BlurDialog {
                 }
             }
         });
-        goToFirstStep();
-//        step2.findViewById(R.id.ok).setOnClickListener(new View.OnClickListener() {
+
+        //TODO
+//        positiveButton.setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View v) {
-//                error.setVisibility(View.GONE);
-//                String email = emailView.getText().toString();
-//                if (email.isEmpty()) {
-//                    showError(R.string.error_email_empty);
-//                    return;
+//                if (checkEmail()) {
+//                    try {
+//                        FileWriter out = new FileWriter(getUserDataFile());
+//                        out.write(fullEmail);
+//                        out.close();
+//                        restart();
+//                    } catch (IOException e) {
+////					    PushLink.sendAsyncException(e);
+//                    }
 //                }
-//                String fullEmail = email + "@glimpseframe.com";
-//                if (!android.util.Patterns.EMAIL_ADDRESS.matcher(fullEmail).matches()) {
-//                    showError(R.string.error_email_invalid);
-//                    return;
-//                }
-////                try {
-////                    FileWriter out = new FileWriter(getUserDataFile());
-////                    out.write(fullEmail);
-////                    out.close();
-////                    restart();
-////                } catch (IOException e) {
-//////					PushLink.sendAsyncException(e);
-////                }
-//            }
-//
-//            void showError(int errorId) {
-//                error.setText(errorId);
-//                error.setVisibility(View.VISIBLE);
 //            }
 //        });
     }
 
+    public boolean checkEmail() {
+        error.setVisibility(View.GONE);
+        String email = emailView.getText().toString();
+        if (email.isEmpty()) {
+            showError(R.string.error_email_empty);
+            return false;
+        }
+        String fullEmail = email + DOMAIN;
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(fullEmail).matches()) {
+            showError(R.string.error_email_invalid);
+            return false;
+        }
+        return true;
+    }
+
+    private void showError(int errorId) {
+        error.setText(errorId);
+        error.setVisibility(View.VISIBLE);
+    }
+
+    //TODO
 //    private int getScreenWidth(double coefficient) {
 //        return (int) (getScreenSize().x * coefficient);
 //    }

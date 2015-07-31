@@ -14,11 +14,12 @@ public interface Constants {
 	String WIFI_REDIRECT_URL = "http://google.com/";
 	String GOOGLE = "google";
 	String REFRESH_STRING = "META HTTP-EQUIV=\"REFRESH\"";
+	String DOMAIN = "@glimpseframe.com";
 
 	int REFRESH_RATE = 10000;
 	int HINT_TIME = 3000;
 	int SCREEN_PAGE_LIMIT = 2;
 	int RESCHEDULE_REFRESH_RATE = 8000;
 	double IMAGE_SIZE_PERCENTAGE = 0.3;
-	int WIFI_TRY_COUNT = 3;
+
 }
