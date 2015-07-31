@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
+import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiManager;
 import android.preference.PreferenceManager;
 
@@ -84,20 +85,21 @@ public class WifiReceiver implements Constants {
     private SharedPreferences prefs;
     private boolean isConnecting;
 
-//    private final BroadcastReceiver supplicantStateReceiver = new BroadcastReceiver() {
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            String action = intent.getAction();
-//            if (action.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)) {
-//                SupplicantState supplicantState = intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
-//                if (supplicantState == SupplicantState.COMPLETED) {
-//                    // do something
-//                } else if (supplicantState == SupplicantState.DISCONNECTED) {
-//
-//                }
-//            }
-//        }
-//    };
+    private final BroadcastReceiver supplicantStateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)) {
+                SupplicantState supplicantState = intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
+                if (supplicantState == SupplicantState.DISCONNECTED) {
+                    if (intent.getIntExtra(WifiManager.EXTRA_SUPPLICANT_ERROR, -1) == WifiManager.ERROR_AUTHENTICATING) {
+                        prefs.edit().remove(PREF_WIFI_PASSWORD).apply();
+                        listener.disconnected(new WifiErrorData(WifiError.CONNECT_ERROR));
+                    }
+                }
+            }
+        }
+    };
 
     private final BroadcastReceiver wifiScanReceiver = new BroadcastReceiver() {
         @Override
@@ -140,10 +142,10 @@ public class WifiReceiver implements Constants {
                 IntentFilter filter = new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION);
                 filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
                 activity.registerReceiver(wifiScanReceiver, new IntentFilter(filter));
-//                activity.registerReceiver(supplicantStateReceiver, new IntentFilter(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION));
+                activity.registerReceiver(supplicantStateReceiver, new IntentFilter(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION));
             } else {
                 activity.unregisterReceiver(wifiScanReceiver);
-//                activity.unregisterReceiver(supplicantStateReceiver);
+                activity.unregisterReceiver(supplicantStateReceiver);
             }
         } catch (Exception e) {
             e.printStackTrace();
