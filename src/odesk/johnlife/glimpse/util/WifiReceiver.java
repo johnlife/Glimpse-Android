@@ -75,7 +75,6 @@ public class WifiReceiver implements Constants {
     private void updateFields(PhotoActivity activity, OnWifiConnectionListener listener) {
         this.activity = activity;
         this.listener = listener;
-        registerWifiBroadcast(true);
     }
 
     private static WifiReceiver instance;
