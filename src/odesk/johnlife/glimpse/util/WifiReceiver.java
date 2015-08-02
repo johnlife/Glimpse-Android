@@ -275,7 +275,6 @@ public class WifiReceiver implements Constants {
     }
 
     public void scanWifi() {
-        //TODO показать прогресс
         wifi.startScan();
     }
 

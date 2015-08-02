@@ -17,12 +17,9 @@ import java.util.TreeSet;
 
 import odesk.johnlife.glimpse.R;
 import odesk.johnlife.glimpse.adapter.ScanResultAdapter;
+import odesk.johnlife.glimpse.util.WifiReceiver;
 
 public class BlurListView extends BlurLayout {
-
-    public interface OnItemClickListener {
-        void onItemClick(ScanResult item);
-    }
 
     private ScanResultAdapter adapter;
     private ListView list;
@@ -47,6 +44,12 @@ public class BlurListView extends BlurLayout {
         list = (ListView) findViewById(R.id.list);
         adapter = new ScanResultAdapter(context);
         list.setAdapter(adapter);
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                WifiReceiver.getInstance().connectToNetwork(adapter.getItem(position));
+            }
+        });
     }
 
     public void update(List<ScanResult> result) {
@@ -65,15 +68,6 @@ public class BlurListView extends BlurLayout {
         }
         adapter.clear();
         adapter.addAll(scanResults);
-    }
-
-    public void setOnItemClickListener(final OnItemClickListener listener) {
-        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                listener.onItemClick(adapter.getItem(position));
-            }
-        });
     }
 
     public void show() {

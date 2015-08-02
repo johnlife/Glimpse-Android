@@ -6,8 +6,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
 import android.os.Bundle;
 import android.os.Environment;
@@ -65,14 +63,14 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 //		private final BroadcastReceiver wifiScanReceiver = new BroadcastReceiver() {
 //			@Override
 //			public void onReceive(Context c, Intent intent) {
-//				progressBar.setVisibility(View.GONE);
+//				progress.setVisibility(View.GONE);
 //				wifiList.hide(false);
 //				String action = intent.getAction();
 //				if (action.equals(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
 //					if (isConnectedOrConnecting() /* TODO || wifiDialogFrame.getVisibility() == View.VISIBLE*/) return;
 //					wifiList.update(wifi.getScanResults());
 //					if (!isConnectedOrConnecting()) return;
-//					progressBar.setVisibility(View.GONE);
+//					progress.setVisibility(View.GONE);
 //					errorPane.setVisibility(View.GONE);
 //					wifiList.hide(false);
 //					//TODO
@@ -164,7 +162,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 		@Override
 		public void run() {
 			String user = getUser();
-			if (isConnected() && null != user) {
+			if (wifi.isConnected() && null != user) {
 				MailConnector mailer = new MailConnector(user, "HPgqL2658P", new OnItemDownloadListener() {
 					@Override
 					public void onItemDownload() {
@@ -189,7 +187,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 
 	private BlurActionBar actionBar;
 	private ViewPager pager;
-	private ProgressBar progressBar;
+	private ProgressBar progress;
 	private BlurTextView seeNewPhoto, error;
 	private HintTextView hint;
 	private BlurListView wifiList;
@@ -198,8 +196,6 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	private EmailChangeDialog emailChangeDialog;
 	private HelpDialog helpDialog;
 	private WifiDialog wifiDialog;
-
-	private Context context;
 	private DatabaseHelper databaseHelper;
 	private WifiReceiver wifi;
 	private ImagePagerAdapter pagerAdapter;
@@ -217,28 +213,72 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 //		}
 	}
 
-	private void initViews() {
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		Crashlytics.start(this);
+		setContentView(R.layout.activity_photo);
+		progress = (ProgressBar) findViewById(R.id.progressLoading);
+		if (!(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED) && GlimpseApp.getPicturesDir().canWrite())) {
+			progress.setVisibility(View.VISIBLE);
+			IntentFilter filter = new IntentFilter(Intent.ACTION_MEDIA_MOUNTED);
+			filter.addDataScheme("file");
+			registerReceiver(new BroadcastReceiver() {
+				@Override
+				public void onReceive(Context context, Intent intent) {
+					restart();
+				}
+			}, filter);
+			return;
+		}
+
 		createActionBar();
-		pager = (ViewPager) findViewById(R.id.pager);
-		progressBar = (ProgressBar) findViewById(R.id.progressLoading);
 		seeNewPhoto = (BlurTextView) findViewById(R.id.see_new_photos);
+		seeNewPhoto.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				seeNewPhoto.hide();
+				pagerAdapter.setHasNewPhotos(false);
+				showNewPhotos();
+			}
+		});
 		error = (BlurTextView) findViewById(R.id.error_pane);
 		hint = (HintTextView) findViewById(R.id.hint);
 		wifiList = (BlurListView) findViewById(R.id.wifi_list);
 		gallery = (Gallery) findViewById(R.id.gallery1);
+		gallery.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+				gallery.setVisibility(View.GONE);
+				pagerAdapter = createAdapter((PictureData) gallery.getItemAtPosition(position));
+				pager.setAdapter(pagerAdapter);
+				if (galleryHideSeeNewPhoto) {
+					recreateSeeNewPhoto();
+				}
+			}
+		});
 		deletingDialog = (DeletingDialog) findViewById(R.id.dialog_deleting);
+		deletingDialog.setPositiveButtonListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				pagerAdapter.deleteCurrentItem(pager);
+				deletingDialog.hide();
+				checkForNoPhotos();
+			}
+		});
 		emailChangeDialog = (EmailChangeDialog) findViewById(R.id.dialog_change_email);
 		helpDialog = (HelpDialog) findViewById(R.id.dialog_help);
 		wifiDialog = (WifiDialog) findViewById(R.id.dialog_wifi);
-	}
-
-	private void init() {
-		context = this;
 		getActionBar().hide();
-		mailTimer.scheduleAtFixedRate(mailPollTask, 0, REFRESH_RATE);
-		databaseHelper = DatabaseHelper.getInstance(getApplicationContext());
 		wifi = WifiReceiver.createInstance(this, this);
 		wifi.registerWifiBroadcast(true);
+		mailTimer.scheduleAtFixedRate(mailPollTask, 0, REFRESH_RATE);
+		databaseHelper = DatabaseHelper.getInstance(getApplicationContext());
+		createPager();
+	}
+
+	private void createPager() {
+		pager = (ViewPager) findViewById(R.id.pager);
 		pagerAdapter = createAdapter();
 		pager.setAdapter(pagerAdapter);
 		pager.setOffscreenPageLimit(SCREEN_PAGE_LIMIT);
@@ -277,64 +317,8 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 				return isBlocked();
 			}
 		});
-		wifiList.setOnItemClickListener(new BlurListView.OnItemClickListener() {
-			@Override
-			public void onItemClick(ScanResult item) {
-				wifi.connectToNetwork(item);
-			}
-		});
-		gallery.setOnItemClickListener(new OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-				gallery.setVisibility(View.GONE);
-				pagerAdapter = createAdapter((PictureData) gallery.getItemAtPosition(position));
-				pager.setAdapter(pagerAdapter);
-				if (galleryHideSeeNewPhoto) {
-					recreateSeeNewPhoto();
-				}
-			}
-		});
-		deletingDialog.setPositiveButtonListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				pagerAdapter.deleteCurrentItem(pager);
-				deletingDialog.hide();
-				checkForNoPhotos();
-			}
-		});
-		seeNewPhoto.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				seeNewPhoto.hide();
-				pagerAdapter.setHasNewPhotos(false);
-				showNewPhotos();
-			}
-		});
-	}
-
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		Crashlytics.start(this);
-		setContentView(R.layout.activity_photo);
-		initViews();
-		/** uncomment if newEmailWizard is needed*/
-//		newEmail = new NewEmailWizard();
-		if (!(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED) && GlimpseApp.getPicturesDir().canWrite())) {
-			progressBar.setVisibility(View.VISIBLE);
-			IntentFilter filter = new IntentFilter(Intent.ACTION_MEDIA_MOUNTED);
-			filter.addDataScheme("file");
-			registerReceiver(new BroadcastReceiver() {
-				@Override
-				public void onReceive(Context context, Intent intent) {
-					restart();
-				}
-			}, filter);
-			return;
-		}
-		init();
 		pagerAdapter.checkNewPhotos();
-		if (pagerAdapter.hasNewPhotos() && isConnected()) recreateSeeNewPhoto();
+		if (pagerAdapter.hasNewPhotos() && wifi.isConnected()) recreateSeeNewPhoto();
 		if (getUser() == null) {
 			error.show(R.string.error_no_user_data);
 			return;
@@ -420,9 +404,9 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 				helpDialog,
 				deletingDialog,
 				wifiDialog,
-				progressBar
+				progress
 		};
-		if (!isConnectedOrConnecting()) return true;
+		if (!wifi.isConnectedOrConnecting()) return true;
 		for (View blocker : swipeBlockers) {
 			if (blocker.getVisibility() == View.VISIBLE) return true;
 		}
@@ -471,9 +455,9 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 
 	private void showPopupMenu(View view) {
 		try {
-			LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			LayoutInflater layoutInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			View layout = layoutInflater.inflate(R.layout.popup_menu, null);
-			final PopupWindow popupWindow = new PopupWindow(context);
+			final PopupWindow popupWindow = new PopupWindow(this);
 			popupWindow.setContentView(layout);
 			popupWindow.setWidth(ViewGroup.LayoutParams.WRAP_CONTENT);
 			popupWindow.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -523,7 +507,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 //					if (isConnected()) {
 //						new WifiConnector(context).forgetCurrent();
 //						hideErrorPane();
-//						progressBar.setVisibility(View.VISIBLE);
+//						progress.setVisibility(View.VISIBLE);
 //						registerReceiver(wifiConnectionHandler.getReceiver(), new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 //					}
 //					return true;
@@ -563,29 +547,12 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	}
 
 	private File getUserDataFile() {
-		File dataFile = new File(
-				Environment.getExternalStorageDirectory(),
-				context.getString(R.string.data_file)
-		);
-		return dataFile;
+		return new File(Environment.getExternalStorageDirectory(), getString(R.string.data_file));
 	}
 
 	private void rescheduleImageSwipe() {
 		pager.removeCallbacks(swipeRunnable);
 		pager.postDelayed(swipeRunnable, RESCHEDULE_REFRESH_RATE);
-	}
-
-	private boolean isConnectedOrConnecting() {
-		return getNetworkInfo().isConnectedOrConnecting();
-	}
-
-	private boolean isConnected() {
-		return getNetworkInfo().isConnected();
-	}
-
-	private NetworkInfo getNetworkInfo() {
-		ConnectivityManager connectionManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-		return connectionManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 	}
 
 	public void showHint(String text) {
@@ -594,7 +561,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 
 	@Override
 	public void onConnecting() {
-		progressBar.setVisibility(View.VISIBLE);
+		progress.setVisibility(View.VISIBLE);
 		wifiList.hide(false);
 		wifiDialog.hide();
 		error.hide();
@@ -603,7 +570,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 
 	@Override
 	public void onConnected() {
-		progressBar.setVisibility(View.GONE);
+		progress.setVisibility(View.GONE);
 		wifiList.hide(false);
 		wifiDialog.hide();
 		error.hide();
@@ -613,7 +580,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 
 	@Override
 	public void onDisconnected(WifiReceiver.WifiError wifiError) {
-		progressBar.setVisibility(View.GONE);
+		progress.setVisibility(View.GONE);
 		error.hide();
 		hint.hide();
 		getActionBar().hide();
@@ -635,14 +602,14 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	@Override
 	public void onScanning() {
 		if (wifi.isConnectedOrConnecting() || wifi.isConnected()) return;
-		progressBar.setVisibility(View.VISIBLE);
+		progress.setVisibility(View.VISIBLE);
 	}
 
 	@Override
 	public void onScansResultReceive(List<ScanResult> scanResults) {
 		wifiList.update(scanResults);
 		if (wifi.isConnectedOrConnecting() || wifi.isConnected() || wifiDialog.getVisibility() == View.VISIBLE) return;
-		progressBar.setVisibility(View.GONE);
+		progress.setVisibility(View.GONE);
 //		hint.hide();
 //		error.hide();
 		wifiList.show();
