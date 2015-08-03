@@ -18,7 +18,7 @@
             style="@style/title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/text_size" />
+            android:textSize="@dimen/title" />
 
         <FrameLayout
             android:id="@+id/container"
@@ -39,7 +39,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@android:string/ok" />
+                android:text="@string/ok" />
 
             <Button
                 android:id="@+id/cancel"
@@ -47,7 +47,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@android:string/cancel" />
+                android:text="@string/cancel" />
         </LinearLayout>
     </LinearLayout>
 </odesk.johnlife.glimpse.ui.BlurLayout>
