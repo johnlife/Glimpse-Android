@@ -2,6 +2,8 @@ package odesk.johnlife.glimpse;
 
 public interface Constants {
 
+	String ACTION_WIFI_SCAN = "action.wifi.scan";
+
 	String PREF_WIFI_BSSID = "wifi.bssid.pref";
 	String PREF_WIFI_PASSWORD = "wifi.password.pref";
 	String PREF_FIRST_LAUNCH = "glimpse.first.launch";

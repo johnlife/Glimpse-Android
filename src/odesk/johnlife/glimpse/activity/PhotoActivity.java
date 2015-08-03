@@ -276,6 +276,18 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 		createPager();
 	}
 
+	@Override
+	protected void onResume() {
+		super.onResume();
+		wifi.onResume();
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		wifi.onPause();
+	}
+
 	private void initViews() {
 		createActionBar();
 		progress = (ProgressBar) findViewById(R.id.progressLoading);
@@ -408,6 +420,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 		if (!wifi.isConnectedOrConnecting()) return true;
 		View[] swipeBlockers = {
 				error,
+				wifiList,
 				/** uncomment if newEmail is needing*/
 //			newEmail.dialog,
 				helpDialog,
@@ -570,6 +583,17 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 		progress.setVisibility(View.GONE);
 	}
 
+	private void hideViews() {
+		hideProgress();
+		getActionBar().hide();
+		wifiList.hide(false);
+		wifiDialog.hide();
+		deletingDialog.hide();
+		helpDialog.hide();
+		gallery.setVisibility(View.GONE);
+		seeNewPhoto.hide();
+	}
+
 	public void showHint(String text) {
 		hint.show(text);
 	}
@@ -584,6 +608,8 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	@Override
 	public void onConnected() {
 		hideProgress();
+		checkForNoPhotos();
+		if (pagerAdapter.hasNewPhotos()) recreateSeeNewPhoto();
 		wifiList.hide(false);
 		wifiDialog.hide();
 		hint.show(R.string.hint_wifi_connected);
@@ -592,8 +618,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 
 	@Override
 	public void onDisconnected(WifiReceiver.WifiError wifiError) {
-		hideProgress();
-		getActionBar().hide();
+		hideViews();
 		if (WifiReceiver.WifiError.NEED_PASSWORD.equals(wifiError)) {
 			wifiDialog.show();
 		} else {

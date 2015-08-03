@@ -1,5 +1,7 @@
 package odesk.johnlife.glimpse.util;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -13,6 +15,7 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 
 import odesk.johnlife.glimpse.Constants;
@@ -142,6 +145,7 @@ public class WifiReceiver implements Constants {
                         protected void onPostExecute(Boolean result) {
                             if (result) {
                                 unregisterScanReceiver();
+                                stopRefresher();
                                 listener.onConnected();
                             } else {
                                 resetCurrentWifi();
@@ -159,7 +163,12 @@ public class WifiReceiver implements Constants {
     private final BroadcastReceiver wifiScanReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context c, Intent intent) {
-            listener.onScansResultReceive(wifi.getScanResults());
+            if (ACTION_WIFI_SCAN.equals(intent.getAction())) {
+                listener.onScanning();
+                wifi.startScan();
+            } else {
+                listener.onScansResultReceive(wifi.getScanResults());
+            }
         }
     };
 
@@ -171,6 +180,9 @@ public class WifiReceiver implements Constants {
     private Context context;
     private WifiConnectionListener listener;
     private SharedPreferences prefs;
+    private AlarmManager wifiRefresher;
+    private PendingIntent wifiPendingIntent;
+    private boolean isRefresherPaused;
 
     private WifiReceiver(Context context, WifiConnectionListener listener) {
         this.context = context;
@@ -180,6 +192,25 @@ public class WifiReceiver implements Constants {
         if (!wifi.isWifiEnabled()) {
             wifi.setWifiEnabled(true);
         }
+    }
+
+    private void startRefresher() {
+        stopRefresher();
+        wifiRefresher = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(ACTION_WIFI_SCAN);
+        wifiPendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        wifiRefresher.setRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime(), REFRESH_RATE, wifiPendingIntent);
+    }
+
+    private void stopRefresher() {
+        if (wifiRefresher == null) return;
+        try {
+            wifiRefresher.cancel(wifiPendingIntent);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        wifiRefresher = null;
+        wifiPendingIntent = null;
     }
 
     public static WifiReceiver createInstance(Context context, WifiConnectionListener listener) {
@@ -229,8 +260,7 @@ public class WifiReceiver implements Constants {
 
     public void scanWifi() {
         registerScanReceiver();
-        listener.onScanning();
-        wifi.startScan();
+        startRefresher();
     }
 
     public boolean isConnectedOrConnecting() {
@@ -263,7 +293,19 @@ public class WifiReceiver implements Constants {
     }
 
     private void registerScanReceiver() {
-        context.registerReceiver(wifiScanReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+        IntentFilter filter = new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+        filter.addAction(ACTION_WIFI_SCAN);
+        context.registerReceiver(wifiScanReceiver, filter);
+    }
+
+    public void onResume() {
+        if (isRefresherPaused) startRefresher();
+        isRefresherPaused = false;
+    }
+
+    public void onPause() {
+        isRefresherPaused = wifiRefresher != null;
+        stopRefresher();
     }
 
     public void unregister() {
@@ -281,6 +323,7 @@ public class WifiReceiver implements Constants {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        stopRefresher();
     }
 
 }
