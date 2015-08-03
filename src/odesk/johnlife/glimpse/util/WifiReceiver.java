@@ -20,20 +20,22 @@ public class WifiReceiver implements Constants {
 
     public enum WifiError { NEED_PASSWORD, CONNECT_ERROR, DISCONNECTED, UNKNOWN_ERROR }
 
-    private abstract class Connector {
+    private class OpenConnector {
 
-        public abstract WifiConfiguration configure(WifiConfiguration config);
-
-        public void connect() {
+        protected WifiConfiguration configure() {
             WifiConfiguration config = new WifiConfiguration();
             config.SSID = addQuotes(selectedNetwork.SSID);
             config.status = WifiConfiguration.Status.ENABLED;
-            config = configure(config);
             config.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
             config.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.SHARED);
-            selectedNetworkId = wifi.addNetwork(config);
+            config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+            return config;
+        }
+
+        protected void connect() {
+            selectedNetworkId = wifi.addNetwork(configure());
             wifi.disconnect();
-            wifi.enableNetwork(selectedNetworkId, false);
+            wifi.enableNetwork(selectedNetworkId, true);
             wifi.reconnect();
         }
 
@@ -42,9 +44,10 @@ public class WifiReceiver implements Constants {
         }
     }
 
-    private class WepConnector extends Connector {
+    private class WepConnector extends OpenConnector {
 
-        public void connect() {
+        @Override
+        protected WifiConfiguration configure() {
             WifiConfiguration config = new WifiConfiguration();
             config.SSID = addQuotes(selectedNetwork.SSID);
             config.status = WifiConfiguration.Status.DISABLED;
@@ -64,18 +67,10 @@ public class WifiReceiver implements Constants {
                 config.wepKeys[0] = addQuotes(selectedNetworkPass);
             }
             config.wepTxKeyIndex = 0;
-            wifi.setWifiEnabled(true);
-            selectedNetworkId = wifi.addNetwork(config);
-            wifi.saveConfiguration();
-            wifi.enableNetwork(selectedNetworkId, true);
-        }
-
-        @Override
-        public WifiConfiguration configure(WifiConfiguration config) {
             return config;
         }
 
-        protected boolean isHexString(String s) {
+        private boolean isHexString(String s) {
             if (s == null) {
                 return false;
             }
@@ -95,10 +90,9 @@ public class WifiReceiver implements Constants {
 
     }
 
-    private class WpaConnector extends Connector {
-
+    private class WpaConnector extends OpenConnector {
         @Override
-        public void connect() {
+        protected WifiConfiguration configure() {
             WifiConfiguration config = new WifiConfiguration();
             config.SSID = addQuotes(selectedNetwork.SSID);
             config.BSSID = selectedNetwork.BSSID;
@@ -111,27 +105,11 @@ public class WifiReceiver implements Constants {
             config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
             config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
             config.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
-            selectedNetworkId = wifi.addNetwork(config);
-            wifi.enableNetwork(selectedNetworkId, true);
-            wifi.setWifiEnabled(true);
-        }
-
-        @Override
-        public WifiConfiguration configure(WifiConfiguration config) {
-            return null;
-        }
-    }
-
-    private class OpenConnector extends Connector {
-
-        @Override
-        public WifiConfiguration configure(WifiConfiguration config) {
-            config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
             return config;
         }
     }
 
-    private final BroadcastReceiver supplicantStateReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver wifiStateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
@@ -144,16 +122,6 @@ public class WifiReceiver implements Constants {
                         listener.onDisconnected(WifiError.CONNECT_ERROR);
                     }
                 }
-            }
-        }
-    };
-
-    private final BroadcastReceiver wifiScanReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context c, Intent intent) {
-            String action = intent.getAction();
-            if (WifiManager.SCAN_RESULTS_AVAILABLE_ACTION.equals(action)) {
-                if (!isConnecting) listener.onScansResultReceive(wifi.getScanResults());
             } else if (WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(action)) {
                 final NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
                 NetworkInfo.DetailedState details = info.getDetailedState();
@@ -162,15 +130,12 @@ public class WifiReceiver implements Constants {
                 boolean isSuspended = info.getState() == NetworkInfo.State.SUSPENDED;
                 boolean unknown = info.getState() == NetworkInfo.State.UNKNOWN;
                 if (isSuspended || unknown) {
-                    isConnecting = false;
                     listener.onDisconnected(WifiError.UNKNOWN_ERROR);
                 } else if (details == NetworkInfo.DetailedState.DISCONNECTED) {
-                    isConnecting = false;
                     resetCurrentWifi();
                     prefs.edit().putString(PREF_WIFI_PASSWORD, "").apply();
                     listener.onDisconnected(WifiError.DISCONNECTED);
                 } else if (connected && details == NetworkInfo.DetailedState.CONNECTED) {
-                    isConnecting = false;
                     listener.onConnected();
                 } else if (!connected && !connecting && details != NetworkInfo.DetailedState.SCANNING) {
                     listener.onScanning();
@@ -178,6 +143,13 @@ public class WifiReceiver implements Constants {
                 }
 
             }
+        }
+    };
+
+    private final BroadcastReceiver wifiScanReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context c, Intent intent) {
+            listener.onScansResultReceive(wifi.getScanResults());
         }
     };
 
@@ -189,17 +161,16 @@ public class WifiReceiver implements Constants {
     private Context context;
     private WifiConnectionListener listener;
     private SharedPreferences prefs;
-    private boolean isConnecting;
 
     private WifiReceiver(Context context, WifiConnectionListener listener) {
         this.context = context;
         this.listener = listener;
-        registerWifiBroadcast(true);
         prefs = PreferenceManager.getDefaultSharedPreferences(context);
         wifi = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         if (!wifi.isWifiEnabled()) {
             wifi.setWifiEnabled(true);
         }
+        register();
         //TODO
 //			if (isConnectedOrConnecting()) {
 //				wifiList.hide(false);
@@ -219,22 +190,6 @@ public class WifiReceiver implements Constants {
         return instance;
     }
 
-    public void registerWifiBroadcast(boolean isNeed) {
-        try {
-            if (isNeed) {
-                IntentFilter filter = new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-                filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
-                context.registerReceiver(wifiScanReceiver, new IntentFilter(filter));
-                context.registerReceiver(supplicantStateReceiver, new IntentFilter(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION));
-            } else {
-                context.unregisterReceiver(wifiScanReceiver);
-                context.unregisterReceiver(supplicantStateReceiver);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     public void connectToNetwork(ScanResult selectedNetwork) {
         this.selectedNetwork = selectedNetwork;
         String pass = prefs.getString(PREF_WIFI_PASSWORD, "");
@@ -243,12 +198,10 @@ public class WifiReceiver implements Constants {
     }
 
     public void connectToSelectedNetwork(String pass) {
-        isConnecting = true;
         listener.onConnecting();
         selectedNetworkPass = pass;
         String cap = selectedNetwork.capabilities;
         if (pass.isEmpty() && !(cap.isEmpty() || cap.startsWith("[ESS"))) {
-            isConnecting = false;
             listener.onDisconnected(WifiError.NEED_PASSWORD);
         } else {
             if (cap.contains("[WPA")) {
@@ -263,7 +216,6 @@ public class WifiReceiver implements Constants {
     }
 
     private void checkConnectionResult() {
-        isConnecting = false;
         if (selectedNetworkId != -1) {
             prefs.edit().putString(PREF_WIFI_BSSID, selectedNetwork.BSSID)
                     .putString(PREF_WIFI_PASSWORD, selectedNetworkPass).apply();
@@ -299,6 +251,22 @@ public class WifiReceiver implements Constants {
 
     public ScanResult getSelectedNetwork() {
         return selectedNetwork;
+    }
+
+    private void register() {
+        IntentFilter filter = new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+        filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
+        context.registerReceiver(wifiStateReceiver, filter);
+        context.registerReceiver(wifiScanReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+    }
+
+    public void unregister() {
+        try {
+            context.unregisterReceiver(wifiStateReceiver);
+            context.unregisterReceiver(wifiScanReceiver);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

@@ -271,7 +271,6 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 		wifiDialog = (WifiDialog) findViewById(R.id.dialog_wifi);
 		getActionBar().hide();
 		wifi = WifiReceiver.createInstance(this, this);
-		wifi.registerWifiBroadcast(true);
 		mailTimer.scheduleAtFixedRate(mailPollTask, 0, REFRESH_RATE);
 		databaseHelper = DatabaseHelper.getInstance(getApplicationContext());
 		createPager();
@@ -350,7 +349,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 
 	@Override
 	protected void onDestroy() {
-		wifi.registerWifiBroadcast(false);
+		wifi.unregister();
 		mailTimer.cancel();
 		super.onDestroy();
 	}
