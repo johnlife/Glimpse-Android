@@ -48,7 +48,7 @@ public class WifiDialog extends BlurDialog {
                 return false;
             }
         });
-        password.setInputType(TYPE_VISIBLE_PASS);
+        password.setInputType(TYPE_INVISIBLE_PASS);
         CheckBox showPassword = (CheckBox) view.findViewById(R.id.is_password_visible);
         showPassword.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
