@@ -178,8 +178,12 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 				});
 				mailer.connect();
 				if (!GlimpseApp.getFileHandler().isEmpty()) {
-					//TODO runOnUiThread, scanWifi
-					error.hide();
+					runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							error.hide();
+						}
+					});
 				}
 			}
 		}
@@ -230,10 +234,8 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 					restart();
 				}
 			}, filter);
-			return;
 		} else if (getUser() == null) {
 			error.show(R.string.error_no_user_data);
-			return;
 		}
 	}
 
@@ -404,7 +406,6 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 		if (!wifi.isConnectedOrConnecting()) return true;
 		View[] swipeBlockers = {
 				error,
-				hint,
 				/** uncomment if newEmail is needing*/
 //			newEmail.dialog,
 				helpDialog,
@@ -608,7 +609,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 
 	@Override
 	public void onScanning() {
-		if (wifi.isConnectedOrConnecting() || wifi.isConnected()) return;
+		if (wifi == null || wifi.isConnectedOrConnecting() || wifi.isConnected()) return;
 		showProgress();
 	}
 
