@@ -47,6 +47,7 @@ public class BlurListView extends BlurLayout {
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                hide(false);
                 WifiReceiver.getInstance().connectToNetwork(adapter.getItem(position));
             }
         });

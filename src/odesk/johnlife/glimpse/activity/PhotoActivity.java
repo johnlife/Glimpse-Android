@@ -236,6 +236,8 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 			}, filter);
 		} else if (getUser() == null) {
 			error.show(R.string.error_no_user_data);
+		} else {
+			wifi.register();
 		}
 	}
 

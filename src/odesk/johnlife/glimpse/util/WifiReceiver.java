@@ -12,6 +12,7 @@ import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 
 import odesk.johnlife.glimpse.Constants;
@@ -130,18 +131,32 @@ public class WifiReceiver implements Constants {
                 boolean isSuspended = info.getState() == NetworkInfo.State.SUSPENDED;
                 boolean unknown = info.getState() == NetworkInfo.State.UNKNOWN;
                 if (isSuspended || unknown) {
+                    registerScanReceiver();
                     listener.onDisconnected(WifiError.UNKNOWN_ERROR);
                 } else if (details == NetworkInfo.DetailedState.DISCONNECTED) {
+                    registerScanReceiver();
                     resetCurrentWifi();
                     prefs.edit().putString(PREF_WIFI_PASSWORD, "").apply();
                     listener.onDisconnected(WifiError.DISCONNECTED);
                 } else if (connected && details == NetworkInfo.DetailedState.CONNECTED) {
-                    listener.onConnected();
+                    WifiRedirectionTask redirectionTask = new WifiRedirectionTask() {
+                        @Override
+                        protected void onPostExecute(Boolean result) {
+                            if (result) {
+                                unregisterScanReceiver();
+                                listener.onConnected();
+                            } else {
+                                registerScanReceiver();
+                                resetCurrentWifi();
+                            }
+                        }
+                    };
+                    redirectionTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 } else if (!connected && !connecting && details != NetworkInfo.DetailedState.SCANNING) {
+                    registerScanReceiver();
                     listener.onScanning();
                     scanWifi();
                 }
-
             }
         }
     };
@@ -170,15 +185,6 @@ public class WifiReceiver implements Constants {
         if (!wifi.isWifiEnabled()) {
             wifi.setWifiEnabled(true);
         }
-//        register();
-        //TODO
-//			if (isConnectedOrConnecting()) {
-//				wifiList.hide(false);
-//			} else {
-//				registerScanReciver();
-//				scanWifi();
-//			}
-
     }
 
     public static WifiReceiver createInstance(Context context, WifiConnectionListener listener) {
@@ -254,16 +260,31 @@ public class WifiReceiver implements Constants {
         return selectedNetwork;
     }
 
-    private void register() {
+    public void register() {
         IntentFilter filter = new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
         context.registerReceiver(wifiStateReceiver, filter);
+        registerScanReceiver();
+    }
+
+    private void registerScanReceiver() {
         context.registerReceiver(wifiScanReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+        if (!isConnectedOrConnecting()) {
+            scanWifi();
+        }
     }
 
     public void unregister() {
         try {
             context.unregisterReceiver(wifiStateReceiver);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        unregisterScanReceiver();
+    }
+
+    private void unregisterScanReceiver() {
+        try {
             context.unregisterReceiver(wifiScanReceiver);
         } catch (Exception e) {
             e.printStackTrace();
