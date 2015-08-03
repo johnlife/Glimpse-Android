@@ -170,7 +170,7 @@ public class WifiReceiver implements Constants {
         if (!wifi.isWifiEnabled()) {
             wifi.setWifiEnabled(true);
         }
-        register();
+//        register();
         //TODO
 //			if (isConnectedOrConnecting()) {
 //				wifiList.hide(false);
