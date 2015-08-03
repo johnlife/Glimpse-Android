@@ -481,6 +481,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 				@Override
 				public void onClick(View v) {
 					popupWindow.dismiss();
+					getActionBar().hide();
 					wifi.resetCurrentWifi();
 				}
 			});
@@ -575,7 +576,6 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 		showProgress();
 		wifiList.hide(false);
 		wifiDialog.hide();
-		hint.hide();
 	}
 
 	@Override
@@ -590,7 +590,6 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	@Override
 	public void onDisconnected(WifiReceiver.WifiError wifiError) {
 		hideProgress();
-		hint.hide();
 		getActionBar().hide();
 		if (WifiReceiver.WifiError.NEED_PASSWORD.equals(wifiError)) {
 			wifiDialog.show();
@@ -618,8 +617,6 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 		wifiList.update(scanResults);		
 		if (wifi.isConnectedOrConnecting() || wifi.isConnected() || wifiDialog.getVisibility() == View.VISIBLE) return;
 		hideProgress();
-//		hint.hide();
-//		error.hide();
 		wifiList.show();
 	}
 

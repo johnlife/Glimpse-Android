@@ -6,6 +6,7 @@ import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -48,6 +49,17 @@ public class WifiDialog extends BlurDialog {
                 return false;
             }
         });
+        password.setOnFocusChangeListener(new OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                InputMethodManager imm = ((InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE));
+                if (hasFocus) {
+                    imm.showSoftInput(password, InputMethodManager.SHOW_FORCED);
+                } else {
+                    imm.hideSoftInputFromWindow(password.getWindowToken(), 0);
+                }
+            }
+        });
         password.setInputType(TYPE_INVISIBLE_PASS);
         CheckBox showPassword = (CheckBox) view.findViewById(R.id.is_password_visible);
         showPassword.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -76,6 +88,7 @@ public class WifiDialog extends BlurDialog {
         password.setText("");
         setTitle(WifiReceiver.getInstance().getSelectedNetwork().SSID);
         super.show();
+        password.requestFocus();
     }
 
     @Override

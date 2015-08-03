@@ -12,10 +12,7 @@
         android:layout_height="wrap_content"
         android:hint="@string/hint_password"
         android:inputType="textPassword"
-        android:textSize="@dimen/text_size">
-
-        <requestFocus />
-    </EditText>
+        android:textSize="@dimen/text_size" />
 
     <CheckBox
         android:id="@+id/is_password_visible"

@@ -227,6 +227,7 @@ public class WifiReceiver implements Constants {
     }
 
     public void scanWifi() {
+        listener.onScanning();
         wifi.startScan();
     }
 
