@@ -134,15 +134,19 @@ public class WifiReceiver implements Constants {
                 boolean isSuspended = info.getState() == NetworkInfo.State.SUSPENDED;
                 boolean unknown = info.getState() == NetworkInfo.State.UNKNOWN;
                 if (isSuspended || unknown) {
+                    isConnecting = false;
                     listener.onDisconnected(WifiError.UNKNOWN_ERROR);
                 } else if (details == NetworkInfo.DetailedState.DISCONNECTED) {
+                    isConnecting = false;
                     resetCurrentWifi();
                     prefs.edit().putString(PREF_WIFI_PASSWORD, "").apply();
                     listener.onDisconnected(WifiError.DISCONNECTED);
                 } else if (connected && details == NetworkInfo.DetailedState.CONNECTED) {
+                    isConnecting = true;
                     WifiRedirectionTask redirectionTask = new WifiRedirectionTask() {
                         @Override
                         protected void onPostExecute(Boolean result) {
+                            isConnecting = false;
                             if (result) {
                                 unregisterScanReceiver();
                                 stopRefresher();
@@ -167,6 +171,7 @@ public class WifiReceiver implements Constants {
                 listener.onScanning();
                 wifi.startScan();
             } else {
+                if (isConnecting) return;
                 listener.onScansResultReceive(wifi.getScanResults());
             }
         }
@@ -183,6 +188,7 @@ public class WifiReceiver implements Constants {
     private AlarmManager wifiRefresher;
     private PendingIntent wifiPendingIntent;
     private boolean isRefresherPaused;
+    private boolean isConnecting;
 
     private WifiReceiver(Context context, WifiConnectionListener listener) {
         this.context = context;
@@ -236,6 +242,7 @@ public class WifiReceiver implements Constants {
         if (pass.isEmpty() && !(cap.isEmpty() || cap.startsWith("[ESS"))) {
             listener.onDisconnected(WifiError.NEED_PASSWORD);
         } else {
+            isConnecting = true;
             if (cap.contains("[WPA")) {
                 new WpaConnector().connect();
             } else if (cap.contains("[WEP")) {
@@ -252,6 +259,7 @@ public class WifiReceiver implements Constants {
             prefs.edit().putString(PREF_WIFI_BSSID, selectedNetwork.BSSID)
                     .putString(PREF_WIFI_PASSWORD, selectedNetworkPass).apply();
         } else {
+            isConnecting = false;
             listener.onDisconnected(WifiError.UNKNOWN_ERROR);
             resetCurrentWifi();
             scanWifi();
