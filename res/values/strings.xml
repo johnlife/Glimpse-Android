@@ -2,6 +2,7 @@
 <resources>
 
     <string name="app_name">Skylight</string>
+	<string name="app_name_version">%1$s v %2$s</string>
 	<string name="domain">\@glimpseframe.com</string>
 
 	<string name="connect">Connect</string>
