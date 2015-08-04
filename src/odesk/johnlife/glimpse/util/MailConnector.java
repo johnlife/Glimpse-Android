@@ -1,5 +1,7 @@
 package odesk.johnlife.glimpse.util;
 
+import android.util.Log;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -23,22 +25,21 @@ import javax.mail.search.FlagTerm;
 import odesk.johnlife.glimpse.Constants;
 import odesk.johnlife.glimpse.app.GlimpseApp;
 import odesk.johnlife.glimpse.data.FileHandler;
-import android.util.Log;
 
 public class MailConnector implements Constants {
-	
+
 	public interface OnItemDownloadListener {
 		void onItemDownload();
 	}
-	
+
 	private static final String LOG_TAG = MailConnector.class.getSimpleName();
-	
+
 	private String user;
 	private String pass;
 	private String server;
 	private OnItemDownloadListener onItemDownLoadListener;
 	byte[] buf = new byte[4096];
-	
+
 	public MailConnector(String user, String pass, OnItemDownloadListener onItemDownLoadListener) {
 		this.user = user;
 		this.pass = pass;
@@ -48,21 +49,23 @@ public class MailConnector implements Constants {
 
 	public void connect() {
 		Log.d(LOG_TAG, String.format("Connecting to %s, user=%s, pass=%s", server, user, pass));
-	    Properties properties = System.getProperties();
-	    properties.setProperty("mail.store.protocol", "imaps");
-	    properties.setProperty("mail.imaps.socketFactory.class", SSL_FACTORY);
+		Properties properties = System.getProperties();
+		properties.setProperty("mail.store.protocol", "imaps");
+		properties.setProperty("mail.imaps.socketFactory.class", SSL_FACTORY);
+		Store store = null;
+		Folder folder = null;
 		try {
-	        Session session = Session.getDefaultInstance(properties, null);
-	        Store store = session.getStore("imaps");
-		    store.connect(server, user, pass);
+			Session session = Session.getDefaultInstance(properties, null);
+			store = session.getStore("imaps");
+			store.connect(server, user, pass);
 			Log.d(LOG_TAG, "Connected to store");
-			Folder folder = store.getDefaultFolder().getFolder("INBOX");
+			folder = store.getDefaultFolder().getFolder("INBOX");
 			folder.open(Folder.READ_WRITE);
 			Log.d(LOG_TAG, "Opened inbox");
 			FileHandler fileHandler = GlimpseApp.getFileHandler();
 			Message[] messages = fileHandler.isEmpty() ?
-				folder.getMessages() : 
-				folder.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
+					folder.getMessages() :
+					folder.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
 			for(Message msg : messages) {
 				try {
 					List<File> attachments = getAttachments((Multipart) msg.getContent());
@@ -73,50 +76,77 @@ public class MailConnector implements Constants {
 					msg.setFlag(Flags.Flag.DELETED, true);
 				} catch (Exception e) {
 					Log.e(LOG_TAG, "Error: ", e);
-				//	PushLink.sendAsyncException(e);
+					//	PushLink.sendAsyncException(e);
 				}
 			}
 			folder.setFlags(messages, new Flags(Flags.Flag.SEEN), true);
-			folder.close(true);
-			store.close();
 		} catch (MessagingException e) {
 			Log.e(LOG_TAG, "Error: ", e);
 //			PushLink.sendAsyncException(e);
+		} finally {
+			try {
+				folder.close(true);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			folder = null;
+			try {
+				store.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			store = null;
 		}
 	}
-	
+
 	private List<File> getAttachments(Multipart multipart) throws MessagingException {
 		List<File> attachments = new ArrayList<File>();
 		for (int i = 0; i < multipart.getCount(); i++) {
+			FileOutputStream fos = null;
+			InputStream is = null;
 			try {
 				BodyPart bodyPart = multipart.getBodyPart(i);
-				if (
-					!Part.ATTACHMENT.equalsIgnoreCase(bodyPart.getDisposition()) &&
-					(bodyPart.getFileName() == null ||
-					bodyPart.getFileName().isEmpty())
-				) {
+				if (!Part.ATTACHMENT.equalsIgnoreCase(bodyPart.getDisposition()) &&
+						(bodyPart.getFileName() == null || bodyPart.getFileName().isEmpty())) {
 					if (bodyPart.isMimeType("multipart/*")) {
 						attachments.addAll(getAttachments((Multipart) bodyPart.getContent()));
 					}
 					continue; // dealing with attachments only
-				} 
-				InputStream is = bodyPart.getInputStream();
+				}
+				is = bodyPart.getInputStream();
 				File f = new File(GlimpseApp.getTempDir(), bodyPart.getFileName());
-				FileOutputStream fos = new FileOutputStream(f);
+				fos = new FileOutputStream(f);
 				int bytesRead;
 				while ((bytesRead=is.read(buf)) != -1) {
 					fos.write(buf, 0, bytesRead);
 				}
-				fos.close();
 				attachments.add(f);
 			} catch (IOException e) {
 //				PushLink.sendAsyncException(e);
+			} finally {
+				try {
+					is.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				is = null;
+				try {
+					fos.flush();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				try {
+					fos.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				fos = null;
 			}
 		}
 		Log.d(LOG_TAG, "Found "+attachments.size()+" attachments.");
 		return attachments;
 	}
-	
+
 //	/**
 //     * Return the primary text content of the message.
 //     */

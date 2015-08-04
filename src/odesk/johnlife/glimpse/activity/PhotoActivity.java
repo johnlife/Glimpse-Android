@@ -551,17 +551,25 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 
 	public String getUser() {
 		String user = null;
+		BufferedReader br = null;
 		try {
 			File dataFile = getUserDataFile();
 			if (!dataFile.exists()) return null;
-			BufferedReader br = new BufferedReader(new FileReader(dataFile));
+			br = new BufferedReader(new FileReader(dataFile));
 			String line = br.readLine();
 			if (line != null) {
 				user = line;
 			}
-			br.close();
 		} catch (Exception e) {
 			Log.e("UserInfo", e.getMessage(), e);
+			return null;
+		} finally {
+			try {
+				br.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			br = null;
 		}
 		return Normalizer.normalize(user, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
 	}
@@ -613,7 +621,6 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 		wifiList.hide(false);
 		wifiDialog.hide();
 		hint.show(R.string.hint_wifi_connected);
-		checkForNoPhotos();
 	}
 
 	@Override
@@ -642,7 +649,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 
 	@Override
 	public void onScansResultReceive(List<ScanResult> scanResults) {
-		wifiList.update(scanResults);		
+		wifiList.update(scanResults);
 		if (wifi.isConnectedOrConnecting() || wifi.isConnected() || wifiDialog.getVisibility() == View.VISIBLE) return;
 		hideProgress();
 		wifiList.show();
