@@ -438,8 +438,8 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 		Activity activity = PhotoActivity.this;
 		Intent intent = new Intent(activity, activity.getClass());
 		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		activity.startActivity(intent);
 		activity.finish();
+		activity.startActivity(intent);
 	}
 
 	private void createActionBar() {
