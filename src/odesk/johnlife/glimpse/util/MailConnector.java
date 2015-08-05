@@ -132,7 +132,7 @@ public class MailConnector implements Constants {
 				is = null;
 				try {
 					fos.flush();
-				} catch (IOException e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 				try {
