@@ -328,7 +328,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 					if (getActionBar() != null && getActionBar().isShowing()) {
 						getActionBar().hide();
 					}
-					seeNewPhoto.setVisibility(View.GONE);
+					seeNewPhoto.hide();
 					pager.setAlpha(0);
 				} else if (state == 0) {
 					Animation animation = AnimationUtils.loadAnimation(PhotoActivity.this, R.anim.image_alpha);
@@ -357,12 +357,12 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	//TODO
 	private void recreateSeeNewPhoto() {
 		if (gallery != null && gallery.getVisibility() == View.VISIBLE) return;
-		seeNewPhoto.setVisibility(View.VISIBLE);
+		seeNewPhoto.show(R.string.see_new_photos);
 		final Animation animation = AnimationUtils.loadAnimation(PhotoActivity.this, R.anim.image_alpha);
 		seeNewPhoto.postDelayed(new Runnable() {
 			@Override
 			public void run() {
-				seeNewPhoto.setVisibility(View.VISIBLE); // need to invalidate background
+				seeNewPhoto.show(R.string.see_new_photos); // need to invalidate background
 				Animation anim = animation;
 				anim.setDuration(anim.getDuration() / 2);
 				seeNewPhoto.startAnimation(anim);
@@ -468,7 +468,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 						}
 						break;
 				}
-				seeNewPhoto.setVisibility(View.GONE);
+				seeNewPhoto.hide();
 			}
 		});
 	}

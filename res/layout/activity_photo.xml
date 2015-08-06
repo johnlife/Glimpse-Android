@@ -20,9 +20,10 @@
 
     <odesk.johnlife.glimpse.ui.BlurTextView
         android:id="@+id/see_new_photos"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/see_new_photos_layout_hight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal|bottom"
+        android:layout_marginBottom="@dimen/heart_padding"
         android:visibility="gone" />
 
     <odesk.johnlife.glimpse.ui.BlurTextView
