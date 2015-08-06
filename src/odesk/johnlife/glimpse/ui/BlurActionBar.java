@@ -25,20 +25,25 @@ public class BlurActionBar {
 	private boolean isFreeze = false;
 	private OnActionClick listener;
 	
-	public BlurActionBar(Activity activity, boolean isFreeze) {
+	public BlurActionBar(Activity activity, boolean isFreeze, boolean isBlocked) {
 		this.actionBar = activity.getActionBar();
 		customActionBar = activity.getLayoutInflater().inflate(R.layout.custom_bar, null);
 		actionBar.setCustomView(customActionBar);
 		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
 		this.isFreeze = isFreeze;
-		createActionButtons();
+		createActionButtons(isBlocked);
 	}
 	
-	private void createActionButtons() {
+	private void createActionButtons(boolean isBlocked) {
 		View deleteActionView = customActionBar.findViewById(R.id.action_delete);
 		View freezeActionView = customActionBar.findViewById(R.id.action_freeze);
 		View settingActionView = customActionBar.findViewById(R.id.action_setting);
 		View galleryActionView = customActionBar.findViewById(R.id.action_gallery);
+		if (isBlocked) {
+			deleteActionView.setEnabled(false);
+			freezeActionView.setEnabled(false);
+			galleryActionView.setEnabled(false);
+		}
 		chageFreezeState(isFreeze, freezeActionView);
 		ActionClickListener simpleClickListener = new ActionClickListener();
 		deleteActionView.setOnClickListener(simpleClickListener);

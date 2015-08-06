@@ -144,7 +144,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	private Runnable swipeRunnable = new Runnable() {
 		@Override
 		public void run() {
-			boolean blocked = actionBar.isFreeze() || getActionBar().isShowing() || isBlocked();
+			boolean blocked = actionBar.isFreeze() || getActionBar().isShowing() || isBlocked(true);
 			if (blocked || GlimpseApp.getFileHandler().isLocked()) {
 				pager.postDelayed(swipeRunnable, 50);
 			} else {
@@ -244,6 +244,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	private void init() {
 		initViews();
 		wifi = WifiReceiver.createInstance(this, this);
+		createActionBar();
 		mailTimer.scheduleAtFixedRate(mailPollTask, 0, REFRESH_RATE);
 		databaseHelper = DatabaseHelper.getInstance(getApplicationContext());
 		seeNewPhoto.setOnClickListener(new OnClickListener() {
@@ -263,6 +264,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 				if (galleryHideSeeNewPhoto) {
 					recreateSeeNewPhoto();
 				}
+				rescheduleImageSwipe();
 			}
 		});
 		deletingDialog.setPositiveButtonListener(new View.OnClickListener() {
@@ -289,7 +291,6 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	}
 
 	private void initViews() {
-		createActionBar();
 		progress = (ProgressBar) findViewById(R.id.progressLoading);
 		error = (BlurTextView) findViewById(R.id.error_pane);
 		hint = (HintTextView) findViewById(R.id.hint);
@@ -339,7 +340,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 		((FreezeViewPager)pager).setSwipeValidator(new FreezeViewPager.SwipeValidator() {
 			@Override
 			public boolean isSwipeBlocked() {
-				return isBlocked();
+				return isBlocked(true);
 			}
 		});
 		pagerAdapter.checkNewPhotos();
@@ -388,7 +389,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 		return new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (isBlocked()) return;
+				if (isBlocked(false) || (error.getVisibility() == View.VISIBLE && getString(R.string.error_no_photo).equals(error.getText()))) return;
 				createActionBar();
 				ActionBar actionBar = getActionBar();
 				if (actionBar.isShowing()) {
@@ -416,10 +417,10 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 		});
 	}
 
-	private boolean isBlocked() {
+	private boolean isBlocked(boolean checkWithError) {
 		if (!wifi.isConnectedOrConnecting()) return true;
+		if (checkWithError) if (error.getVisibility() == View.VISIBLE) return true;
 		View[] swipeBlockers = {
-				error,
 				wifiList,
 				/** uncomment if newEmail is needing*/
 //			newEmail.dialog,
@@ -443,7 +444,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	}
 
 	private void createActionBar() {
-		actionBar = new BlurActionBar(this, actionBar == null ? isFreeze : actionBar.isFreeze());
+		actionBar = new BlurActionBar(this, actionBar == null ? isFreeze : actionBar.isFreeze(), isBlocked(true));
 		actionBar.setOnActionClickListener(new OnActionClick() {
 			@Override
 			public void onClick(View v) {
@@ -600,6 +601,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 		helpDialog.hide();
 		gallery.setVisibility(View.GONE);
 		seeNewPhoto.hide();
+		error.hide();
 	}
 
 	public void showHint(String text) {

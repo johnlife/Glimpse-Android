@@ -36,6 +36,10 @@ public class BlurTextView extends BlurLayout {
         setVisibility(View.VISIBLE);
     }
 
+    public String getText() {
+        return textView.getText().toString();
+    }
+
     public void show(int res) {
         show(getContext().getString(res));
     }

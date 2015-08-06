@@ -29,7 +29,7 @@ public class WifiRedirectionTask extends AsyncTask<Object, Object, Boolean> impl
 			int status = con.getResponseCode();
 			if (status != HttpURLConnection.HTTP_OK) {
 				location = con.getHeaderField(LOCATION);
-				if (location != null && location.equals(WIFI_REDIRECT_URL)) {
+				if (location != null && location.contains(GOOGLE)) {
 					result = true;
 				}
 			} else {
