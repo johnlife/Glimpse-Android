@@ -1,5 +1,8 @@
 package odesk.johnlife.glimpse;
 
+import java.util.Arrays;
+import java.util.List;
+
 public interface Constants {
 
 	String ACTION_WIFI_SCAN = "action.wifi.scan";
@@ -15,7 +18,7 @@ public interface Constants {
 
 	String WIFI_REDIRECT_URL = "http://google.com/";
 	String GOOGLE = "google";
-	String REFRESH_STRING = "META HTTP-EQUIV=\"REFRESH\"";
+	List<String> REDIRECTION_STRINGS = Arrays.asList("authorization", "redirect", "wifi", "wi-fi", "sms", "mobnum", "mobpass");
 	String DOMAIN = "@glimpseframe.com";
 
 	int REFRESH_RATE = 10000;

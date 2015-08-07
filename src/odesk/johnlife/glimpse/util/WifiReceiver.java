@@ -125,6 +125,12 @@ public class WifiReceiver implements Constants {
                         prefs.edit().remove(PREF_WIFI_PASSWORD).apply();
                         listener.onDisconnected(WifiError.CONNECT_ERROR);
                     }
+                } else if (state == SupplicantState.INACTIVE && isConnecting) {
+                    isConnecting = false;
+                    resetCurrentWifi();
+                    prefs.edit().remove(PREF_WIFI_PASSWORD).apply();
+                    listener.onDisconnected(WifiError.CONNECT_ERROR);
+                    scanWifi();
                 }
             } else if (WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(action)) {
                 final NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);

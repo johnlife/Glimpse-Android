@@ -43,8 +43,11 @@ public class WifiRedirectionTask extends AsyncTask<Object, Object, Boolean> impl
 						html.append(inputLine);
 					}
 					in.close();
-					String htmlString = html.toString();
-					result = !htmlString.toUpperCase(Locale.ENGLISH).contains(REFRESH_STRING);
+					String htmlString = html.toString().toLowerCase(Locale.ENGLISH);
+					for (String string : REDIRECTION_STRINGS) {
+						if (htmlString.contains(string)) return false;
+					}
+					return true;
 				}
 			}
 		} catch (MalformedURLException e) {
