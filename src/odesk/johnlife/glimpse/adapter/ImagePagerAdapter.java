@@ -1,16 +1,5 @@
 package odesk.johnlife.glimpse.adapter;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
-import odesk.johnlife.glimpse.R;
-import odesk.johnlife.glimpse.activity.PhotoActivity;
-import odesk.johnlife.glimpse.app.GlimpseApp;
-import odesk.johnlife.glimpse.data.DatabaseHelper;
-import odesk.johnlife.glimpse.data.FileHandler;
-import odesk.johnlife.glimpse.data.MailSender;
-import odesk.johnlife.glimpse.data.PictureData;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -30,6 +19,18 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import odesk.johnlife.glimpse.R;
+import odesk.johnlife.glimpse.activity.PhotoActivity;
+import odesk.johnlife.glimpse.app.GlimpseApp;
+import odesk.johnlife.glimpse.data.DatabaseHelper;
+import odesk.johnlife.glimpse.data.FileHandler;
+import odesk.johnlife.glimpse.data.MailSender;
+import odesk.johnlife.glimpse.data.PictureData;
 
 public class ImagePagerAdapter extends PagerAdapter {
 
@@ -145,10 +146,11 @@ public class ImagePagerAdapter extends PagerAdapter {
 						@Override
 						protected Boolean doInBackground(Object... params) {
 							try {
-								MailSender mailSender = new MailSender(((PhotoActivity) context).getUser(), "HPgqL2658P");
-								mailSender.postMail(pictureData.getSenderAddress(), pictureData.getPath());
+								String user = ((PhotoActivity) context).getUser();
+								String pass = context.getString(R.string.mail_sender_pass);
+								MailSender mailSender = new MailSender(user, pass);
+								mailSender.postMail(context, pictureData.getSenderAddress(), pictureData.getPath());
 							} catch (Exception e) {
-								// TODO Auto-generated catch block
 								e.printStackTrace();
 								return false;
 							}

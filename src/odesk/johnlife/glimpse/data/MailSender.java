@@ -1,5 +1,7 @@
 package odesk.johnlife.glimpse.data;
 
+import android.content.Context;
+
 import java.util.Properties;
 
 import javax.activation.DataHandler;
@@ -18,6 +20,7 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 import odesk.johnlife.glimpse.Constants;
+import odesk.johnlife.glimpse.R;
 
 public class MailSender extends Authenticator implements Constants {	
 
@@ -29,7 +32,7 @@ public class MailSender extends Authenticator implements Constants {
 		this.password = password;
 	}
 
-	public void postMail(String recipient, String picturePath) {
+	public void postMail(Context context, String recipient, String picturePath) {
 		try {
 			Properties props = new Properties();
 			props.put("mail.smtp.host", EMAIL_SERVER);
@@ -38,10 +41,10 @@ public class MailSender extends Authenticator implements Constants {
 			Message msg = new MimeMessage(session);
 			msg.setFrom(new InternetAddress(email));
 			msg.setRecipient(Message.RecipientType.TO, new InternetAddress(recipient));
-			msg.setSubject(EMAIL_SUBJECT);
+			msg.setSubject(context.getString(R.string.email_subject));
 			Multipart multipart = new MimeMultipart();
 			BodyPart messageBodyPart = new MimeBodyPart();
-			messageBodyPart.setText(EMAIL_TEXT);
+			messageBodyPart.setText(context.getString(R.string.email_text));
 			multipart.addBodyPart(messageBodyPart);
 			BodyPart attachBodyPart = new MimeBodyPart();
 			DataSource source = new FileDataSource(picturePath);
