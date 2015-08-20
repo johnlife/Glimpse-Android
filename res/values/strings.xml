@@ -25,7 +25,10 @@
 
 	<string name="how_it_works">How It Works</string>
 	<string name="how_it_works_email">Your Skylight email address is %1$s</string>
-	<string name="how_it_works_message">Very long text about how it works</string>
+	<string name="how_it_works_message">
+		1) Connect Skylight to your wi-fi network\n
+		2) Tell loved ones to send photos as attachments to the above email. Any size photo will do, but we recommend 500 KB to 2 MB.\n
+		If you have any issues, email us at info@skylightframe.com</string>
 
 	<string name="title_new_email_step1">Request new email address</string>
 	<string name="title_new_email_step2">New email address confirmed</string>
