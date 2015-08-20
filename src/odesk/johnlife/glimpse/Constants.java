@@ -13,7 +13,7 @@ public interface Constants {
 
 	String SSL_FACTORY = "odesk.johnlife.glimpse.util.AlwaysTrustSSLContextFactory";
 	String EMAIL_SERVER = "mx.glimpseframe.com"; //pop.mail.ru
-	String EMAIL_SUBJECT = "Someone liked a photo you sent to Glimpse.";
+	String EMAIL_SUBJECT = "Someone liked a photo you sent to Skylight.";
 	String EMAIL_TEXT = "In the body is some dummy text that we'll fill in later + a thumbnail of the liked photo.";
 
 	String WIFI_REDIRECT_URL = "http://google.com/";
