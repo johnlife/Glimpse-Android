@@ -2,8 +2,10 @@ package odesk.johnlife.glimpse.dialog;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Typeface;
 import android.text.Spannable;
-import android.text.SpannableStringBuilder;
+import android.text.SpannableString;
+import android.text.style.StyleSpan;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.TextView;
@@ -40,10 +42,12 @@ public class HelpDialog extends BlurDialog {
                 hide();
             }
         });
-        SpannableStringBuilder string = new SpannableStringBuilder(context.getString(R.string.how_it_works_email, ((PhotoActivity) context).getUser()));
-        string.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD),
-                context.getString(R.string.how_it_works_email).length(), string.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        ((TextView) findViewById(R.id.textEmail)).setText(string);
+        String email = ((PhotoActivity) context).getUser();
+        SpannableString fullEmailText = new SpannableString(context.getString(R.string.how_it_works_email, email));
+        int startBold = (fullEmailText.length() - email.length());
+        int endBold = fullEmailText.length();
+        fullEmailText.setSpan(new StyleSpan(Typeface.BOLD), startBold, endBold, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        ((TextView) findViewById(R.id.textEmail)).setText(fullEmailText);
         String version = "";
         try {
             version = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
