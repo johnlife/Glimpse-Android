@@ -1,14 +1,11 @@
 package odesk.johnlife.glimpse.dialog;
 
 import android.content.Context;
-import android.text.InputType;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -16,9 +13,6 @@ import odesk.johnlife.glimpse.R;
 import odesk.johnlife.glimpse.util.WifiReceiver;
 
 public class WifiDialog extends BlurDialog {
-
-    private static final int TYPE_VISIBLE_PASS = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD;
-    private static final int TYPE_INVISIBLE_PASS = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD;
 
     private EditText password;
 
@@ -58,14 +52,6 @@ public class WifiDialog extends BlurDialog {
                 } else {
                     imm.hideSoftInputFromWindow(password.getWindowToken(), 0);
                 }
-            }
-        });
-        password.setInputType(TYPE_INVISIBLE_PASS);
-        CheckBox showPassword = (CheckBox) view.findViewById(R.id.is_password_visible);
-        showPassword.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                password.setInputType(isChecked ? TYPE_VISIBLE_PASS : TYPE_INVISIBLE_PASS);
             }
         });
         negativeButton.setOnClickListener(new OnClickListener() {
