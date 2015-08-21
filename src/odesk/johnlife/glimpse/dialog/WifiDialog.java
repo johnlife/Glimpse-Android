@@ -78,9 +78,10 @@ public class WifiDialog extends BlurDialog {
     }
 
     @Override
-    protected void cancel() {
-        super.cancel();
-        WifiReceiver.getInstance().scanWifi();
+    public boolean cancel() {
+        boolean isCanceled = super.cancel();
+        if (isCanceled) WifiReceiver.getInstance().scanWifi();
+        return isCanceled;
     }
 
     private void connect() {

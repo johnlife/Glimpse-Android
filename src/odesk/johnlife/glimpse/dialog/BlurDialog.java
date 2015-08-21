@@ -10,6 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import odesk.johnlife.glimpse.R;
+import odesk.johnlife.glimpse.activity.PhotoActivity;
 
 public abstract class BlurDialog extends FrameLayout {
 
@@ -47,6 +48,7 @@ public abstract class BlurDialog extends FrameLayout {
                 hide();
             }
         });
+        addCallback();
     }
 
     private OnTouchListener getOutsideListener() {
@@ -89,8 +91,16 @@ public abstract class BlurDialog extends FrameLayout {
         content.setVisibility(View.GONE);
     }
 
-    protected void cancel() {
-        hide();
+    public boolean cancel() {
+        if (getVisibility() == View.VISIBLE) {
+            hide();
+            return true;
+        }
+        return false;
+    }
+
+    private void addCallback() {
+        ((PhotoActivity)getContext()).addDialogToList(this);
     }
 
 }

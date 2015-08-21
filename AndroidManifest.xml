@@ -34,10 +34,7 @@
                 </intent-filter>
         </activity>
 
-
-    
-
-    <meta-data android:name="com.crashlytics.ApiKey" android:value="711e239e09b0533368e9a008ee11dc6f043216fb"/>
+        <meta-data android:name="com.crashlytics.ApiKey" android:value="711e239e09b0533368e9a008ee11dc6f043216fb"/>
     </application>
 
 </manifest>

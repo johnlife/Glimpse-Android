@@ -29,6 +29,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.text.Normalizer;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -40,6 +41,7 @@ import odesk.johnlife.glimpse.adapter.ImagesGalleryAdapter;
 import odesk.johnlife.glimpse.app.GlimpseApp;
 import odesk.johnlife.glimpse.data.DatabaseHelper;
 import odesk.johnlife.glimpse.data.PictureData;
+import odesk.johnlife.glimpse.dialog.BlurDialog;
 import odesk.johnlife.glimpse.dialog.DeletingDialog;
 import odesk.johnlife.glimpse.dialog.EmailChangeDialog;
 import odesk.johnlife.glimpse.dialog.HelpDialog;
@@ -79,7 +81,8 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 		public void run() {
 			String user = getUser();
 			if (wifi.isConnected() && null != user) {
-				MailConnector mailer = new MailConnector(user, "HPgqL2658P", new OnItemDownloadListener() {
+				String pass = getString(R.string.mail_sender_pass);
+				MailConnector mailer = new MailConnector(user, pass, new OnItemDownloadListener() {
 					@Override
 					public void onItemDownload() {
 						pagerAdapter.setHasNewPhotos(true);
@@ -122,15 +125,20 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	private Timer mailTimer = new Timer();
 	private boolean isFreeze = false;
 	private boolean galleryHideSeeNewPhoto;
+	private List<BlurDialog> dialogs = new ArrayList<>();
+
+	public void addDialogToList(BlurDialog dialog) {
+		if (dialog != null) {
+			dialogs.add(dialog);
+		}
+	}
 
 	@Override
 	public void onBackPressed() {
-		//TODO
-//		if (wifiConnectionHandler.isConnectionDialogVisible()) {
-//			wifiConnectionHandler.hideConnectionDialog();
-//		} else {
+		for (BlurDialog dialog : dialogs) {
+			if (dialog.cancel()) return;
+		}
 		super.onBackPressed();
-//		}
 	}
 
 	@Override
