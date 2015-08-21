@@ -103,7 +103,7 @@ public class EmailChangeDialog extends BlurDialog implements Constants{
             showError(R.string.error_email_empty);
             return false;
         }
-        String fullEmail = email + DOMAIN;
+        String fullEmail = email + getContext().getString(R.string.domain);
         if (!android.util.Patterns.EMAIL_ADDRESS.matcher(fullEmail).matches()) {
             showError(R.string.error_email_invalid);
             return false;

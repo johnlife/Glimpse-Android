@@ -17,7 +17,6 @@ public interface Constants {
 	String WIFI_REDIRECT_URL = "http://google.com/";
 	String GOOGLE = "google";
 	List<String> REDIRECTION_STRINGS = Arrays.asList("authorization", "redirect", "wifi", "wi-fi", "sms", "mobnum", "mobpass");
-	String DOMAIN = "@glimpseframe.com";
 
 	int REFRESH_RATE = 10000;
 	int HINT_TIME = 6000;
