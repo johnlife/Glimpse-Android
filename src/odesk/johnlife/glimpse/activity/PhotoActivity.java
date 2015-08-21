@@ -253,11 +253,11 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 						getActionBar().hide();
 					}
 					seeNewPhoto.hide();
-					pager.setAlpha(0);
+					//pager.setAlpha(0);
 				} else if (state == 0) {
-					Animation animation = AnimationUtils.loadAnimation(PhotoActivity.this, R.anim.image_alpha);
-					pager.startAnimation(animation);
-					pager.setAlpha(1);
+					//Animation animation = AnimationUtils.loadAnimation(PhotoActivity.this, R.anim.image_alpha);
+					//pager.startAnimation(animation);
+					//pager.setAlpha(1);
 				}
 			}
 		});
