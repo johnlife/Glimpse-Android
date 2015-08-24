@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:keepScreenOn="true"
-    tools:context=".PhotoActivity" >
+    tools:context=".PhotoActivity">
 
     <odesk.johnlife.glimpse.ui.FreezeViewPager
         android:id="@+id/pager"
@@ -18,13 +18,30 @@
         android:layout_gravity="center"
         android:visibility="gone" />
 
-    <odesk.johnlife.glimpse.ui.BlurTextView
-        android:id="@+id/see_new_photos"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal|bottom"
-        android:layout_marginBottom="@dimen/heart_padding"
-        android:visibility="gone" />
+        android:layout_gravity="center_horizontal|bottom">
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1.25" />
+
+        <Button
+            android:id="@+id/see_new_photos"
+            android:layout_width="0dp"
+            android:visibility="gone"
+            android:layout_height="@dimen/see_new_photos_height"
+            android:layout_weight="7.5"
+            android:background="@drawable/see_new_photos" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1.25" />
+
+    </LinearLayout>
 
     <odesk.johnlife.glimpse.ui.BlurTextView
         android:id="@+id/error_pane"

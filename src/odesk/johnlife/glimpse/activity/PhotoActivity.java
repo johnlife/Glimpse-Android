@@ -15,10 +15,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Button;
 import android.widget.Gallery;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
@@ -89,7 +88,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 						runOnUiThread(new Runnable() {
 							@Override
 							public void run() {
-								recreateSeeNewPhoto();
+								showSeeNewPhoto();
 								showNewPhotos();
 							}
 						});
@@ -111,7 +110,8 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	private BlurActionBar actionBar;
 	private ViewPager pager;
 	private ProgressBar progress;
-	private BlurTextView seeNewPhoto, error;
+	private Button seeNewPhoto;
+	private BlurTextView error;
 	private HintTextView hint;
 	private BlurListView wifiList;
 	private Gallery gallery;
@@ -174,7 +174,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 		seeNewPhoto.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				seeNewPhoto.hide();
+				hideSeeNewPhoto();
 				pagerAdapter.setHasNewPhotos(false);
 				showNewPhotos();
 			}
@@ -186,7 +186,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 				pagerAdapter = createAdapter((PictureData) gallery.getItemAtPosition(position));
 				pager.setAdapter(pagerAdapter);
 				if (galleryHideSeeNewPhoto) {
-					recreateSeeNewPhoto();
+					showSeeNewPhoto();
 				}
 				rescheduleImageSwipe();
 			}
@@ -218,7 +218,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 		progress = (ProgressBar) findViewById(R.id.progressLoading);
 		error = (BlurTextView) findViewById(R.id.error_pane);
 		hint = (HintTextView) findViewById(R.id.hint);
-		seeNewPhoto = (BlurTextView) findViewById(R.id.see_new_photos);
+		seeNewPhoto = (Button) findViewById(R.id.see_new_photos);
 		wifiList = (BlurListView) findViewById(R.id.wifi_list);
 		gallery = (Gallery) findViewById(R.id.gallery1);
 		deletingDialog = (DeletingDialog) findViewById(R.id.dialog_deleting);
@@ -241,23 +241,14 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 					actionBar.unFreeze();
 				}
 				if (pagerAdapter.hasNewPhotos()) {
-					recreateSeeNewPhoto();
+					showSeeNewPhoto();
 				}
 			}
 
 			@Override
 			public void onPageScrollStateChanged(int state) {
-				if (state == 2 || state == 1) {
-					seeNewPhoto.clearAnimation();
-					if (getActionBar() != null && getActionBar().isShowing()) {
-						getActionBar().hide();
-					}
-					seeNewPhoto.hide();
-					//pager.setAlpha(0);
-				} else if (state == 0) {
-					//Animation animation = AnimationUtils.loadAnimation(PhotoActivity.this, R.anim.image_alpha);
-					//pager.startAnimation(animation);
-					//pager.setAlpha(1);
+				if (getActionBar() != null && getActionBar().isShowing() && (state == 2 || state == 1)) {
+					getActionBar().hide();
 				}
 			}
 		});
@@ -268,7 +259,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 			}
 		});
 		pagerAdapter.checkNewPhotos();
-		if (pagerAdapter.hasNewPhotos() && wifi.isConnected()) recreateSeeNewPhoto();
+		if (pagerAdapter.hasNewPhotos() && wifi.isConnected()) showSeeNewPhoto();
 		if (pagerAdapter.getCount() >= SCREEN_PAGE_LIMIT) rescheduleImageSwipe();
 	}
 
@@ -278,20 +269,13 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 		}
 	}
 
-	//TODO
-	private void recreateSeeNewPhoto() {
+	private void showSeeNewPhoto() {
 		if (gallery != null && gallery.getVisibility() == View.VISIBLE) return;
-		seeNewPhoto.show(R.string.see_new_photos);
-		final Animation animation = AnimationUtils.loadAnimation(PhotoActivity.this, R.anim.image_alpha);
-		seeNewPhoto.postDelayed(new Runnable() {
-			@Override
-			public void run() {
-				seeNewPhoto.show(R.string.see_new_photos); // need to invalidate background
-				Animation anim = animation;
-				anim.setDuration(anim.getDuration() / 2);
-				seeNewPhoto.startAnimation(anim);
-			}
-		}, animation.getDuration());
+		seeNewPhoto.setVisibility(View.VISIBLE);
+	}
+
+	private void hideSeeNewPhoto() {
+		seeNewPhoto.setVisibility(View.GONE);
 	}
 
 	@Override
@@ -381,7 +365,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 						break;
 					case R.id.action_freeze:
 						if (pagerAdapter.hasNewPhotos()) {
-							recreateSeeNewPhoto();
+							showSeeNewPhoto();
 						}
 						break;
 					case R.id.action_gallery:
@@ -392,7 +376,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 						}
 						break;
 				}
-				seeNewPhoto.hide();
+				hideSeeNewPhoto();
 			}
 		});
 	}
@@ -524,7 +508,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 		deletingDialog.hide();
 		helpDialog.hide();
 		gallery.setVisibility(View.GONE);
-		seeNewPhoto.hide();
+		hideSeeNewPhoto();
 		error.hide();
 	}
 
@@ -543,7 +527,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	public void onConnected() {
 		hideProgress();
 		checkForNoPhotos();
-		if (pagerAdapter.hasNewPhotos()) recreateSeeNewPhoto();
+		if (pagerAdapter.hasNewPhotos()) showSeeNewPhoto();
 		wifiList.hide(false);
 		wifiDialog.hide();
 		hint.show(R.string.hint_wifi_connected);
