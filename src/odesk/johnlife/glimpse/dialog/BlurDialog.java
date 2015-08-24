@@ -9,10 +9,11 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import odesk.johnlife.glimpse.Constants;
 import odesk.johnlife.glimpse.R;
 import odesk.johnlife.glimpse.activity.PhotoActivity;
 
-public abstract class BlurDialog extends FrameLayout {
+public abstract class BlurDialog extends FrameLayout implements Constants{
 
     private TextView title;
     protected LinearLayout content;

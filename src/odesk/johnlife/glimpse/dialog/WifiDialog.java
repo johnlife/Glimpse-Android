@@ -1,6 +1,9 @@
 package odesk.johnlife.glimpse.dialog;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.net.wifi.ScanResult;
+import android.preference.PreferenceManager;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.View;
@@ -71,8 +74,16 @@ public class WifiDialog extends BlurDialog {
 
     @Override
     public void show() {
-        password.setText("");
-        setTitle(WifiReceiver.getInstance().getSelectedNetwork().SSID);
+        ScanResult selectedNetwork = WifiReceiver.getInstance().getSelectedNetwork();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+        String savedBssid = prefs.getString(PREF_WIFI_BSSID, "");
+        if (savedBssid.equals(selectedNetwork.BSSID)) {
+            String pass = prefs.getString(PREF_WIFI_PASSWORD, "");
+            password.setText(pass);
+        } else {
+            password.setText("");
+        }
+        setTitle(selectedNetwork.SSID);
         super.show();
         password.requestFocus();
     }

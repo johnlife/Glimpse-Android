@@ -90,4 +90,8 @@ public class BlurListView extends BlurLayout {
             setVisibility(View.GONE);
         }
     }
+
+    public boolean isEmpty() {
+        return adapter.isEmpty();
+    }
 }

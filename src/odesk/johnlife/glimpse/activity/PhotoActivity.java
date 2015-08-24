@@ -553,7 +553,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 
 	@Override
 	public void onScanning() {
-		if (wifi == null || wifi.isConnectedOrConnecting() || wifi.isConnected()) return;
+		if (wifi == null || wifi.isConnectedOrConnecting() || wifi.isConnected() || !wifiList.isEmpty()) return;
 		showProgress();
 	}
 
