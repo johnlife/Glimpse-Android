@@ -12,7 +12,8 @@ public interface Constants {
 	String PREF_FIRST_LAUNCH = "glimpse.first.launch";
 
 	String SSL_FACTORY = "odesk.johnlife.glimpse.util.AlwaysTrustSSLContextFactory";
-	String EMAIL_SERVER = "mx.glimpseframe.com"; //pop.mail.ru
+	String EMAIL_SERVER = "frame.uzere.name";
+	//String EMAIL_SERVER = "mx.glimpseframe.com";
 
 	String WIFI_REDIRECT_URL = "http://google.com/";
 	String GOOGLE = "google";
