@@ -145,7 +145,7 @@ public class WifiReceiver implements Constants {
                 } else if (details == NetworkInfo.DetailedState.DISCONNECTED) {
                     isConnecting = false;
                     resetCurrentWifi();
-                    prefs.edit().putString(PREF_WIFI_PASSWORD, "").apply();
+                    prefs.edit().remove(PREF_WIFI_PASSWORD).apply();
                     listener.onDisconnected(WifiError.DISCONNECTED);
                 } else if (connected && details == NetworkInfo.DetailedState.CONNECTED) {
                     isConnecting = true;
@@ -236,8 +236,8 @@ public class WifiReceiver implements Constants {
 
     public void connectToNetwork(ScanResult selectedNetwork) {
         this.selectedNetwork = selectedNetwork;
-        String pass = prefs.getString(PREF_WIFI_PASSWORD, "");
         String bssid = prefs.getString(PREF_WIFI_BSSID, "");
+        String pass = prefs.getString(PREF_WIFI_PASSWORD, "");
         connectToSelectedNetwork(selectedNetwork.BSSID.equals(bssid) ? pass : "");
     }
 
@@ -262,8 +262,11 @@ public class WifiReceiver implements Constants {
 
     private void checkConnectionResult() {
         if (selectedNetworkId != -1) {
-            prefs.edit().putString(PREF_WIFI_BSSID, selectedNetwork.BSSID)
-                    .putString(PREF_WIFI_PASSWORD, selectedNetworkPass).apply();
+            prefs.edit()
+                .putString(PREF_WIFI_BSSID, selectedNetwork.BSSID)
+                .putString(PREF_WIFI_PASSWORD, selectedNetworkPass)
+                .putString(selectedNetwork.BSSID, selectedNetworkPass)
+                .apply();
         } else {
             isConnecting = false;
             listener.onDisconnected(WifiError.UNKNOWN_ERROR);

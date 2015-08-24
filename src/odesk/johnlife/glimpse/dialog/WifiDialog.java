@@ -76,13 +76,8 @@ public class WifiDialog extends BlurDialog {
     public void show() {
         ScanResult selectedNetwork = WifiReceiver.getInstance().getSelectedNetwork();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
-        String savedBssid = prefs.getString(PREF_WIFI_BSSID, "");
-        if (savedBssid.equals(selectedNetwork.BSSID)) {
-            String pass = prefs.getString(PREF_WIFI_PASSWORD, "");
-            password.setText(pass);
-        } else {
-            password.setText("");
-        }
+        String savedPass = prefs.getString(selectedNetwork.BSSID, "");
+        password.setText(savedPass);
         setTitle(selectedNetwork.SSID);
         super.show();
         password.requestFocus();
