@@ -122,7 +122,10 @@ public class WifiReceiver implements Constants {
                 if (state == SupplicantState.DISCONNECTED) {
                     int errorCode = intent.getIntExtra(WifiManager.EXTRA_SUPPLICANT_ERROR, -1);
                     if (errorCode == WifiManager.ERROR_AUTHENTICATING) {
-                        prefs.edit().remove(PREF_WIFI_PASSWORD).apply();
+                        SharedPreferences.Editor editor = prefs.edit();
+                        editor.remove(PREF_WIFI_PASSWORD);
+                        if (selectedNetwork != null) editor.remove(selectedNetwork.BSSID);
+                        editor.apply();
                         listener.onDisconnected(WifiError.CONNECT_ERROR);
                     }
                 } else if (state == SupplicantState.INACTIVE && isConnecting) {
