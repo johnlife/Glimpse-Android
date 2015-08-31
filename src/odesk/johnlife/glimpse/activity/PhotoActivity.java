@@ -297,7 +297,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 		return new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (isBlocked(false) || (error.getVisibility() == View.VISIBLE && getString(R.string.error_no_photo).equals(error.getText()))) return;
+				if (isBlocked(false) || (error.getVisibility() == View.VISIBLE && getString(R.string.error_no_user_data).equals(error.getText()))) return;
 				createActionBar();
 				ActionBar actionBar = getActionBar();
 				if (actionBar.isShowing()) {

@@ -43,6 +43,7 @@ public class HelpDialog extends BlurDialog {
             }
         });
         String email = ((PhotoActivity) context).getUser();
+        if (email == null) return;
         SpannableString fullEmailText = new SpannableString(context.getString(R.string.how_it_works_email, email));
         int startBold = (fullEmailText.length() - email.length());
         int endBold = fullEmailText.length();
