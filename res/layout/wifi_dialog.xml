@@ -3,5 +3,7 @@
     android:id="@+id/password"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:inputType="textVisiblePassword"
+    android:imeOptions="actionDone"
     android:hint="@string/hint_password"
     android:textSize="@dimen/text_size" />
