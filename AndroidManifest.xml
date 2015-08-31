@@ -25,6 +25,7 @@
         <activity
             android:name="odesk.johnlife.glimpse.activity.PhotoActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
+            android:windowSoftInputMode="adjustResize"
             android:theme="@style/AppTheme.WithActionBar" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
