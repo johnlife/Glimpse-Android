@@ -8,7 +8,6 @@ public interface Constants {
 	String ACTION_WIFI_SCAN = "action.wifi.scan";
 
 	String PREF_WIFI_BSSID = "wifi.bssid.pref";
-	String PREF_WIFI_PASSWORD = "wifi.password.pref";
 	String PREF_FIRST_LAUNCH = "glimpse.first.launch";
 
 	String SSL_FACTORY = "odesk.johnlife.glimpse.util.AlwaysTrustSSLContextFactory";
@@ -20,6 +19,7 @@ public interface Constants {
 	List<String> REDIRECTION_STRINGS = Arrays.asList("authorization", "redirect", "wifi", "wi-fi", "sms", "mobnum", "mobpass");
 
 	int REFRESH_RATE = 10000;
+	int CONNECTION_TIMEOUT = 15000;
 	int HINT_TIME = 6000;
 	int SCREEN_PAGE_LIMIT = 2;
 	int RESCHEDULE_REFRESH_RATE = 8000;

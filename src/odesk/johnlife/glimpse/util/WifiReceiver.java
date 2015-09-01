@@ -15,6 +15,7 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 
@@ -49,7 +50,6 @@ public class WifiReceiver implements Constants {
     }
 
     private class WepConnector extends OpenConnector {
-
         @Override
         protected WifiConfiguration configure() {
             WifiConfiguration config = new WifiConfiguration();
@@ -122,16 +122,12 @@ public class WifiReceiver implements Constants {
                 if (state == SupplicantState.DISCONNECTED) {
                     int errorCode = intent.getIntExtra(WifiManager.EXTRA_SUPPLICANT_ERROR, -1);
                     if (errorCode == WifiManager.ERROR_AUTHENTICATING) {
-                        SharedPreferences.Editor editor = prefs.edit();
-                        editor.remove(PREF_WIFI_PASSWORD);
-                        if (selectedNetwork != null) editor.remove(selectedNetwork.BSSID);
-                        editor.apply();
+                        if (selectedNetwork != null) prefs.edit().remove(selectedNetwork.BSSID).apply();
                         listener.onDisconnected(WifiError.CONNECT_ERROR);
                     }
                 } else if (state == SupplicantState.INACTIVE && isConnecting) {
                     isConnecting = false;
                     resetCurrentWifi();
-                    prefs.edit().remove(PREF_WIFI_PASSWORD).apply();
                     listener.onDisconnected(WifiError.CONNECT_ERROR);
                     scanWifi();
                 }
@@ -148,13 +144,14 @@ public class WifiReceiver implements Constants {
                 } else if (details == NetworkInfo.DetailedState.DISCONNECTED) {
                     isConnecting = false;
                     resetCurrentWifi();
-                    prefs.edit().remove(PREF_WIFI_PASSWORD).apply();
                     listener.onDisconnected(WifiError.DISCONNECTED);
+                    connectionTimeoutHandler.removeCallbacks(connectionTimeout);
                 } else if (connected && details == NetworkInfo.DetailedState.CONNECTED) {
                     isConnecting = true;
                     WifiRedirectionTask redirectionTask = new WifiRedirectionTask() {
                         @Override
                         protected void onPostExecute(Boolean result) {
+                            connectionTimeoutHandler.removeCallbacks(connectionTimeout);
                             isConnecting = false;
                             if (result) {
                                 unregisterScanReceiver();
@@ -198,6 +195,13 @@ public class WifiReceiver implements Constants {
     private PendingIntent wifiPendingIntent;
     private boolean isRefresherPaused;
     private boolean isConnecting;
+    private Handler connectionTimeoutHandler = new Handler();
+    private Runnable connectionTimeout = new Runnable() {
+        @Override
+        public void run() {
+            if (isConnecting) wifi.removeNetwork(selectedNetworkId);
+        }
+    };
 
     private WifiReceiver(Context context, WifiConnectionListener listener) {
         this.context = context;
@@ -237,9 +241,7 @@ public class WifiReceiver implements Constants {
 
     public void connectToNetwork(ScanResult selectedNetwork) {
         this.selectedNetwork = selectedNetwork;
-        String bssid = prefs.getString(PREF_WIFI_BSSID, "");
-        String pass = prefs.getString(PREF_WIFI_PASSWORD, "");
-        connectToSelectedNetwork(selectedNetwork.BSSID.equals(bssid) ? pass : "");
+        connectToSelectedNetwork("");
     }
 
     public void connectToSelectedNetwork(String pass) {
@@ -249,6 +251,8 @@ public class WifiReceiver implements Constants {
         if (pass.isEmpty() && !(cap.isEmpty() || cap.startsWith("[ESS"))) {
             listener.onDisconnected(WifiError.NEED_PASSWORD);
         } else {
+            connectionTimeoutHandler.removeCallbacks(connectionTimeout);
+            connectionTimeoutHandler.postDelayed(connectionTimeout, CONNECTION_TIMEOUT);
             isConnecting = true;
             if (cap.contains("[WPA")) {
                 new WpaConnector().connect();
@@ -265,7 +269,6 @@ public class WifiReceiver implements Constants {
         if (selectedNetworkId != -1) {
             prefs.edit()
                 .putString(PREF_WIFI_BSSID, selectedNetwork.BSSID)
-                .putString(PREF_WIFI_PASSWORD, selectedNetworkPass)
                 .putString(selectedNetwork.BSSID, selectedNetworkPass)
                 .apply();
         } else {
