@@ -204,9 +204,7 @@ public class WifiReceiver implements Constants {
         this.listener = listener;
         prefs = PreferenceManager.getDefaultSharedPreferences(context);
         wifi = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-        if (!wifi.isWifiEnabled()) {
-            wifi.setWifiEnabled(true);
-        }
+        if (!wifi.isWifiEnabled()) wifi.setWifiEnabled(true);
     }
 
     private void startRefresher() {
@@ -319,8 +317,12 @@ public class WifiReceiver implements Constants {
     }
 
     public void onResume() {
-        if (isRefresherPaused) startRefresher();
-        isRefresherPaused = false;
+        if (!isConnectedOrConnecting()) {
+            listener.onDisconnected(WifiError.DISCONNECTED);
+        } else {
+            if (isRefresherPaused) startRefresher();
+            isRefresherPaused = false;
+        }
     }
 
     public void onPause() {
