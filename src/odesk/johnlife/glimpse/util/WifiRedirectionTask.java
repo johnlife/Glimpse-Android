@@ -6,7 +6,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
 
@@ -44,15 +43,13 @@ public class WifiRedirectionTask extends AsyncTask<Object, Object, Boolean> impl
 					}
 					in.close();
 					String htmlString = html.toString().toLowerCase(Locale.ENGLISH);
-					for (String string : REDIRECTION_STRINGS) {
-						if (htmlString.contains(string)) return false;
-					}
-					return true;
+//					for (String string : REDIRECTION_STRINGS) {
+//						if (htmlString.contains(string)) return false;
+//					}
+//					return true;
+					return htmlString.contains(GOOGLE);
 				}
 			}
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-			result = false;
 		} catch (IOException e) {
 			e.printStackTrace();
 			result = false;
