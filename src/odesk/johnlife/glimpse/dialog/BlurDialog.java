@@ -19,6 +19,7 @@ public abstract class BlurDialog extends FrameLayout implements Constants{
     protected LinearLayout content;
     protected FrameLayout container;
     protected Button positiveButton, negativeButton;
+    protected View buttons;
 
     public BlurDialog(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
@@ -41,8 +42,9 @@ public abstract class BlurDialog extends FrameLayout implements Constants{
         content = (LinearLayout) findViewById(R.id.content);
         title = (TextView) content.findViewById(R.id.title);
         container = (FrameLayout) content.findViewById(R.id.container);
-        positiveButton = (Button) content.findViewById(R.id.ok);
-        negativeButton = (Button) content.findViewById(R.id.cancel);
+        buttons = content.findViewById(R.id.buttons);
+        positiveButton = (Button) buttons.findViewById(R.id.ok);
+        negativeButton = (Button) buttons.findViewById(R.id.cancel);
         negativeButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {

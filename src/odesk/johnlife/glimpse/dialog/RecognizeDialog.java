@@ -48,8 +48,7 @@ public class RecognizeDialog extends BlurDialog {
     protected void createView(Context context) {
         super.createView(context);
         inflate(context, R.layout.dialog_recognize, container);
-        positiveButton.setVisibility(View.GONE);
-        negativeButton.setVisibility(View.GONE);
+        buttons.setVisibility(View.GONE);
         setTitle(R.string.recognize_title);
         progress = findViewById(R.id.progress);
         recognize = (EditText) findViewById(R.id.recognize);
@@ -90,7 +89,7 @@ public class RecognizeDialog extends BlurDialog {
                 InputStream in = null;
                 BufferedReader reader = null;
                 try {
-                    HttpGet httpGet = new HttpGet(getContext().getString(R.string.server_url, params[0]));\
+                    HttpGet httpGet = new HttpGet(getContext().getString(R.string.server_url, params[0]));
                     HttpResponse response = httpclient.execute(httpGet);
                     in = response.getEntity().getContent();
                     StringBuilder stringbuilder = new StringBuilder();
