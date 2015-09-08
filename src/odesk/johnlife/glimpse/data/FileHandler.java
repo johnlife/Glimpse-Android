@@ -49,17 +49,19 @@ public class FileHandler {
 			} catch (IOException e) {
 				Log.e(getClass().getName(), "Error writing scaled bitmap", e);
 			} finally {
-				try {
-					out.flush();
-				} catch (Exception e) {
-					e.printStackTrace();
+				if (out != null) {
+					try {
+						out.flush();
+					} catch (Exception e) {
+						Log.e("Flushing OutputStream", e.getMessage(), e);
+					}
+					try {
+						out.close();
+					} catch (Exception e) {
+						Log.e("Closing OutputStream", e.getMessage(), e);
+					}
+					out = null;
 				}
-				try {
-					out.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				out = null;
 			}
 			locked = true;
 			PictureData picture = new PictureData(path, from);

@@ -18,6 +18,7 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import odesk.johnlife.glimpse.Constants;
 
@@ -224,7 +225,7 @@ public class WifiReceiver implements Constants {
         try {
             wifiRefresher.cancel(wifiPendingIntent);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("Cancel Refresher", e.getMessage(), e);
         }
         wifiRefresher = null;
         wifiPendingIntent = null;
@@ -336,18 +337,14 @@ public class WifiReceiver implements Constants {
     public void unregister() {
         try {
             context.unregisterReceiver(wifiStateReceiver);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception e) {}
         unregisterScanReceiver();
     }
 
     private void unregisterScanReceiver() {
         try {
             context.unregisterReceiver(wifiScanReceiver);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception e) {}
         stopRefresher();
     }
 

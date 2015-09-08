@@ -52,11 +52,15 @@ public abstract class BlurDialog extends FrameLayout implements Constants{
         addCallback();
     }
 
+    protected boolean canCloseOnTouchOutside() {
+        return true;
+    }
+
     private OnTouchListener getOutsideListener() {
         return new OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                cancel();
+                if (canCloseOnTouchOutside()) cancel();
                 return true;
             }
         };
@@ -101,7 +105,7 @@ public abstract class BlurDialog extends FrameLayout implements Constants{
     }
 
     private void addCallback() {
-        ((PhotoActivity)getContext()).addDialogToList(this);
+        if (canCloseOnTouchOutside()) ((PhotoActivity)getContext()).addDialogToList(this);
     }
 
 }

@@ -1,6 +1,7 @@
 package odesk.johnlife.glimpse.util;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -51,7 +52,7 @@ public class WifiRedirectionTask extends AsyncTask<Object, Object, Boolean> impl
 				}
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			Log.e("Redirection Task", e.getMessage(), e);
 			result = false;
 		}
 		return result;

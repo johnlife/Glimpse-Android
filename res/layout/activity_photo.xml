@@ -40,14 +40,6 @@
         android:layout_gravity="right"
         android:visibility="gone" />
 
-    <odesk.johnlife.glimpse.ui.HintTextView
-        android:id="@+id/hint"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal|bottom"
-        android:layout_marginBottom="@dimen/hint_margin_bottom"
-        android:visibility="gone" />
-
     <odesk.johnlife.glimpse.dialog.DeletingDialog
         android:id="@+id/dialog_deleting"
         android:layout_width="match_parent"
@@ -56,6 +48,12 @@
 
     <odesk.johnlife.glimpse.dialog.HelpDialog
         android:id="@+id/dialog_help"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
+
+    <odesk.johnlife.glimpse.dialog.RecognizeDialog
+        android:id="@+id/dialog_recognize"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone" />
@@ -77,5 +75,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
+        android:visibility="gone" />
+
+    <odesk.johnlife.glimpse.ui.HintTextView
+        android:id="@+id/hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|bottom"
+        android:layout_marginBottom="@dimen/hint_margin_bottom"
         android:visibility="gone" />
 </FrameLayout>

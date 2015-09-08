@@ -151,12 +151,12 @@ public class ImagePagerAdapter extends PagerAdapter {
 								MailSender mailSender = new MailSender(user, pass);
 								mailSender.postMail(context, pictureData.getSenderAddress(), pictureData.getPath());
 							} catch (Exception e) {
-								e.printStackTrace();
+								Log.e("Sending like", e.getMessage(), e);
 								return false;
 							}
 							return true;
 						}
-					}.execute();
+					}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 				}
 			});
 		}

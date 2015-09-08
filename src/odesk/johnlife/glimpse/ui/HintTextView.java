@@ -19,15 +19,19 @@ public class HintTextView extends BlurTextView implements Constants {
         super(context, attrs, defStyle);
     }
 
-    @Override
-    public void show(String text) {
+    public void show(String text, int time) {
         super.show(text);
         postDelayed(new Runnable() {
             @Override
             public void run() {
                 hide();
             }
-        }, HINT_TIME);
+        }, time);
+    }
+
+    @Override
+    public void show(String text) {
+        show(text, HINT_TIME);
     }
 
 }

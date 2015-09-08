@@ -25,8 +25,10 @@ import android.widget.ProgressBar;
 import com.crashlytics.android.Crashlytics;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +46,7 @@ import odesk.johnlife.glimpse.dialog.BlurDialog;
 import odesk.johnlife.glimpse.dialog.DeletingDialog;
 import odesk.johnlife.glimpse.dialog.EmailChangeDialog;
 import odesk.johnlife.glimpse.dialog.HelpDialog;
+import odesk.johnlife.glimpse.dialog.RecognizeDialog;
 import odesk.johnlife.glimpse.dialog.WifiDialog;
 import odesk.johnlife.glimpse.ui.BlurActionBar;
 import odesk.johnlife.glimpse.ui.BlurActionBar.OnActionClick;
@@ -56,7 +59,7 @@ import odesk.johnlife.glimpse.util.MailConnector.OnItemDownloadListener;
 import odesk.johnlife.glimpse.util.WifiConnectionListener;
 import odesk.johnlife.glimpse.util.WifiReceiver;
 
-public class PhotoActivity extends Activity implements Constants, WifiConnectionListener {
+public class PhotoActivity extends Activity implements Constants, WifiConnectionListener, RecognizeDialog.OnCodeAssociatingListener {
 
 	private Runnable swipeRunnable = new Runnable() {
 		@Override
@@ -116,6 +119,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	private BlurListView wifiList;
 	private Gallery gallery;
 	private DeletingDialog deletingDialog;
+	private RecognizeDialog recognizeDialog;
 	private EmailChangeDialog emailChangeDialog;
 	private HelpDialog helpDialog;
 	private WifiDialog wifiDialog;
@@ -158,11 +162,11 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 					restart();
 				}
 			}, filter);
-		} else if (getUser() == null) {
-			error.show(R.string.error_no_user_data);
-		} else {
-			wifi.register();
+		} else if (getUser() == null && wifi.isConnected()) {
+			recognizeDialog.show();
+//			showError(R.string.error_no_user_data);
 		}
+		wifi.register();
 	}
 
 	private void init() {
@@ -221,6 +225,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 		seeNewPhoto = (Button) findViewById(R.id.see_new_photos);
 		wifiList = (BlurListView) findViewById(R.id.wifi_list);
 		gallery = (Gallery) findViewById(R.id.gallery1);
+		recognizeDialog = (RecognizeDialog) findViewById(R.id.dialog_recognize);
 		deletingDialog = (DeletingDialog) findViewById(R.id.dialog_deleting);
 		emailChangeDialog = (EmailChangeDialog) findViewById(R.id.dialog_change_email);
 		helpDialog = (HelpDialog) findViewById(R.id.dialog_help);
@@ -420,7 +425,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 			});
 			popupWindow.showAsDropDown(view, 5, 5);
 		} catch (Exception e) {
-			e.printStackTrace();
+			Log.e("Show popup menu", e.getMessage(), e);
 		}
 //		PopupMenu popupMenu = new PopupMenu(this, v);
 //		popupMenu.inflate(R.menu.popup_menu);
@@ -473,14 +478,51 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 			Log.e("UserInfo", e.getMessage(), e);
 			return null;
 		} finally {
-			try {
-				br.close();
-			} catch (Exception e) {
-				e.printStackTrace();
+			if (br != null) {
+				try {
+					br.close();
+				} catch (Exception e) {
+					Log.e("Closing BufferedReader", e.getMessage(), e);
+				}
+				br = null;
 			}
-			br = null;
 		}
+		if (user == null || user.isEmpty()) return null;
 		return Normalizer.normalize(user, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
+	}
+
+	@Override
+	public void onCodeAssociated(String email) {
+		BufferedWriter bw = null;
+		try {
+			File dataFile = getUserDataFile();
+			if (!dataFile.exists()) dataFile.createNewFile();
+			bw = new BufferedWriter(new FileWriter(dataFile));
+			bw.write(email);
+		} catch (Exception e) {
+			Log.e("Writing email to file", e.getMessage(), e);
+		} finally {
+			if (bw != null) {
+				try {
+					bw.flush();
+				} catch (Exception e) {
+					Log.e("Flushing BufferedWriter", e.getMessage(), e);
+				}
+				try {
+					bw.close();
+				} catch (Exception e) {
+					Log.e("Closing BufferedWriter", e.getMessage(), e);
+				}
+				bw = null;
+			}
+		}
+		checkForNoPhotos();
+		if (pagerAdapter.hasNewPhotos()) showSeeNewPhoto();
+	}
+
+	@Override
+	public void onCodeRefused(String error) {
+		hint.show(error, ERROR_RECOGNIZE_TIME);
 	}
 
 	private File getUserDataFile() {
@@ -507,6 +549,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 		wifiDialog.hide();
 		deletingDialog.hide();
 		helpDialog.hide();
+		recognizeDialog.hide();
 		gallery.setVisibility(View.GONE);
 		hideSeeNewPhoto();
 		error.hide();
@@ -526,11 +569,15 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	@Override
 	public void onConnected() {
 		hideProgress();
-		checkForNoPhotos();
-		if (pagerAdapter.hasNewPhotos()) showSeeNewPhoto();
 		wifiList.hide(false);
 		wifiDialog.hide();
 		hint.show(R.string.hint_wifi_connected);
+		if (getUser() == null) {
+			recognizeDialog.show();
+		} else {
+			checkForNoPhotos();
+			if (pagerAdapter.hasNewPhotos()) showSeeNewPhoto();
+		}
 	}
 
 	@Override

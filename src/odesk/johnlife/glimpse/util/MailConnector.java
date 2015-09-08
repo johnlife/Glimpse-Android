@@ -84,18 +84,22 @@ public class MailConnector implements Constants {
 			Log.e(LOG_TAG, "Error: ", e);
 //			PushLink.sendAsyncException(e);
 		} finally {
-			try {
-				folder.close(true);
-			} catch (Exception e) {
-				e.printStackTrace();
+			if (folder != null) {
+				try {
+					folder.close(true);
+				} catch (Exception e) {
+					Log.e("Closing Folder", e.getMessage(), e);
+				}
+				folder = null;
 			}
-			folder = null;
-			try {
-				store.close();
-			} catch (Exception e) {
-				e.printStackTrace();
+			if (store != null) {
+				try {
+					store.close();
+				} catch (Exception e) {
+					Log.e("Closing Store", e.getMessage(), e);
+				}
+				store = null;
 			}
-			store = null;
 		}
 	}
 
@@ -124,23 +128,27 @@ public class MailConnector implements Constants {
 			} catch (IOException e) {
 //				PushLink.sendAsyncException(e);
 			} finally {
-				try {
-					is.close();
-				} catch (Exception e) {
-					e.printStackTrace();
+				if (is != null) {
+					try {
+						is.close();
+					} catch (Exception e) {
+						Log.e("Closing InputStream", e.getMessage(), e);
+					}
+					is = null;
 				}
-				is = null;
-				try {
-					fos.flush();
-				} catch (Exception e) {
-					e.printStackTrace();
+				if (fos != null) {
+					try {
+						fos.flush();
+					} catch (Exception e) {
+						Log.e("Flushing OutputStream", e.getMessage(), e);
+					}
+					try {
+						fos.close();
+					} catch (Exception e) {
+						Log.e("Closing OutputStream", e.getMessage(), e);
+					}
+					fos = null;
 				}
-				try {
-					fos.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				fos = null;
 			}
 		}
 		Log.d(LOG_TAG, "Found "+attachments.size()+" attachments.");

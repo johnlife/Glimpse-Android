@@ -1,6 +1,7 @@
 package odesk.johnlife.glimpse.data;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.util.Properties;
 
@@ -54,7 +55,7 @@ public class MailSender extends Authenticator implements Constants {
 			msg.setContent(multipart);
 			Transport.send(msg);
 		} catch (Exception e) {
-			e.printStackTrace();
+			Log.e("Sending like", e.getMessage(), e);
 		}
 	}
 
