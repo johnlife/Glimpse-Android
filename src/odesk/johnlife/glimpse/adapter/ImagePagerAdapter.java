@@ -52,16 +52,18 @@ public class ImagePagerAdapter extends PagerAdapter {
 			@Override
 			public void onChanged() {
 				if (fileHandler.isEmpty()) {
-					activity.startActivity(new Intent(activity, activity.getClass()));
+					Intent intent = new Intent(activity, activity.getClass());
+					intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 					activity.finish();
-				}/* else {
+					activity.startActivity(intent);
+				} else {
 					activity.runOnUiThread(new Runnable() {
 						@Override
 						public void run() {
 							notifyDataSetChanged();
 						}
 					});
-				}*/
+				}
 			}
 		});
 		this.pictures = new ArrayList<PictureData>();

@@ -91,6 +91,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 						runOnUiThread(new Runnable() {
 							@Override
 							public void run() {
+								pagerAdapter.notifyDataSetChanged();
 								showSeeNewPhoto();
 								showNewPhotos();
 							}
@@ -338,6 +339,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 				/** uncomment if newEmail is needing*/
 //			newEmail.dialog,
 				helpDialog,
+				recognizeDialog,
 				deletingDialog,
 				wifiDialog,
 				progress
