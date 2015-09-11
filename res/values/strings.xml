@@ -24,7 +24,8 @@
 	<string name="hint_password">password</string>
 	<string name="hint_new_email">new email</string>
 
-	<string name="recognize_title">Skylight code</string>
+	<string name="recognize_title">Enter Your Skylight Code</string>
+	<string name="recognize_hint">Skylight code</string>
 	<string name="recognize_message">Please enter your personal Skylight code. If you don’t have your code, email info@skylightframe.com.</string>
 	<string name="recognize_error">Your code is not recognized. Try again or email info@skylightframe.com for help.</string>
 

@@ -15,7 +15,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="number"
-        android:hint="@string/recognize_title"
+        android:hint="@string/recognize_hint"
         android:textSize="@dimen/text_size" />
 
     <ProgressBar
