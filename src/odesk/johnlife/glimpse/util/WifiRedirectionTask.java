@@ -24,6 +24,8 @@ public class WifiRedirectionTask extends AsyncTask<Object, Object, Boolean> impl
 			con = (HttpURLConnection) (new URL(WIFI_REDIRECT_URL).openConnection());
 			con.setInstanceFollowRedirects(true);
 			con.setUseCaches(false);
+			con.setConnectTimeout(CONNECTION_TIMEOUT);
+			con.setReadTimeout(CONNECTION_TIMEOUT);
 			con.connect();
 			String location;
 			int status = con.getResponseCode();
