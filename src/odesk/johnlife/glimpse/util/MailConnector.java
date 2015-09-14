@@ -126,6 +126,7 @@ public class MailConnector implements Constants {
 				}
 				attachments.add(f);
 			} catch (IOException e) {
+				Log.e("Get Attachments", e.getMessage(), e);
 //				PushLink.sendAsyncException(e);
 			} finally {
 				if (is != null) {

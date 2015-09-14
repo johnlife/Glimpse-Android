@@ -70,6 +70,7 @@ public class FileHandler {
 			file.delete();
 			locked = false;
 		} catch (IllegalStateException e) {
+			Log.e("Adding file", e.getMessage(), e);
 //			PushLink.sendAsyncException(e);
 		}
 	}

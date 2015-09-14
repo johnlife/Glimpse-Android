@@ -40,7 +40,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 	private OnClickListener onClickListener;
 	private DatabaseHelper dbHelper;
 	private boolean hasNewPhotos = false;
-	
+
 	public ImagePagerAdapter(final Activity activity, DatabaseHelper databaseHelper, OnClickListener onClickListener) {
 		super();
 		this.context = activity;
@@ -51,25 +51,24 @@ public class ImagePagerAdapter extends PagerAdapter {
 		fileHandler.setObserver(new DataSetObserver() {
 			@Override
 			public void onChanged() {
+				activity.runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						notifyDataSetChanged();
+					}
+				});
 				if (fileHandler.isEmpty()) {
 					Intent intent = new Intent(activity, activity.getClass());
 					intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 					activity.finish();
 					activity.startActivity(intent);
-				} else {
-					activity.runOnUiThread(new Runnable() {
-						@Override
-						public void run() {
-							notifyDataSetChanged();
-						}
-					});
 				}
 			}
 		});
 		this.pictures = new ArrayList<PictureData>();
 		fileHandler.resetCurrentPicture();
 	}
-	
+
 	public ImagePagerAdapter(Activity activity, PictureData pictureData, DatabaseHelper databaseHelper, OnClickListener onClickListener) {
 		this(activity, databaseHelper, onClickListener);
 		fileHandler.rewind(pictureData);
@@ -80,12 +79,12 @@ public class ImagePagerAdapter extends PagerAdapter {
 		return fileHandler.size() < 2 ? 1 : Integer.MAX_VALUE;
 //		return Math.max(1, fileHandler.size());	
 	}
-	
+
 	private PictureData getItem(int position) {
 		return position >= pictures.size() ? null : pictures.get(position);
-		
+
 	}
-	
+
 	@Override
 	public Object instantiateItem(ViewGroup pager, int position) {
 		ImageView image = new ImageView(context);
@@ -122,7 +121,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 		image.setOnClickListener(onClickListener);
 		setScaleType(image, bitmap);
 		pager.addView(frame);
-		return frame;		
+		return frame;
 	}
 
 	private ImageView createLikeButton(final PictureData pictureData, int position) {
@@ -174,7 +173,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 	public boolean isViewFromObject(View view, Object object) {
 		return view == ((View) object);
 	}
-	
+
 	@Override
 	public int getItemPosition(Object object){
 		return PagerAdapter.POSITION_NONE;
@@ -186,22 +185,20 @@ public class ImagePagerAdapter extends PagerAdapter {
 			int height = bitmap.getHeight();
 			int width = bitmap.getWidth();
 			int currentOrientation = context.getResources().getConfiguration().orientation;
-			if (
-				(height > width && currentOrientation == Configuration.ORIENTATION_PORTRAIT) || 
-				(height < width && currentOrientation == Configuration.ORIENTATION_LANDSCAPE)
-			) {
+			if ((height > width && currentOrientation == Configuration.ORIENTATION_PORTRAIT)
+					|| (height < width && currentOrientation == Configuration.ORIENTATION_LANDSCAPE)) {
 				imageView.setScaleType(ScaleType.CENTER_CROP);
 			} else {
 				imageView.setScaleType(ScaleType.FIT_CENTER);
 			}
 		}
 	}
-	
+
 	public void deleteCurrentItem(ViewPager pager) {
 		if (fileHandler.isEmpty()) return;
 		int position = pager.getCurrentItem();
 		PictureData item = getItem(position);
-		if (null == item) return; 
+		if (null == item) return;
 		int deleted = fileHandler.delete(item);
 		notifyDataSetChanged();
 		pager.setCurrentItem(position-deleted);
@@ -209,15 +206,18 @@ public class ImagePagerAdapter extends PagerAdapter {
 
 	public void setImageShown(int position) {
 		PictureData item = getItem(position);
-		if (null == item) return; 
+		if (null == item) return;
 		fileHandler.show(item);
 	}
+
 	public void setHasNewPhotos(boolean newPhotos) {
 		hasNewPhotos = newPhotos;
 	}
+
 	public boolean hasNewPhotos() {
 		return hasNewPhotos;
 	}
+
 	public void checkNewPhotos() {
 		if (fileHandler.isEmpty()) {
 			hasNewPhotos = false;

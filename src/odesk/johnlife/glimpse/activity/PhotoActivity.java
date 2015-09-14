@@ -64,6 +64,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	private Runnable swipeRunnable = new Runnable() {
 		@Override
 		public void run() {
+			if (pagerAdapter.getCount() < SCREEN_PAGE_LIMIT) return;
 			boolean blocked = actionBar.isFreeze() || getActionBar().isShowing() || isBlocked(true);
 			if (blocked || GlimpseApp.getFileHandler().isLocked()) {
 				pager.postDelayed(swipeRunnable, 50);
@@ -72,6 +73,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 				if (idx == pagerAdapter.getCount()) {
 					idx = 0;
 				}
+				pagerAdapter.notifyDataSetChanged();
 				pager.setCurrentItem(idx);
 				rescheduleImageSwipe();
 			}
