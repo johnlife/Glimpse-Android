@@ -19,9 +19,11 @@ import java.util.Comparator;
 import java.util.List;
 
 import odesk.johnlife.glimpse.app.GlimpseApp;
+import ru.johnlife.lifetools.reporter.UpmobileExceptionReporter;
 
 public class FileHandler {
 
+	private final UpmobileExceptionReporter logger;
 	private boolean locked;
 	private DatabaseHelper databaseHelper;
 	private List<PictureData> files;
@@ -30,6 +32,7 @@ public class FileHandler {
 	private int nextPosition;
 
 	public FileHandler(Context context) {
+		logger = UpmobileExceptionReporter.getInstance(context);
 		databaseHelper = DatabaseHelper.getInstance(context);
 		files = databaseHelper.getPictures();
 		comparator = PictureData.TIME_COMPARATOR;
@@ -48,6 +51,7 @@ public class FileHandler {
 				scaled.compress(CompressFormat.JPEG, 85, out);
 			} catch (IOException e) {
 				Log.e(getClass().getName(), "Error writing scaled bitmap", e);
+				logger.logException(e);
 			} finally {
 				if (out != null) {
 					try {

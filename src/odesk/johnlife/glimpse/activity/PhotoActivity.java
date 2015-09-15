@@ -58,6 +58,7 @@ import odesk.johnlife.glimpse.util.MailConnector;
 import odesk.johnlife.glimpse.util.MailConnector.OnItemDownloadListener;
 import odesk.johnlife.glimpse.util.WifiConnectionListener;
 import odesk.johnlife.glimpse.util.WifiReceiver;
+import ru.johnlife.lifetools.reporter.UpmobileExceptionReporter;
 
 public class PhotoActivity extends Activity implements Constants, WifiConnectionListener, RecognizeDialog.OnCodeAssociatingListener {
 
@@ -133,6 +134,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	private boolean isFreeze = false;
 	private boolean galleryHideSeeNewPhoto;
 	private List<BlurDialog> dialogs = new ArrayList<>();
+	private UpmobileExceptionReporter logger;
 
 	public void addDialogToList(BlurDialog dialog) {
 		if (dialog != null) {
@@ -153,6 +155,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 		super.onCreate(savedInstanceState);
 		Crashlytics.start(this);
 		setContentView(R.layout.activity_photo);
+		logger = UpmobileExceptionReporter.getInstance(this);
 		init();
 		getActionBar().hide();
 		if (!(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED) && GlimpseApp.getPicturesDir().canWrite())) {
@@ -505,6 +508,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 			bw.write(email);
 		} catch (Exception e) {
 			Log.e("Writing email to file", e.getMessage(), e);
+			logger.logException(e);
 		} finally {
 			if (bw != null) {
 				try {

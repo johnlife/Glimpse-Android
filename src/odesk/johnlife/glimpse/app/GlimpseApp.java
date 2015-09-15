@@ -1,17 +1,20 @@
 package odesk.johnlife.glimpse.app;
 
+import android.app.Application;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.FileObserver;
+import android.preference.PreferenceManager;
+
+import com.lazydroid.autoupdateapk.SilentAutoUpdate;
+
 import java.io.File;
 
 import odesk.johnlife.glimpse.Constants;
 import odesk.johnlife.glimpse.data.FileHandler;
 import odesk.johnlife.glimpse.data.PictureData;
 import odesk.johnlife.glimpse.util.DeviceScreen;
-import android.app.Application;
-import android.content.SharedPreferences;
-import android.os.FileObserver;
-import android.preference.PreferenceManager;
-
-import com.lazydroid.autoupdateapk.SilentAutoUpdate;
+import ru.johnlife.lifetools.reporter.UpmobileExceptionReporter;
 
 public class GlimpseApp extends Application implements Constants {
 
@@ -25,7 +28,9 @@ public class GlimpseApp extends Application implements Constants {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+		Context context = getApplicationContext();
+		Thread.setDefaultUncaughtExceptionHandler(UpmobileExceptionReporter.getInstance(context));
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		if (!prefs.contains(PREF_FIRST_LAUNCH)) {
 			//TODO backend
 			prefs.edit().putBoolean(PREF_FIRST_LAUNCH, false).commit();

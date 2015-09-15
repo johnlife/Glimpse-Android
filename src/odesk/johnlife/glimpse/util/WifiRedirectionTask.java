@@ -11,6 +11,7 @@ import java.net.URL;
 import java.util.Locale;
 
 import odesk.johnlife.glimpse.Constants;
+import ru.johnlife.lifetools.reporter.UpmobileExceptionReporter;
 
 public class WifiRedirectionTask extends AsyncTask<Object, Object, Boolean> implements Constants {
 
@@ -55,6 +56,7 @@ public class WifiRedirectionTask extends AsyncTask<Object, Object, Boolean> impl
 			}
 		} catch (IOException e) {
 			Log.e("Redirection Task", e.getMessage(), e);
+			UpmobileExceptionReporter.logIfAvailable(e);
 			result = false;
 		}
 		return result;

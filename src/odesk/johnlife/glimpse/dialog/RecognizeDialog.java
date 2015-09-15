@@ -21,8 +21,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import odesk.johnlife.glimpse.R;
+import ru.johnlife.lifetools.reporter.UpmobileExceptionReporter;
 
 public class RecognizeDialog extends BlurDialog {
+
+    private final UpmobileExceptionReporter logger;
 
     public interface OnCodeAssociatingListener {
         void onCodeAssociated(String email);
@@ -34,14 +37,17 @@ public class RecognizeDialog extends BlurDialog {
 
     public RecognizeDialog(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        logger = UpmobileExceptionReporter.getInstance(context);
     }
 
     public RecognizeDialog(Context context, AttributeSet attrs) {
         super(context, attrs);
+        logger = UpmobileExceptionReporter.getInstance(context);
     }
 
     public RecognizeDialog(Context context) {
         super(context);
+        logger = UpmobileExceptionReporter.getInstance(context);
     }
 
     @Override
@@ -104,6 +110,7 @@ public class RecognizeDialog extends BlurDialog {
                     }
                 } catch (Exception e) {
                     Log.e("Sending code", e.getMessage(), e);
+                    logger.logException(e);
                 } finally {
                     if (in != null) {
                         try {

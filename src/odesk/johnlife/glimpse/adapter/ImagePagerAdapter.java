@@ -31,9 +31,11 @@ import odesk.johnlife.glimpse.data.DatabaseHelper;
 import odesk.johnlife.glimpse.data.FileHandler;
 import odesk.johnlife.glimpse.data.MailSender;
 import odesk.johnlife.glimpse.data.PictureData;
+import ru.johnlife.lifetools.reporter.UpmobileExceptionReporter;
 
 public class ImagePagerAdapter extends PagerAdapter {
 
+	private final UpmobileExceptionReporter logger;
 	private Context context;
 	private FileHandler fileHandler;
 	private List<PictureData> pictures;
@@ -44,6 +46,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 	public ImagePagerAdapter(final Activity activity, DatabaseHelper databaseHelper, OnClickListener onClickListener) {
 		super();
 		this.context = activity;
+		logger = UpmobileExceptionReporter.getInstance(context);
 		this.onClickListener = onClickListener;
 		dbHelper = databaseHelper;
 		this.fileHandler = GlimpseApp.getFileHandler();
@@ -153,6 +156,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 								mailSender.postMail(context, pictureData.getSenderAddress(), pictureData.getPath());
 							} catch (Exception e) {
 								Log.e("Sending like", e.getMessage(), e);
+								logger.logException(e);
 								return false;
 							}
 							return true;
