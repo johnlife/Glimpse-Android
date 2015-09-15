@@ -193,6 +193,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 			@Override
 			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
 				gallery.setVisibility(View.GONE);
+                actionBar.setGalleryState(false);
 				getActionBar().hide();
 				pagerAdapter = createAdapter((PictureData) gallery.getItemAtPosition(position));
 				pager.setAdapter(pagerAdapter);
@@ -385,11 +386,11 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 							if (seeNewPhoto.getVisibility() == View.VISIBLE) {
 								galleryHideSeeNewPhoto = true;
 							}
-							actionBar.setGalleryText(getString(R.string.exit_gallery));
+                            actionBar.setGalleryState(true);
 							getActionBar().show();
 						} else {
 							gallery.setVisibility(View.GONE);
-							actionBar.setGalleryText(getString(R.string.gallery));
+							actionBar.setGalleryState(false);
 							getActionBar().hide();
 							if (galleryHideSeeNewPhoto) {
 								showSeeNewPhoto();
