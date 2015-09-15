@@ -23,14 +23,14 @@ public class ImagesGalleryAdapter extends BaseAdapter implements Constants {
 	private final static int CACHE_CAPACITY = 50;
 	private final int SMALL_BITMAP_SIZE = 500;
 
-	private static final HashMap<Integer, Bitmap> hardBitmapCache = new LinkedHashMap<Integer, Bitmap>(CACHE_CAPACITY, 0.75f, true) {
+	private static final HashMap<String, Bitmap> hardBitmapCache = new LinkedHashMap<String, Bitmap>(CACHE_CAPACITY, 0.75f, true) {
 		@Override
-		protected boolean removeEldestEntry(LinkedHashMap.Entry<Integer, Bitmap> eldest) {
+		protected boolean removeEldestEntry(LinkedHashMap.Entry<String, Bitmap> eldest) {
 			return size() > CACHE_CAPACITY;
 		}
 	};
 
-	private void putToCache(Integer key, Bitmap bitmap) {
+	private void putToCache(String key, Bitmap bitmap) {
 		if (bitmap != null) {
 			synchronized (hardBitmapCache) {
 				hardBitmapCache.put(key, bitmap);
@@ -38,7 +38,7 @@ public class ImagesGalleryAdapter extends BaseAdapter implements Constants {
 		}
 	}
 
-	private Bitmap getFromCache(Integer key) {
+	private Bitmap getFromCache(String key) {
 		Bitmap bitmap;
 		synchronized (hardBitmapCache) {
 			bitmap = hardBitmapCache.get(key);
@@ -74,10 +74,11 @@ public class ImagesGalleryAdapter extends BaseAdapter implements Constants {
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		ImageView view = new ImageView(context);
-		Bitmap bitmap = getFromCache(position);
+		String path = fileHandler.getFiles().get(position).getPath();
+		Bitmap bitmap = getFromCache(path);
 		if (null == bitmap) {
-			bitmap = resizeToSmall(BitmapFactory.decodeFile(fileHandler.getFiles().get(position).getPath()));
-			putToCache(position, bitmap);
+			bitmap = resizeToSmall(BitmapFactory.decodeFile(path));
+			putToCache(path, bitmap);
 		}
 		view.setImageBitmap(bitmap);
 		int sizeHeight = GlimpseApp.getScreen().getHeight();
