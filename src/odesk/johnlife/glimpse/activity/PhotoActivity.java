@@ -381,6 +381,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 						break;
 					case R.id.action_gallery:
 						if (View.GONE == gallery.getVisibility()) {
+							gallery.setPadding(0, getActionBar().getHeight(), 0, 0);
 							gallery.setAdapter(new ImagesGalleryAdapter(PhotoActivity.this));
 							gallery.setVisibility(View.VISIBLE);
 							if (seeNewPhoto.getVisibility() == View.VISIBLE) {
