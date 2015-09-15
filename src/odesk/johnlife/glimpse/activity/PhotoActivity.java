@@ -18,7 +18,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
-import android.widget.Gallery;
+import android.widget.GridView;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 
@@ -121,7 +121,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	private BlurTextView error;
 	private HintTextView hint;
 	private BlurListView wifiList;
-	private Gallery gallery;
+	private GridView gallery;
 	private DeletingDialog deletingDialog;
 	private RecognizeDialog recognizeDialog;
 	private EmailChangeDialog emailChangeDialog;
@@ -193,6 +193,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 			@Override
 			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
 				gallery.setVisibility(View.GONE);
+				getActionBar().hide();
 				pagerAdapter = createAdapter((PictureData) gallery.getItemAtPosition(position));
 				pager.setAdapter(pagerAdapter);
 				if (galleryHideSeeNewPhoto) {
@@ -230,7 +231,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 		hint = (HintTextView) findViewById(R.id.hint);
 		seeNewPhoto = (Button) findViewById(R.id.see_new_photos);
 		wifiList = (BlurListView) findViewById(R.id.wifi_list);
-		gallery = (Gallery) findViewById(R.id.gallery1);
+		gallery = (GridView) findViewById(R.id.gallery1);
 		recognizeDialog = (RecognizeDialog) findViewById(R.id.dialog_recognize);
 		deletingDialog = (DeletingDialog) findViewById(R.id.dialog_deleting);
 		emailChangeDialog = (EmailChangeDialog) findViewById(R.id.dialog_change_email);
@@ -316,9 +317,6 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 				} else {
 					actionBar.show();
 				}
-				if (gallery != null && gallery.getVisibility() == View.VISIBLE) {
-					gallery.setVisibility(View.GONE);
-				}
 			}
 		};
 	}
@@ -381,10 +379,22 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 						}
 						break;
 					case R.id.action_gallery:
-						gallery.setAdapter(new ImagesGalleryAdapter(PhotoActivity.this));
-						gallery.setVisibility(View.VISIBLE);
-						if (seeNewPhoto.getVisibility() == View.VISIBLE) {
-							galleryHideSeeNewPhoto = true;
+						if (View.GONE == gallery.getVisibility()) {
+							gallery.setAdapter(new ImagesGalleryAdapter(PhotoActivity.this));
+							gallery.setVisibility(View.VISIBLE);
+							if (seeNewPhoto.getVisibility() == View.VISIBLE) {
+								galleryHideSeeNewPhoto = true;
+							}
+							actionBar.setGalleryText(getString(R.string.exit_gallery));
+							getActionBar().show();
+						} else {
+							gallery.setVisibility(View.GONE);
+							actionBar.setGalleryText(getString(R.string.gallery));
+							getActionBar().hide();
+							if (galleryHideSeeNewPhoto) {
+								showSeeNewPhoto();
+							}
+							rescheduleImageSwipe();
 						}
 						break;
 				}

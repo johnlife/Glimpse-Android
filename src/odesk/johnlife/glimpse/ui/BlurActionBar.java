@@ -81,4 +81,8 @@ public class BlurActionBar {
 		chageFreezeState(true, customActionBar);
 	}
 
+	public void setGalleryText(String text) {
+		((TextView)customActionBar.findViewById(R.id.action_gallery)).setText(text);
+	}
+
 }

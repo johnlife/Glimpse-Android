@@ -3,6 +3,7 @@ package odesk.johnlife.glimpse.app;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.FileObserver;
 import android.preference.PreferenceManager;
 
@@ -50,6 +51,12 @@ public class GlimpseApp extends Application implements Constants {
 			}
 		};
 		directoryObserver.startWatching();
+	}
+
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+		screen = new DeviceScreen(this);
 	}
 
 	public static File getPicturesDir() {

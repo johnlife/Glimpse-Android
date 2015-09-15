@@ -14,6 +14,7 @@
 	<string name="resume">Resume</string>
 	<string name="reset_wifi">Reset WiFi</string>
 	<string name="gallery">Gallery</string>
+	<string name="exit_gallery">Exit Gallery</string>
 	<string name="settings">Settings</string>
 	<string name="change_email">Change email</string>
 	<string name="see_new_photos">See New Photos</string>
