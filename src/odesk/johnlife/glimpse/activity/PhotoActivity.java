@@ -148,6 +148,14 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 		for (BlurDialog dialog : dialogs) {
 			if (dialog.cancel()) return;
 		}
+		if (null != gallery && gallery.getVisibility() == View.VISIBLE) {
+			closeGallery();
+			if (galleryHideSeeNewPhoto) {
+				showSeeNewPhoto();
+			}
+			rescheduleImageSwipe();
+			return;
+		}
 		super.onBackPressed();
 	}
 
@@ -194,9 +202,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 		gallery.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-				gallery.setVisibility(View.GONE);
-                actionBar.setGalleryState(false);
-				getActionBar().hide();
+				closeGallery();
 				pagerAdapter = createAdapter((PictureData) gallery.getItemAtPosition(position));
 				pager.setAdapter(pagerAdapter);
 				if (galleryHideSeeNewPhoto) {
@@ -389,12 +395,10 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 							if (seeNewPhoto.getVisibility() == View.VISIBLE) {
 								galleryHideSeeNewPhoto = true;
 							}
-                            actionBar.setGalleryState(true);
+							actionBar.setGalleryState(true);
 							getActionBar().show();
 						} else {
-							gallery.setVisibility(View.GONE);
-							actionBar.setGalleryState(false);
-							getActionBar().hide();
+							closeGallery();
 							if (galleryHideSeeNewPhoto) {
 								showSeeNewPhoto();
 							}
@@ -405,6 +409,12 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 				hideSeeNewPhoto();
 			}
 		});
+	}
+
+	private void closeGallery() {
+		gallery.setVisibility(View.GONE);
+		actionBar.setGalleryState(false);
+		getActionBar().hide();
 	}
 
 	private void showPopupMenu(View view) {
