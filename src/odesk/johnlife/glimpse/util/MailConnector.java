@@ -25,6 +25,7 @@ import javax.mail.search.FlagTerm;
 import odesk.johnlife.glimpse.Constants;
 import odesk.johnlife.glimpse.app.GlimpseApp;
 import odesk.johnlife.glimpse.data.FileHandler;
+import ru.johnlife.lifetools.reporter.UpmobileExceptionReporter;
 
 public class MailConnector implements Constants {
 
@@ -127,6 +128,7 @@ public class MailConnector implements Constants {
 				attachments.add(f);
 			} catch (IOException e) {
 				Log.e("Get Attachments", e.getMessage(), e);
+				UpmobileExceptionReporter.logIfAvailable(e);
 //				PushLink.sendAsyncException(e);
 			} finally {
 				if (is != null) {
