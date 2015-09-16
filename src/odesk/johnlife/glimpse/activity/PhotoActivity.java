@@ -74,7 +74,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 				if (idx == pagerAdapter.getCount()) {
 					idx = 0;
 				}
-				pagerAdapter.notifyDataSetChanged();
+//				pagerAdapter.notifyDataSetChanged();
 				pager.setCurrentItem(idx);
 				rescheduleImageSwipe();
 			}
