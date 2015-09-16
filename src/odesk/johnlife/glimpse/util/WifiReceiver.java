@@ -174,11 +174,11 @@ public class WifiReceiver implements Constants {
     private final BroadcastReceiver wifiScanReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context c, Intent intent) {
+            if (isConnecting) return;
             if (ACTION_WIFI_SCAN.equals(intent.getAction())) {
                 listener.onScanning();
                 wifi.startScan();
             } else {
-                if (isConnecting) return;
                 listener.onScansResultReceive(wifi.getScanResults());
             }
         }
