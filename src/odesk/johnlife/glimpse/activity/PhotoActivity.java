@@ -6,9 +6,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.wifi.ScanResult;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -25,10 +27,8 @@ import android.widget.ProgressBar;
 import com.crashlytics.android.Crashlytics;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
@@ -135,6 +135,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	private boolean galleryHideSeeNewPhoto;
 	private List<BlurDialog> dialogs = new ArrayList<>();
 	private UpmobileExceptionReporter logger;
+	private SharedPreferences prefs;
 
 	public void addDialogToList(BlurDialog dialog) {
 		if (dialog != null) {
@@ -154,6 +155,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Crashlytics.start(this);
+		prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		setContentView(R.layout.activity_photo);
 		logger = UpmobileExceptionReporter.getInstance(this);
 		init();
@@ -483,59 +485,41 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	}
 
 	public String getUser() {
-		String user = null;
-		BufferedReader br = null;
-		try {
-			File dataFile = getUserDataFile();
-			if (!dataFile.exists()) return null;
-			br = new BufferedReader(new FileReader(dataFile));
-			String line = br.readLine();
-			if (line != null) {
-				user = line;
-			}
-		} catch (Exception e) {
-			Log.e("UserInfo", e.getMessage(), e);
-			return null;
-		} finally {
-			if (br != null) {
-				try {
-					br.close();
-				} catch (Exception e) {
-					Log.e("Closing BufferedReader", e.getMessage(), e);
+		if (!prefs.contains(PREF_USER_EMAIL)) {
+			String user = null;
+			BufferedReader br = null;
+			try {
+				File dataFile = getUserDataFile();
+				if (dataFile.exists()) {
+					br = new BufferedReader(new FileReader(dataFile));
+					String line = br.readLine();
+					if (line != null) {
+						user = line;
+					}
+					dataFile.delete();
+					if (user == null || user.isEmpty()) return null;
+					prefs.edit().putString(PREF_USER_EMAIL, Normalizer.normalize(user, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "")).commit();
 				}
-				br = null;
+			} catch (Exception e) {
+				Log.e("UserInfo", e.getMessage(), e);
+				return null;
+			} finally {
+				if (br != null) {
+					try {
+						br.close();
+					} catch (Exception e) {
+						Log.e("Closing BufferedReader", e.getMessage(), e);
+					}
+					br = null;
+				}
 			}
 		}
-		if (user == null || user.isEmpty()) return null;
-		return Normalizer.normalize(user, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
+		return prefs.getString(PREF_USER_EMAIL, null);
 	}
 
 	@Override
 	public void onCodeAssociated(String email) {
-		BufferedWriter bw = null;
-		try {
-			File dataFile = getUserDataFile();
-			if (!dataFile.exists()) dataFile.createNewFile();
-			bw = new BufferedWriter(new FileWriter(dataFile));
-			bw.write(email);
-		} catch (Exception e) {
-			Log.e("Writing email to file", e.getMessage(), e);
-			logger.logException(e);
-		} finally {
-			if (bw != null) {
-				try {
-					bw.flush();
-				} catch (Exception e) {
-					Log.e("Flushing BufferedWriter", e.getMessage(), e);
-				}
-				try {
-					bw.close();
-				} catch (Exception e) {
-					Log.e("Closing BufferedWriter", e.getMessage(), e);
-				}
-				bw = null;
-			}
-		}
+		prefs.edit().putString(PREF_USER_EMAIL, email).commit();
 		checkForNoPhotos();
 		if (pagerAdapter.hasNewPhotos()) showSeeNewPhoto();
 	}

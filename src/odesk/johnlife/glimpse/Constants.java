@@ -9,6 +9,7 @@ public interface Constants {
 
 	String PREF_WIFI_BSSID = "wifi.bssid.pref";
 	String PREF_FIRST_LAUNCH = "glimpse.first.launch";
+	String PREF_USER_EMAIL = "user.email";
 
 	String SSL_FACTORY = "odesk.johnlife.glimpse.util.AlwaysTrustSSLContextFactory";
 	String EMAIL_SERVER = "frame.uzere.name";
