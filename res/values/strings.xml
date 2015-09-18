@@ -5,6 +5,7 @@
 	<string name="app_name_version">%1$s v %2$s</string>
 	<string name="domain">\@skylightframe.com</string>
 	<string name="server_url">http://frame.uzere.name:1337/api/v1/bind/%1$s</string>
+	<string name="like_url">http://frame.uzere.name:1337/api/v1/like</string>
 
 	<string name="connect">Connect</string>
 	<string name="cancel">Cancel</string>
@@ -57,11 +58,5 @@
 	<string name="hint_wifi_disconnected">Wifi is disconnected. Try again or choose other network</string>
 
 	<string name="mail_sender_pass">HPgqL2658P</string>
-	<string name="email_subject">Someone liked a photo you sent to Skylight</string>
-	<string name="email_text">
-		Guess what? Your loved one wanted to thank you for the attached photo you sent to their Skylight - they loved it!\n\n
-		Keep on sending new photos to their Skylight -- they\'re checking it, and you might just make their day!\n\n
-		-Team Skylight
-	</string>
 
 </resources>

@@ -29,7 +29,7 @@ import odesk.johnlife.glimpse.activity.PhotoActivity;
 import odesk.johnlife.glimpse.app.GlimpseApp;
 import odesk.johnlife.glimpse.data.DatabaseHelper;
 import odesk.johnlife.glimpse.data.FileHandler;
-import odesk.johnlife.glimpse.data.MailSender;
+import odesk.johnlife.glimpse.data.LikeSender;
 import odesk.johnlife.glimpse.data.PictureData;
 import ru.johnlife.lifetools.reporter.UpmobileExceptionReporter;
 
@@ -150,10 +150,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 						@Override
 						protected Boolean doInBackground(Object... params) {
 							try {
-								String user = ((PhotoActivity) context).getUser();
-								String pass = context.getString(R.string.mail_sender_pass);
-								MailSender mailSender = new MailSender(user, pass);
-								mailSender.postMail(context, pictureData.getSenderAddress(), pictureData.getPath());
+								new LikeSender().sendLike(context, pictureData.getSenderAddress(), pictureData.getPath());
 							} catch (Exception e) {
 								Log.e("Sending like", e.getMessage(), e);
 								logger.logException(e);

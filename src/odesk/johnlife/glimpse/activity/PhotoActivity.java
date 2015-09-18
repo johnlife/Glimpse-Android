@@ -95,6 +95,9 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 							@Override
 							public void run() {
 								pagerAdapter.notifyDataSetChanged();
+								if (gallery.getVisibility() == View.VISIBLE) {
+									galleryAdapter.notifyDataSetChanged();
+								}
 								showSeeNewPhoto();
 								showNewPhotos();
 							}
@@ -130,6 +133,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	private DatabaseHelper databaseHelper;
 	private WifiReceiver wifi;
 	private ImagePagerAdapter pagerAdapter;
+	private ImagesGalleryAdapter galleryAdapter;
 	private Timer mailTimer = new Timer();
 	private boolean isFreeze = false;
 	private boolean galleryHideSeeNewPhoto;
@@ -389,8 +393,12 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 						break;
 					case R.id.action_gallery:
 						if (View.GONE == gallery.getVisibility()) {
-							gallery.setPadding(0, getActionBar().getHeight(), 0, 0);
-							gallery.setAdapter(new ImagesGalleryAdapter(PhotoActivity.this));
+							gallery.setPadding(gallery.getPaddingLeft(), getActionBar().getHeight(),
+									gallery.getPaddingRight(), gallery.getPaddingBottom());
+							gallery.setVerticalScrollBarEnabled(false);
+							gallery.setHorizontalScrollBarEnabled(false);
+							galleryAdapter = new ImagesGalleryAdapter(PhotoActivity.this);
+							gallery.setAdapter(galleryAdapter);
 							gallery.setVisibility(View.VISIBLE);
 							if (seeNewPhoto.getVisibility() == View.VISIBLE) {
 								galleryHideSeeNewPhoto = true;

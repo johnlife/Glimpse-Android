@@ -3,14 +3,11 @@ package odesk.johnlife.glimpse.util;
 import android.util.Log;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import javax.mail.BodyPart;
 import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Message;
@@ -20,6 +17,7 @@ import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.search.FlagTerm;
 
 import odesk.johnlife.glimpse.Constants;
@@ -39,7 +37,6 @@ public class MailConnector implements Constants {
 	private String pass;
 	private String server;
 	private OnItemDownloadListener onItemDownLoadListener;
-	byte[] buf = new byte[4096];
 
 	public MailConnector(String user, String pass, OnItemDownloadListener onItemDownLoadListener) {
 		this.user = user;
@@ -107,10 +104,8 @@ public class MailConnector implements Constants {
 	private List<File> getAttachments(Multipart multipart) throws MessagingException {
 		List<File> attachments = new ArrayList<File>();
 		for (int i = 0; i < multipart.getCount(); i++) {
-			FileOutputStream fos = null;
-			InputStream is = null;
 			try {
-				BodyPart bodyPart = multipart.getBodyPart(i);
+				MimeBodyPart bodyPart = (MimeBodyPart) multipart.getBodyPart(i);
 				if (!Part.ATTACHMENT.equalsIgnoreCase(bodyPart.getDisposition()) &&
 						(bodyPart.getFileName() == null || bodyPart.getFileName().isEmpty())) {
 					if (bodyPart.isMimeType("multipart/*")) {
@@ -118,40 +113,13 @@ public class MailConnector implements Constants {
 					}
 					continue; // dealing with attachments only
 				}
-				is = bodyPart.getInputStream();
 				File f = new File(GlimpseApp.getTempDir(), bodyPart.getFileName());
-				fos = new FileOutputStream(f);
-				int bytesRead;
-				while ((bytesRead=is.read(buf)) != -1) {
-					fos.write(buf, 0, bytesRead);
-				}
+				bodyPart.saveFile(f);
 				attachments.add(f);
 			} catch (IOException e) {
 				Log.e("Get Attachments", e.getMessage(), e);
 				UpmobileExceptionReporter.logIfAvailable(e);
 //				PushLink.sendAsyncException(e);
-			} finally {
-				if (is != null) {
-					try {
-						is.close();
-					} catch (Exception e) {
-						Log.e("Closing InputStream", e.getMessage(), e);
-					}
-					is = null;
-				}
-				if (fos != null) {
-					try {
-						fos.flush();
-					} catch (Exception e) {
-						Log.e("Flushing OutputStream", e.getMessage(), e);
-					}
-					try {
-						fos.close();
-					} catch (Exception e) {
-						Log.e("Closing OutputStream", e.getMessage(), e);
-					}
-					fos = null;
-				}
 			}
 		}
 		Log.d(LOG_TAG, "Found "+attachments.size()+" attachments.");

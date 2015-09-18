@@ -13,6 +13,7 @@ public class DeviceScreen {
 	private float heightIn;
 	private int widthDp; 
 	private int heightDp;
+	private int densityDpi;
 
 	public DeviceScreen(Context context) {
 		DisplayMetrics m = context.getResources().getDisplayMetrics();
@@ -26,6 +27,7 @@ public class DeviceScreen {
 		heightDpScaled = (int)Math.ceil(((float)height)/density);
 		widthIn = width / m.xdpi;
 		heightIn = height / m.ydpi;
+		densityDpi = m.densityDpi;
 	}
 
 	public int getWidth() {
@@ -43,6 +45,8 @@ public class DeviceScreen {
 	public int getLargestWidth() {
 		return Math.max(width, height);
 	}
+
+	public int getDensityDpi() { return densityDpi; }
 
 	public int getWidthDpScaled() {
 		return widthDpScaled;
