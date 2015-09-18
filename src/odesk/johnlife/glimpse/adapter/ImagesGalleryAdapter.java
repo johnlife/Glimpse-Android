@@ -84,11 +84,9 @@ public class ImagesGalleryAdapter extends BaseAdapter implements Constants {
 		} else {
 			view.setImageBitmap(bitmap);
 		}
-		int sizeHeight = GlimpseApp.getScreen().getHeight();
 		int sizeWidth = GlimpseApp.getScreen().getWidth();
-		sizeHeight /= sizeHeight > sizeWidth ? 6 : 3;
 		sizeWidth = (sizeWidth - horizontalSpacing * 4) / 3;
-		view.setLayoutParams(new GridView.LayoutParams(sizeWidth, sizeHeight));
+		view.setLayoutParams(new GridView.LayoutParams(sizeWidth, (int) (sizeWidth/1.5)));
 		view.setScaleType(ImageView.ScaleType.CENTER_CROP);
 		return view;
 	}
