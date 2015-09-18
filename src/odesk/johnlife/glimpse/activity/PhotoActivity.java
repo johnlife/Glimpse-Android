@@ -74,7 +74,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 				if (idx == pagerAdapter.getCount()) {
 					idx = 0;
 				}
-				pagerAdapter.notifyDataSetChanged();
+//				pagerAdapter.notifyDataSetChanged();
 				pager.setCurrentItem(idx);
 				rescheduleImageSwipe();
 			}
@@ -95,6 +95,9 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 							@Override
 							public void run() {
 								pagerAdapter.notifyDataSetChanged();
+								if (gallery.getVisibility() == View.VISIBLE) {
+									galleryAdapter.notifyDataSetChanged();
+								}
 								showSeeNewPhoto();
 								showNewPhotos();
 							}
@@ -130,6 +133,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	private DatabaseHelper databaseHelper;
 	private WifiReceiver wifi;
 	private ImagePagerAdapter pagerAdapter;
+	private ImagesGalleryAdapter galleryAdapter;
 	private Timer mailTimer = new Timer();
 	private boolean isFreeze = false;
 	private boolean galleryHideSeeNewPhoto;
@@ -147,6 +151,14 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	public void onBackPressed() {
 		for (BlurDialog dialog : dialogs) {
 			if (dialog.cancel()) return;
+		}
+		if (null != gallery && gallery.getVisibility() == View.VISIBLE) {
+			closeGallery();
+			if (galleryHideSeeNewPhoto) {
+				showSeeNewPhoto();
+			}
+			rescheduleImageSwipe();
+			return;
 		}
 		super.onBackPressed();
 	}
@@ -194,9 +206,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 		gallery.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-				gallery.setVisibility(View.GONE);
-                actionBar.setGalleryState(false);
-				getActionBar().hide();
+				closeGallery();
 				pagerAdapter = createAdapter((PictureData) gallery.getItemAtPosition(position));
 				pager.setAdapter(pagerAdapter);
 				if (galleryHideSeeNewPhoto) {
@@ -383,18 +393,20 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 						break;
 					case R.id.action_gallery:
 						if (View.GONE == gallery.getVisibility()) {
-							gallery.setPadding(0, getActionBar().getHeight(), 0, 0);
-							gallery.setAdapter(new ImagesGalleryAdapter(PhotoActivity.this));
+							gallery.setPadding(gallery.getPaddingLeft(), getActionBar().getHeight(),
+									gallery.getPaddingRight(), gallery.getPaddingBottom());
+							gallery.setVerticalScrollBarEnabled(false);
+							gallery.setHorizontalScrollBarEnabled(false);
+							galleryAdapter = new ImagesGalleryAdapter(PhotoActivity.this);
+							gallery.setAdapter(galleryAdapter);
 							gallery.setVisibility(View.VISIBLE);
 							if (seeNewPhoto.getVisibility() == View.VISIBLE) {
 								galleryHideSeeNewPhoto = true;
 							}
-                            actionBar.setGalleryState(true);
+							actionBar.setGalleryState(true);
 							getActionBar().show();
 						} else {
-							gallery.setVisibility(View.GONE);
-							actionBar.setGalleryState(false);
-							getActionBar().hide();
+							closeGallery();
 							if (galleryHideSeeNewPhoto) {
 								showSeeNewPhoto();
 							}
@@ -405,6 +417,12 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 				hideSeeNewPhoto();
 			}
 		});
+	}
+
+	private void closeGallery() {
+		gallery.setVisibility(View.GONE);
+		actionBar.setGalleryState(false);
+		getActionBar().hide();
 	}
 
 	private void showPopupMenu(View view) {
