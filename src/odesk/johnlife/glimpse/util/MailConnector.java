@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import javax.mail.BodyPart;
 import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Message;
@@ -20,6 +19,7 @@ import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.search.FlagTerm;
 
 import odesk.johnlife.glimpse.Constants;
@@ -109,7 +109,7 @@ public class MailConnector implements Constants {
 			FileOutputStream fos = null;
 			InputStream is = null;
 			try {
-				BodyPart bodyPart = multipart.getBodyPart(i);
+				MimeBodyPart bodyPart = (MimeBodyPart) multipart.getBodyPart(i);
 				if (!Part.ATTACHMENT.equalsIgnoreCase(bodyPart.getDisposition()) &&
 						(bodyPart.getFileName() == null || bodyPart.getFileName().isEmpty())) {
 					if (bodyPart.isMimeType("multipart/*")) {
@@ -117,13 +117,14 @@ public class MailConnector implements Constants {
 					}
 					continue; // dealing with attachments only
 				}
-				is = bodyPart.getInputStream();
 				File f = new File(GlimpseApp.getTempDir(), bodyPart.getFileName());
-				fos = new FileOutputStream(f);
-				int bytesRead;
-				while ((bytesRead=is.read(buf)) != -1) {
-					fos.write(buf, 0, bytesRead);
-				}
+				bodyPart.saveFile(f);
+//				is = bodyPart.getInputStream();
+//				fos = new FileOutputStream(f);
+//				int bytesRead;
+//				while ((bytesRead=is.read(buf)) != -1) {
+//					fos.write(buf, 0, bytesRead);
+//				}
 				attachments.add(f);
 			} catch (IOException e) {
 				Log.e("Get Attachments", e.getMessage(), e);
