@@ -3,6 +3,8 @@ package odesk.johnlife.glimpse.adapter;
 import odesk.johnlife.glimpse.Constants;
 import odesk.johnlife.glimpse.app.GlimpseApp;
 import odesk.johnlife.glimpse.data.FileHandler;
+
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -11,6 +13,8 @@ import android.util.DisplayMetrics;
 import android.util.LruCache;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -63,15 +67,23 @@ public class ImagesGalleryAdapter extends BaseAdapter implements Constants {
 	}
 	
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
-		ImageView view = new ImageView(context);
-		String path = fileHandler.getFiles().get(position).getPath();
+	public View getView(final int position, View convertView, ViewGroup parent) {
+		final ImageView view = new ImageView(context);
+		final String path = fileHandler.getFiles().get(position).getPath();
 		Bitmap bitmap = getBitmapFromMemCache(path);
 		if (null == bitmap) {
-			bitmap = resizeToSmall(BitmapFactory.decodeFile(path));
-			addBitmapToMemoryCache(path, bitmap);
+			view.setVisibility(view.INVISIBLE);
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					Bitmap bitmap = resizeToSmall(BitmapFactory.decodeFile(path));
+					addBitmapToMemoryCache(path, bitmap);
+					setBitmap(view, bitmap);
+				}
+			}).start();
+		} else {
+			view.setImageBitmap(bitmap);
 		}
-		view.setImageBitmap(bitmap);
 		int sizeHeight = GlimpseApp.getScreen().getHeight();
 		int sizeWidth = GlimpseApp.getScreen().getWidth();
 		sizeHeight /= sizeHeight > sizeWidth ? 6 : 3;
@@ -79,6 +91,30 @@ public class ImagesGalleryAdapter extends BaseAdapter implements Constants {
 		view.setLayoutParams(new GridView.LayoutParams(sizeWidth, sizeHeight));
 		view.setScaleType(ImageView.ScaleType.CENTER_CROP);
 		return view;
+	}
+
+	private void setBitmap(final ImageView view, final Bitmap bitmap) {
+		((Activity)context).runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				view.setImageBitmap(bitmap);
+				AlphaAnimation animation = new AlphaAnimation(0, 1);
+				animation.setDuration(250);
+				animation.setAnimationListener(new Animation.AnimationListener() {
+					@Override
+					public void onAnimationStart(Animation animation) {}
+
+					@Override
+					public void onAnimationEnd(Animation animation) {
+						view.setVisibility(View.VISIBLE);
+					}
+
+					@Override
+					public void onAnimationRepeat(Animation animation) {}
+				});
+				view.startAnimation(animation);
+			}
+		});
 	}
 
 	private Bitmap resizeToSmall(Bitmap original) {
