@@ -3,9 +3,7 @@ package odesk.johnlife.glimpse.util;
 import android.util.Log;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -38,7 +36,6 @@ public class MailConnector implements Constants {
 	private String pass;
 	private String server;
 	private OnItemDownloadListener onItemDownLoadListener;
-	byte[] buf = new byte[4096];
 
 	public MailConnector(String user, String pass, OnItemDownloadListener onItemDownLoadListener) {
 		this.user = user;
@@ -106,8 +103,6 @@ public class MailConnector implements Constants {
 	private List<File> getAttachments(Multipart multipart) throws MessagingException {
 		List<File> attachments = new ArrayList<File>();
 		for (int i = 0; i < multipart.getCount(); i++) {
-			FileOutputStream fos = null;
-			InputStream is = null;
 			try {
 				MimeBodyPart bodyPart = (MimeBodyPart) multipart.getBodyPart(i);
 				if (!Part.ATTACHMENT.equalsIgnoreCase(bodyPart.getDisposition()) &&
@@ -119,38 +114,10 @@ public class MailConnector implements Constants {
 				}
 				File f = new File(GlimpseApp.getTempDir(), bodyPart.getFileName());
 				bodyPart.saveFile(f);
-//				is = bodyPart.getInputStream();
-//				fos = new FileOutputStream(f);
-//				int bytesRead;
-//				while ((bytesRead=is.read(buf)) != -1) {
-//					fos.write(buf, 0, bytesRead);
-//				}
 				attachments.add(f);
 			} catch (IOException e) {
 				Log.e("Get Attachments", e.getMessage(), e);
 //				PushLink.sendAsyncException(e);
-			} finally {
-				if (is != null) {
-					try {
-						is.close();
-					} catch (Exception e) {
-						Log.e("Closing InputStream", e.getMessage(), e);
-					}
-					is = null;
-				}
-				if (fos != null) {
-					try {
-						fos.flush();
-					} catch (Exception e) {
-						Log.e("Flushing OutputStream", e.getMessage(), e);
-					}
-					try {
-						fos.close();
-					} catch (Exception e) {
-						Log.e("Closing OutputStream", e.getMessage(), e);
-					}
-					fos = null;
-				}
 			}
 		}
 		Log.d(LOG_TAG, "Found "+attachments.size()+" attachments.");
