@@ -459,6 +459,13 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 				public void onClick(View v) {
 					popupWindow.dismiss();
 					getActionBar().hide();
+					if (null != gallery && gallery.getVisibility() == View.VISIBLE) {
+						closeGallery();
+						if (galleryHideSeeNewPhoto) {
+							showSeeNewPhoto();
+						}
+						rescheduleImageSwipe();
+					}
 					helpDialog.show();
 				}
 			});
