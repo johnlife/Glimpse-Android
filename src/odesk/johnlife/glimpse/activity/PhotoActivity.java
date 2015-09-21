@@ -154,9 +154,6 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 		}
 		if (null != gallery && gallery.getVisibility() == View.VISIBLE) {
 			closeGallery();
-			if (galleryHideSeeNewPhoto) {
-				showSeeNewPhoto();
-			}
 			rescheduleImageSwipe();
 			return;
 		}
@@ -209,9 +206,6 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 				closeGallery();
 				pagerAdapter = createAdapter((PictureData) gallery.getItemAtPosition(position));
 				pager.setAdapter(pagerAdapter);
-				if (galleryHideSeeNewPhoto) {
-					showSeeNewPhoto();
-				}
 				rescheduleImageSwipe();
 			}
 		});
@@ -407,9 +401,6 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 							getActionBar().show();
 						} else {
 							closeGallery();
-							if (galleryHideSeeNewPhoto) {
-								showSeeNewPhoto();
-							}
 							rescheduleImageSwipe();
 						}
 						break;
@@ -422,6 +413,10 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	private void closeGallery() {
 		gallery.setVisibility(View.GONE);
 		actionBar.setGalleryState(false);
+		if (galleryHideSeeNewPhoto) {
+			showSeeNewPhoto();
+			galleryHideSeeNewPhoto = false;
+		}
 		getActionBar().hide();
 	}
 
@@ -461,9 +456,6 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 					getActionBar().hide();
 					if (null != gallery && gallery.getVisibility() == View.VISIBLE) {
 						closeGallery();
-						if (galleryHideSeeNewPhoto) {
-							showSeeNewPhoto();
-						}
 						rescheduleImageSwipe();
 					}
 					helpDialog.show();
