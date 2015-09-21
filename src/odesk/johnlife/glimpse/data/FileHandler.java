@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -27,6 +28,7 @@ public class FileHandler {
 	private boolean locked;
 	private DatabaseHelper databaseHelper;
 	private List<PictureData> files;
+	private List<PictureData> sortedFiles;
 	private DataSetObserver datasetObserver;
 	private Comparator<PictureData> comparator;
 	private int nextPosition;
@@ -35,6 +37,7 @@ public class FileHandler {
 		logger = UpmobileExceptionReporter.getInstance(context);
 		databaseHelper = DatabaseHelper.getInstance(context);
 		files = databaseHelper.getPictures();
+		createSortedFiles();
 		comparator = PictureData.TIME_COMPARATOR;
 	}
 
@@ -83,12 +86,14 @@ public class FileHandler {
 		for (File file : files) {
 			addFile(file, from);
 		}
+		createSortedFiles();
 		resetCurrentPicture();
 		notifyObserver();
 	}
 
 	public synchronized void add(File file, String from) {
 		addFile(file, from);
+		createSortedFiles();
 		resetCurrentPicture();
 		notifyObserver();
 	}
@@ -139,6 +144,7 @@ public class FileHandler {
 		while (files.remove(picture)) {
 			deleted++;
 		}
+		createSortedFiles();
 		notifyObserver();
 		locked = false;
 		return deleted;
@@ -218,6 +224,10 @@ public class FileHandler {
 		return files;
 	}
 
+	public List<PictureData> getSortedFiles() {
+		return sortedFiles;
+	}
+
 	public void rewind(PictureData pictureData) {
 		for (int i = 0; i < files.size(); i++) {
 			if (getNext().equals(pictureData)) {
@@ -226,4 +236,8 @@ public class FileHandler {
 		}
 	}
 
+	private void createSortedFiles() {
+		sortedFiles = new ArrayList<>(files);
+		Collections.sort(sortedFiles, PictureData.TIME_COMPARATOR_REVERSE);
+	}
 }
