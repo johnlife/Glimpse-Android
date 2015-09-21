@@ -621,7 +621,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 				hint.show(R.string.hint_failed_to_connect);
 			} else if (WifiReceiver.WifiError.DISCONNECTED.equals(wifiError)) {
 				hint.show(R.string.hint_wifi_disconnected);
-			} else {
+			} else if (WifiReceiver.WifiError.UNKNOWN_ERROR.equals(wifiError)) {
 				hint.show(R.string.hint_wifi_error);
 			}
 		}

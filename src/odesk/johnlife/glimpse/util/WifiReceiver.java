@@ -24,7 +24,7 @@ import odesk.johnlife.glimpse.Constants;
 
 public class WifiReceiver implements Constants {
 
-    public enum WifiError { NEED_PASSWORD, CONNECT_ERROR, DISCONNECTED, UNKNOWN_ERROR }
+    public enum WifiError { NEED_PASSWORD, CONNECT_ERROR, DISCONNECTED, UNKNOWN_ERROR, NONE }
 
     private class OpenConnector {
 
@@ -143,9 +143,9 @@ public class WifiReceiver implements Constants {
                     isConnecting = false;
                     listener.onDisconnected(WifiError.UNKNOWN_ERROR);
                 } else if (details == NetworkInfo.DetailedState.DISCONNECTED) {
+                    listener.onDisconnected(isConnecting ? WifiError.DISCONNECTED : WifiError.NONE);
                     isConnecting = false;
                     resetCurrentWifi();
-                    listener.onDisconnected(WifiError.DISCONNECTED);
                     connectionTimeoutHandler.removeCallbacks(connectionTimeout);
                 } else if (connected && details == NetworkInfo.DetailedState.CONNECTED) {
                     isConnecting = true;
@@ -322,10 +322,12 @@ public class WifiReceiver implements Constants {
 
     public void onResume() {
         if (!isConnectedOrConnecting()) {
-            listener.onDisconnected(WifiError.DISCONNECTED);
+            listener.onDisconnected(WifiError.NONE);
         } else {
-            if (isRefresherPaused) startRefresher();
-            isRefresherPaused = false;
+            if (isRefresherPaused) {
+                startRefresher();
+                isRefresherPaused = false;
+            }
         }
     }
 
