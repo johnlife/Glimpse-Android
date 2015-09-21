@@ -204,8 +204,8 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 			@Override
 			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
 				closeGallery();
-				pagerAdapter = createAdapter((PictureData) gallery.getItemAtPosition(position));
-				pager.setAdapter(pagerAdapter);
+				GlimpseApp.getFileHandler().rewind((PictureData) gallery.getItemAtPosition(position));
+				pagerAdapter.notifyDataSetChanged();
 				rescheduleImageSwipe();
 			}
 		});
@@ -248,9 +248,10 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 
 	private void createPager() {
 		pager = (ViewPager) findViewById(R.id.pager);
-		pagerAdapter = createAdapter();
+		pagerAdapter = new ImagePagerAdapter(this, databaseHelper, createOnClickListener());
 		pager.setAdapter(pagerAdapter);
 		pager.setOffscreenPageLimit(SCREEN_PAGE_LIMIT);
+		pager.setCurrentItem(Integer.MAX_VALUE / 2);
 		pager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
 			@Override
 			public void onPageSelected(int position) {
@@ -266,7 +267,8 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 
 			@Override
 			public void onPageScrollStateChanged(int state) {
-				if (getActionBar() != null && getActionBar().isShowing() && (state == 2 || state == 1)) {
+				if (getActionBar() != null && getActionBar().isShowing() &&
+						(state == ViewPager.SCROLL_STATE_SETTLING || state == ViewPager.SCROLL_STATE_DRAGGING)) {
 					getActionBar().hide();
 				}
 			}
@@ -304,14 +306,6 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 		super.onDestroy();
 	}
 
-	private ImagePagerAdapter createAdapter() {
-		return new ImagePagerAdapter(this, databaseHelper, createOnClickListener());
-	}
-
-	private ImagePagerAdapter createAdapter(PictureData pictureData) {
-		return new ImagePagerAdapter(this, pictureData, databaseHelper, createOnClickListener());
-	}
-
 	private OnClickListener createOnClickListener() {
 		return new OnClickListener() {
 			@Override
@@ -332,10 +326,8 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				boolean old = pagerAdapter.hasNewPhotos();
-				pagerAdapter = createAdapter();
-				pagerAdapter.setHasNewPhotos(old);
-				pager.setAdapter(pagerAdapter);
+				GlimpseApp.getFileHandler().resetCurrentPicture();
+				pagerAdapter.notifyDataSetChanged();
 				rescheduleImageSwipe();
 			}
 		});

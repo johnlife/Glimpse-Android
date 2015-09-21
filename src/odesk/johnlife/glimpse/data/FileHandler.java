@@ -138,7 +138,7 @@ public class FileHandler {
 		int deleted = 0;
 		while (files.remove(picture)) {
 			deleted++;
-		};
+		}
 		notifyObserver();
 		locked = false;
 		return deleted;

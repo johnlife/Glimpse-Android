@@ -21,8 +21,7 @@ import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 
 import odesk.johnlife.glimpse.R;
 import odesk.johnlife.glimpse.activity.PhotoActivity;
@@ -38,7 +37,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 	private final UpmobileExceptionReporter logger;
 	private Context context;
 	private FileHandler fileHandler;
-	private List<PictureData> pictures;
+	private HashMap<Integer, PictureData> pictures;
 	private OnClickListener onClickListener;
 	private DatabaseHelper dbHelper;
 	private boolean hasNewPhotos = false;
@@ -68,13 +67,8 @@ public class ImagePagerAdapter extends PagerAdapter {
 				}
 			}
 		});
-		this.pictures = new ArrayList<PictureData>();
+		this.pictures = new HashMap<>();
 		fileHandler.resetCurrentPicture();
-	}
-
-	public ImagePagerAdapter(Activity activity, PictureData pictureData, DatabaseHelper databaseHelper, OnClickListener onClickListener) {
-		this(activity, databaseHelper, onClickListener);
-		fileHandler.rewind(pictureData);
 	}
 
 	@Override
@@ -84,8 +78,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 	}
 
 	private PictureData getItem(int position) {
-		return position >= pictures.size() ? null : pictures.get(position);
-
+		return pictures.get(position);
 	}
 
 	@Override
@@ -112,13 +105,9 @@ public class ImagePagerAdapter extends PagerAdapter {
 			if (pictureData.getSenderAddress() != null) {
 				frame.addView(createLikeButton(pictureData, position));
 			}
-			if (pictures.size() > position) {
-				pictures.set(position, pictureData);
-			} else {
-				pictures.add(pictureData);
-			}
+			pictures.put(position, pictureData);
 			bitmap = BitmapFactory.decodeFile(pictureData.getPath());
-			Log.d("Start - adapter", "Created view for "+pictureData.getPath());
+			Log.d("Start - adapter", "Created view for " + pictureData.getPath());
 		}
 		image.setImageBitmap(bitmap);
 		image.setOnClickListener(onClickListener);
