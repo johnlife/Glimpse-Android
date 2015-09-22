@@ -84,8 +84,7 @@ public class BlurActionBar {
 	public void setGalleryState(boolean isOpen) {
 		customActionBar.findViewById(R.id.action_delete).setEnabled(!isOpen);
 		customActionBar.findViewById(R.id.action_freeze).setEnabled(!isOpen);
-		((TextView)customActionBar.findViewById(R.id.action_gallery)).setText(
-				customActionBar.getContext().getString(isOpen ? R.string.exit_gallery : R.string.gallery));
+		((TextView) customActionBar.findViewById(R.id.action_gallery)).setText(isOpen ? R.string.exit_gallery : R.string.gallery);
 	}
 
 }

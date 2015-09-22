@@ -136,7 +136,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	private ImagesGalleryAdapter galleryAdapter;
 	private Timer mailTimer = new Timer();
 	private boolean isFreeze = false;
-	private boolean galleryHideSeeNewPhoto;
+	private boolean somethingHideSeeNewPhoto;
 	private List<BlurDialog> dialogs = new ArrayList<>();
 	private UpmobileExceptionReporter logger;
 	private SharedPreferences prefs;
@@ -206,6 +206,19 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 				GlimpseApp.getFileHandler().rewind((PictureData) gallery.getItemAtPosition(position));
 				pagerAdapter.notifyDataSetChanged();
 				rescheduleImageSwipe();
+				if (somethingHideSeeNewPhoto && !actionBar.isFreeze()) showSeeNewPhoto();
+			}
+		});
+		helpDialog.setOnCloseListener(new DeletingDialog.OnCloseListener() {
+			@Override
+			public void onClose() {
+				if (somethingHideSeeNewPhoto && !actionBar.isFreeze()) showSeeNewPhoto();
+			}
+		});
+		deletingDialog.setOnCloseListener(new DeletingDialog.OnCloseListener() {
+			@Override
+			public void onClose() {
+				if (somethingHideSeeNewPhoto && !actionBar.isFreeze()) showSeeNewPhoto();
 			}
 		});
 		deletingDialog.setPositiveButtonListener(new View.OnClickListener() {
@@ -291,11 +304,12 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 
 	private void showSeeNewPhoto() {
 		if (gallery != null && gallery.getVisibility() == View.VISIBLE) return;
+		somethingHideSeeNewPhoto = false;
 		seeNewPhoto.setVisibility(View.VISIBLE);
 	}
 
 	private void hideSeeNewPhoto() {
-		seeNewPhoto.setVisibility(View.GONE);
+		hideSeeNewPhoto(false);
 	}
 
 	@Override
@@ -367,13 +381,16 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 				switch (v.getId()) {
 					case R.id.action_delete:
 						deletingDialog.show();
+						hideSeeNewPhoto(true);
 						break;
 					case R.id.action_setting:
 						showPopupMenu(v);
 						break;
 					case R.id.action_freeze:
-						if (pagerAdapter.hasNewPhotos()) {
-							showSeeNewPhoto();
+						if (actionBar.isFreeze()) {
+							hideSeeNewPhoto(true);
+						} else {
+							if (somethingHideSeeNewPhoto) showSeeNewPhoto();
 						}
 						break;
 					case R.id.action_gallery:
@@ -385,9 +402,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 							galleryAdapter = new ImagesGalleryAdapter(PhotoActivity.this);
 							gallery.setAdapter(galleryAdapter);
 							gallery.setVisibility(View.VISIBLE);
-							if (seeNewPhoto.getVisibility() == View.VISIBLE) {
-								galleryHideSeeNewPhoto = true;
-							}
+							hideSeeNewPhoto(true);
 							actionBar.setGalleryState(true);
 							getActionBar().show();
 						} else {
@@ -396,18 +411,19 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 						}
 						break;
 				}
-				hideSeeNewPhoto();
 			}
 		});
+	}
+
+	private void hideSeeNewPhoto(boolean withCheck) {
+		if (withCheck && !somethingHideSeeNewPhoto) somethingHideSeeNewPhoto = seeNewPhoto.getVisibility() == View.VISIBLE;
+		seeNewPhoto.setVisibility(View.GONE);
 	}
 
 	private void closeGallery() {
 		gallery.setVisibility(View.GONE);
 		actionBar.setGalleryState(false);
-		if (galleryHideSeeNewPhoto) {
-			showSeeNewPhoto();
-			galleryHideSeeNewPhoto = false;
-		}
+		if (somethingHideSeeNewPhoto && !actionBar.isFreeze()) showSeeNewPhoto();
 		getActionBar().hide();
 	}
 
@@ -443,6 +459,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 			layout.findViewById(R.id.how_it_works).setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
+					hideSeeNewPhoto(true);
 					popupWindow.dismiss();
 					getActionBar().hide();
 					if (null != gallery && gallery.getVisibility() == View.VISIBLE) {
@@ -529,7 +546,9 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	public void onCodeAssociated(String email) {
 		prefs.edit().putString(PREF_USER_EMAIL, email).commit();
 		checkForNoPhotos();
-		if (pagerAdapter.hasNewPhotos()) showSeeNewPhoto();
+		if (pagerAdapter.hasNewPhotos()) {
+			showSeeNewPhoto();
+		}
 	}
 
 	@Override
@@ -588,7 +607,9 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 			recognizeDialog.show();
 		} else {
 			checkForNoPhotos();
-			if (pagerAdapter.hasNewPhotos()) showSeeNewPhoto();
+			if (pagerAdapter.hasNewPhotos()) {
+				showSeeNewPhoto();
+			}
 		}
 	}
 

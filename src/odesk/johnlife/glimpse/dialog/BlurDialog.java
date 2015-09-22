@@ -13,7 +13,13 @@ import odesk.johnlife.glimpse.Constants;
 import odesk.johnlife.glimpse.R;
 import odesk.johnlife.glimpse.activity.PhotoActivity;
 
-public abstract class BlurDialog extends FrameLayout implements Constants{
+public abstract class BlurDialog extends FrameLayout implements Constants {
+
+    public interface OnCloseListener {
+        void onClose();
+    }
+
+    private OnCloseListener onCloseListener;
 
     private TextView title;
     protected LinearLayout content;
@@ -48,7 +54,7 @@ public abstract class BlurDialog extends FrameLayout implements Constants{
         negativeButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                hide();
+                cancel();
             }
         });
         addCallback();
@@ -98,8 +104,13 @@ public abstract class BlurDialog extends FrameLayout implements Constants{
         content.setVisibility(View.GONE);
     }
 
+    public void setOnCloseListener(OnCloseListener onCloseListener) {
+        this.onCloseListener = onCloseListener;
+    }
+
     public boolean cancel() {
         if (getVisibility() == View.VISIBLE) {
+            if (onCloseListener != null) onCloseListener.onClose();
             hide();
             return true;
         }

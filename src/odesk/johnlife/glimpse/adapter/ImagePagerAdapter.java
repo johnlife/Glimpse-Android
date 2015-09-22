@@ -97,7 +97,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 //				frame.addView(poster);
 //			}
 			if (pictureData.getSenderAddress() != null) {
-				frame.addView(createLikeButton(pictureData, position));
+				frame.addView(createLikeButton(pictureData));
 			}
 			pictures.put(position, pictureData);
 			bitmap = BitmapFactory.decodeFile(pictureData.getPath());
@@ -110,7 +110,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 		return frame;
 	}
 
-	private ImageView createLikeButton(final PictureData pictureData, int position) {
+	private ImageView createLikeButton(final PictureData pictureData) {
 		ImageView like = new ImageView(context);
 		like.setImageResource(pictureData.getHeartState() ? R.drawable.solid_heart : R.drawable.heart);
 		like.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.BOTTOM|Gravity.RIGHT));
