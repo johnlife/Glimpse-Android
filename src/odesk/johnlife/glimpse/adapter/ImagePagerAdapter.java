@@ -2,7 +2,6 @@ package odesk.johnlife.glimpse.adapter;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.DataSetObserver;
 import android.graphics.Bitmap;
@@ -59,12 +58,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 						notifyDataSetChanged();
 					}
 				});
-				if (fileHandler.isEmpty()) {
-					Intent intent = new Intent(activity, activity.getClass());
-					intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					activity.finish();
-					activity.startActivity(intent);
-				}
+
 			}
 		});
 		this.pictures = new HashMap<>();
