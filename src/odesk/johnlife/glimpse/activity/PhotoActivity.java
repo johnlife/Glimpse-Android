@@ -545,6 +545,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	@Override
 	public void onCodeAssociated(String email) {
 		prefs.edit().putString(PREF_USER_EMAIL, email).commit();
+		helpDialog.setEmail(email);
 		checkForNoPhotos();
 		if (pagerAdapter.hasNewPhotos()) {
 			showSeeNewPhoto();

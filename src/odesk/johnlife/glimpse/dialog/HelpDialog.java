@@ -16,21 +16,27 @@ import odesk.johnlife.glimpse.activity.PhotoActivity;
 
 public class HelpDialog extends BlurDialog {
 
+    private Context context;
+
     public HelpDialog(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        this.context = context;
     }
 
     public HelpDialog(Context context, AttributeSet attrs) {
         super(context, attrs);
+        this.context = context;
     }
 
     public HelpDialog(Context context) {
         super(context);
+        this.context = context;
     }
 
     @Override
     protected void createView(Context context) {
         super.createView(context);
+        this.context = context;
         //TODO
 //        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(getScreenWidth(0.75), getScreenHeight(0.75), Gravity.CENTER);
 //        content.setLayoutParams(params);
@@ -44,12 +50,7 @@ public class HelpDialog extends BlurDialog {
             }
         });
         String email = ((PhotoActivity) context).getUser();
-        if (email == null) return;
-        SpannableString fullEmailText = new SpannableString(context.getString(R.string.how_it_works_email, email));
-        int startBold = (fullEmailText.length() - email.length());
-        int endBold = fullEmailText.length();
-        fullEmailText.setSpan(new StyleSpan(Typeface.BOLD), startBold, endBold, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        ((TextView) findViewById(R.id.textEmail)).setText(fullEmailText);
+        setEmail(email);
         String version = "";
         try {
             version = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
@@ -59,4 +60,12 @@ public class HelpDialog extends BlurDialog {
         ((TextView) findViewById(R.id.app_version)).setText(context.getString(R.string.app_name_version, context.getString(R.string.app_name), version));
     }
 
+    public void setEmail(String email) {
+        if (email == null) return;
+        SpannableString fullEmailText = new SpannableString(context.getString(R.string.how_it_works_email, email));
+        int startBold = (fullEmailText.length() - email.length());
+        int endBold = fullEmailText.length();
+        fullEmailText.setSpan(new StyleSpan(Typeface.BOLD), startBold, endBold, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        ((TextView) findViewById(R.id.textEmail)).setText(fullEmailText);
+    }
 }
