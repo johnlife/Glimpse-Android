@@ -74,6 +74,7 @@ public class FileHandler {
 			PictureData picture = new PictureData(path, from);
 			picture = databaseHelper.addOrUpdate(picture);
 			files.add(picture);
+			notifyObserver();
 			file.delete();
 			locked = false;
 		} catch (IllegalStateException e) {
@@ -88,14 +89,12 @@ public class FileHandler {
 		}
 		createSortedFiles();
 		resetCurrentPicture();
-		notifyObserver();
 	}
 
 	public synchronized void add(File file, String from) {
 		addFile(file, from);
 		createSortedFiles();
 		resetCurrentPicture();
-		notifyObserver();
 	}
 
 	private Bitmap scaleAndRotate(Bitmap bmp, File file) {

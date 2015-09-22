@@ -46,7 +46,6 @@
 		<b>Step 3:</b> If we confirm that your requested address is available, click "Received Confirmation" below</string>
 	<string name="new_email_step2">Enter your new email below. Only do so if you\'ve received confirmation from our team, otherwise your frame may stop working!</string>
 
-	<string name="error_no_user_data">User data not found. Please, contact technical support</string>
 	<string name="error_no_photo">To start, send photos to %1$s</string>
 	<string name="error_email_empty">Enter new email address</string>
 	<string name="error_email_invalid">Enter valid and confirmed email address</string>

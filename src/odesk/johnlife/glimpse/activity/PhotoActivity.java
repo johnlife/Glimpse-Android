@@ -181,7 +181,6 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 			}, filter);
 		} else if (getUser() == null && wifi.isConnected()) {
 			recognizeDialog.show();
-//			showError(R.string.error_no_user_data);
 		}
 		wifi.register();
 	}
@@ -310,7 +309,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 		return new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (isBlocked(false) || (error.getVisibility() == View.VISIBLE && getString(R.string.error_no_user_data).equals(error.getText()))) return;
+				if (isBlocked(false)) return;
 				createActionBar();
 				ActionBar actionBar = getActionBar();
 				if (actionBar.isShowing()) {
