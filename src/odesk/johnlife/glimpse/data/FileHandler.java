@@ -186,6 +186,9 @@ public class FileHandler {
 
 	public synchronized PictureData getNext(int position) {
 		locked = true;
+		if (files.size() <= Math.abs(position)) {
+			position %= files.size();
+		}
 		currentPosition += position;
 		if (currentPosition < 0) {
 			currentPosition += files.size();
