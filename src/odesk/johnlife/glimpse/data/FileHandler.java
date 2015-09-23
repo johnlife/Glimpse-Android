@@ -31,7 +31,7 @@ public class FileHandler {
 	private List<PictureData> sortedFiles;
 	private DataSetObserver datasetObserver;
 	private Comparator<PictureData> comparator;
-	private int nextPosition;
+	private int currentPosition;
 
 	public FileHandler(Context context) {
 		logger = UpmobileExceptionReporter.getInstance(context);
@@ -150,7 +150,7 @@ public class FileHandler {
 	}
 
 	public void resetCurrentPicture() {
-		nextPosition = 0;
+		currentPosition = 0;
 	}
 
 	public void show(PictureData picture) {
@@ -184,12 +184,16 @@ public class FileHandler {
 		return value;
 	}
 
-	public synchronized PictureData getNext() {
+	public synchronized PictureData getNext(int position) {
 		locked = true;
-		nextPosition %= files.size();
-		PictureData value = Collections.max(files.subList(0, files.size() - nextPosition++), comparator);
+		currentPosition += position;
+		if (currentPosition < 0) {
+			currentPosition += files.size();
+		} else if (currentPosition >= files.size()) {
+			currentPosition -= files.size();
+		}
 		locked = false;
-		return value;
+		return files.get(currentPosition);
 	}
 
 	public boolean haveNeverSeen() {
@@ -229,9 +233,9 @@ public class FileHandler {
 
 	public void rewind(PictureData pictureData) {
 		for (int i = 0; i < files.size(); i++) {
-			if (getNext().equals(pictureData)) {
-				nextPosition--;
-			}
+//			if (getNext().equals(pictureData)) {
+//				nextPosition--;
+//			}
 		}
 	}
 

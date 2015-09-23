@@ -40,6 +40,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 	private OnClickListener onClickListener;
 	private DatabaseHelper dbHelper;
 	private boolean hasNewPhotos = false;
+	private int lastPosition = -1;
 
 	public ImagePagerAdapter(final Activity activity, DatabaseHelper databaseHelper, OnClickListener onClickListener) {
 		super();
@@ -77,6 +78,11 @@ public class ImagePagerAdapter extends PagerAdapter {
 
 	@Override
 	public Object instantiateItem(ViewGroup pager, int position) {
+		if (lastPosition == -1) {
+			lastPosition = position;
+		}
+		int pos = position - lastPosition;
+		lastPosition = position;
 		ImageView image = new ImageView(context);
 		FrameLayout frame = new FrameLayout(context);
 		frame.addView(image);
@@ -85,7 +91,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wp1);
 			Log.d("Start - adapter", "Created view for startup screen");
 		} else {
-			final PictureData pictureData = fileHandler.getNext();
+			final PictureData pictureData = fileHandler.getNext(pos);
 			if (!new File(pictureData.getPath()).exists()) {
 				fileHandler.delete(pictureData);
 			}
@@ -206,11 +212,6 @@ public class ImagePagerAdapter extends PagerAdapter {
 		if (fileHandler.isEmpty()) {
 			hasNewPhotos = false;
 			return;
-		}
-		PictureData pictureData = fileHandler.getNext();
-		fileHandler.resetCurrentPicture();
-		if (!new File(pictureData.getPath()).exists()) {
-			fileHandler.delete(pictureData);
 		}
 		if (fileHandler.haveNeverSeen()) {
 			hasNewPhotos = true;
