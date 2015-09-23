@@ -74,7 +74,6 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 				if (idx == pagerAdapter.getCount()) {
 					idx = 0;
 				}
-//				pagerAdapter.notifyDataSetChanged();
 				pager.setCurrentItem(idx);
 				rescheduleImageSwipe();
 			}
@@ -94,12 +93,11 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 						runOnUiThread(new Runnable() {
 							@Override
 							public void run() {
-								pagerAdapter.notifyDataSetChanged();
 								if (gallery.getVisibility() == View.VISIBLE) {
 									galleryAdapter.notifyDataSetChanged();
 								}
 								showSeeNewPhoto();
-								showNewPhotos();
+								rescheduleImageSwipe();
 							}
 						});
 					}
@@ -196,7 +194,8 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 			public void onClick(View v) {
 				hideSeeNewPhoto();
 				pagerAdapter.setHasNewPhotos(false);
-				showNewPhotos();
+				GlimpseApp.getFileHandler().resetCurrentPicture();
+				rescheduleImageSwipe();
 			}
 		});
 		gallery.setOnItemClickListener(new OnItemClickListener() {
@@ -204,7 +203,6 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
 				closeGallery();
 				GlimpseApp.getFileHandler().rewind((PictureData) gallery.getItemAtPosition(position));
-				pagerAdapter.notifyDataSetChanged();
 				rescheduleImageSwipe();
 				if (somethingHideSeeNewPhoto && !actionBar.isFreeze()) showSeeNewPhoto();
 			}
@@ -333,17 +331,6 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 				}
 			}
 		};
-	}
-
-	private void showNewPhotos() {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				GlimpseApp.getFileHandler().resetCurrentPicture();
-				pagerAdapter.notifyDataSetChanged();
-				rescheduleImageSwipe();
-			}
-		});
 	}
 
 	private boolean isBlocked(boolean checkWithError) {

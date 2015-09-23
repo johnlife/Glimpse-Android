@@ -40,11 +40,11 @@ public class FileHandler {
 		Collections.sort(files, comparator);
 	}
 
-	private synchronized void addFile(File file, String from) {
+	private synchronized PictureData addFile(File file, String from) {
 		cleanup(file.length());
 		try {
 			Bitmap bmp = BitmapFactory.decodeFile(file.getAbsolutePath());
-			if (null == bmp) return; //not an image
+			if (null == bmp) return null; //not an image
 			Bitmap scaled = scaleAndRotate(bmp, file);
 			String path = new File(GlimpseApp.getPicturesDir(), "pic"+System.currentTimeMillis()+".jpg").getAbsolutePath();
 			OutputStream out = null;
@@ -72,26 +72,25 @@ public class FileHandler {
 			locked = true;
 			PictureData picture = new PictureData(path, from);
 			picture = databaseHelper.addOrUpdate(picture);
-			files.add(picture);
-			notifyObserver();
 			file.delete();
 			locked = false;
+			return picture;
 		} catch (IllegalStateException e) {
 			Log.e("Adding file", e.getMessage(), e);
+			return null;
 //			PushLink.sendAsyncException(e);
 		}
 	}
 
 	public synchronized void add(List<File> files, String from) {
+		List<PictureData> addedFiles = new ArrayList();
 		for (File file : files) {
-			addFile(file, from);
+			PictureData picture = addFile(file, from);
+			if (null != picture) {
+				addedFiles.add(picture);
+			}
 		}
-		Collections.sort(this.files, comparator);
-		resetCurrentPicture();
-	}
-
-	public synchronized void add(File file, String from) {
-		addFile(file, from);
+		this.files.addAll(addedFiles);
 		Collections.sort(this.files, comparator);
 		resetCurrentPicture();
 	}
@@ -133,23 +132,25 @@ public class FileHandler {
 		return rotated;
 	}
 
-	public synchronized int delete(PictureData picture) {
+	public synchronized void delete(PictureData picture) {
 		locked = true;
 		databaseHelper.delete(picture);
 		File file = new File(picture.getPath());
+		if (!file.exists()) return;
 		file.delete();
-		int deleted = 0;
-		while (files.remove(picture)) {
-			deleted++;
-		}
+		currentPosition = files.indexOf(picture);
+		files.remove(picture);
 		Collections.sort(files, comparator);
+		if (currentPosition >= files.size() || currentPosition == -1) {
+			currentPosition = 0;
+		}
 		notifyObserver();
 		locked = false;
-		return deleted;
 	}
 
 	public void resetCurrentPicture() {
 		currentPosition = 0;
+		notifyObserver();
 	}
 
 	public void show(PictureData picture) {
@@ -214,7 +215,6 @@ public class FileHandler {
 				break;
 			}
 		}
-		notifyObserver();
 		locked = false;
 	}
 

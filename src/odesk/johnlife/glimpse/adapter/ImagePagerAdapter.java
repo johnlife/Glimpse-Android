@@ -49,7 +49,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 		this.onClickListener = onClickListener;
 		dbHelper = databaseHelper;
 		this.fileHandler = GlimpseApp.getFileHandler();
-		Log.d("Start - adapter", "Filehadler ready "+(fileHandler.isEmpty() ? "and empty" : ", pics: "+fileHandler.size()));
+		Log.d("Start - adapter", "Filehadler ready " + (fileHandler.isEmpty() ? "and empty" : ", pics: " + fileHandler.size()));
 		fileHandler.setObserver(new DataSetObserver() {
 			@Override
 			public void onChanged() {
@@ -64,7 +64,6 @@ public class ImagePagerAdapter extends PagerAdapter {
 			}
 		});
 		this.pictures = new HashMap<>();
-		fileHandler.resetCurrentPicture();
 	}
 
 	@Override
@@ -190,9 +189,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 		int position = pager.getCurrentItem();
 		PictureData item = getItem(position);
 		if (null == item) return;
-		int deleted = fileHandler.delete(item);
-		notifyDataSetChanged();
-		pager.setCurrentItem(position-deleted);
+		fileHandler.delete(item);
 	}
 
 	public void setImageShown(int position) {
