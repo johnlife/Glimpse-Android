@@ -28,7 +28,6 @@ public class FileHandler {
 	private boolean locked;
 	private DatabaseHelper databaseHelper;
 	private List<PictureData> files;
-	private List<PictureData> sortedFiles;
 	private DataSetObserver datasetObserver;
 	private Comparator<PictureData> comparator;
 	private int currentPosition;
@@ -37,8 +36,8 @@ public class FileHandler {
 		logger = UpmobileExceptionReporter.getInstance(context);
 		databaseHelper = DatabaseHelper.getInstance(context);
 		files = databaseHelper.getPictures();
-		createSortedFiles();
 		comparator = PictureData.TIME_COMPARATOR;
+		Collections.sort(files, comparator);
 	}
 
 	private synchronized void addFile(File file, String from) {
@@ -87,13 +86,13 @@ public class FileHandler {
 		for (File file : files) {
 			addFile(file, from);
 		}
-		createSortedFiles();
+		Collections.sort(this.files, comparator);
 		resetCurrentPicture();
 	}
 
 	public synchronized void add(File file, String from) {
 		addFile(file, from);
-		createSortedFiles();
+		Collections.sort(this.files, comparator);
 		resetCurrentPicture();
 	}
 
@@ -143,7 +142,7 @@ public class FileHandler {
 		while (files.remove(picture)) {
 			deleted++;
 		}
-		createSortedFiles();
+		Collections.sort(files, comparator);
 		notifyObserver();
 		locked = false;
 		return deleted;
@@ -209,7 +208,7 @@ public class FileHandler {
 		locked = true;
 		while (GlimpseApp.getPicturesDir().getUsableSpace() < size) {
 			if (!files.isEmpty()) {
-				PictureData victim = Collections.min(files, PictureData.TIME_COMPARATOR);
+				PictureData victim = files.get(files.size() - 1);
 				delete(victim);
 			} else {
 				break;
@@ -227,20 +226,8 @@ public class FileHandler {
 		return files;
 	}
 
-	public List<PictureData> getSortedFiles() {
-		return sortedFiles;
-	}
-
 	public void rewind(PictureData pictureData) {
-		for (int i = 0; i < files.size(); i++) {
-//			if (getNext().equals(pictureData)) {
-//				nextPosition--;
-//			}
-		}
-	}
-
-	private void createSortedFiles() {
-		sortedFiles = new ArrayList<>(files);
-		Collections.sort(sortedFiles, PictureData.TIME_COMPARATOR_REVERSE);
+		currentPosition = files.indexOf(pictureData);
+		notifyObserver();
 	}
 }

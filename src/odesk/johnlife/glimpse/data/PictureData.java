@@ -77,16 +77,8 @@ public class PictureData {
 			return (int) Math.signum(lhs.getWeight() - rhs.getWeight());
 		}
 	};
-	
-	public static final Comparator<PictureData> TIME_COMPARATOR = new Comparator<PictureData>() {
-		@Override
-		public int compare(PictureData lhs, PictureData rhs) {
-			long dif = lhs.created - rhs.created;
-			return (int) (dif/Math.abs(dif));
-		}
-	};
 
-	public static final Comparator<PictureData> TIME_COMPARATOR_REVERSE = new Comparator<PictureData>() {
+	public static final Comparator<PictureData> TIME_COMPARATOR = new Comparator<PictureData>() {
 		@Override
 		public int compare(PictureData lhs, PictureData rhs) {
 			long dif = rhs.created - lhs.created;

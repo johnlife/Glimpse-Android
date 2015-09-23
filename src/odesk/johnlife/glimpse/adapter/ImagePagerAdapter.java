@@ -56,6 +56,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 				activity.runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
+						lastPosition = -1;
 						notifyDataSetChanged();
 					}
 				});

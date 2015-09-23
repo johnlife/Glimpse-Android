@@ -53,23 +53,23 @@ public class ImagesGalleryAdapter extends BaseAdapter implements Constants {
 
 	@Override
 	public int getCount() {
-		return fileHandler.getSortedFiles().size();
+		return fileHandler.getFiles().size();
 	}
 
 	@Override
 	public Object getItem(int position) {
-		return fileHandler.getSortedFiles().get(position);
+		return fileHandler.getFiles().get(position);
 	}
 
 	@Override
 	public long getItemId(int position) {
-		return fileHandler.getSortedFiles().get(position).hashCode();
+		return fileHandler.getFiles().get(position).hashCode();
 	}
 	
 	@Override
 	public View getView(final int position, View convertView, ViewGroup parent) {
 		final ImageView view = new ImageView(context);
-		final String path = fileHandler.getSortedFiles().get(position).getPath();
+		final String path = fileHandler.getFiles().get(position).getPath();
 		Bitmap bitmap = getBitmapFromMemCache(path);
 		if (null == bitmap) {
 			view.setVisibility(view.INVISIBLE);
