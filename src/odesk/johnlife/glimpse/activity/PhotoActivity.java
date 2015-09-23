@@ -65,13 +65,13 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	private Runnable swipeRunnable = new Runnable() {
 		@Override
 		public void run() {
-			if (pagerAdapter.getCount() < SCREEN_PAGE_LIMIT) return;
+			if (GlimpseApp.getFileHandler().size() < SCREEN_PAGE_LIMIT) return;
 			boolean blocked = actionBar.isFreeze() || getActionBar().isShowing() || isBlocked(true);
 			if (blocked || GlimpseApp.getFileHandler().isLocked()) {
 				pager.postDelayed(swipeRunnable, 50);
 			} else {
 				int idx = pager.getCurrentItem() + 1;
-				if (idx == pagerAdapter.getCount()) {
+				if (idx == GlimpseApp.getFileHandler().size()) {
 					idx = 0;
 				}
 				pager.setCurrentItem(idx);
@@ -286,12 +286,12 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 		((FreezeViewPager)pager).setSwipeValidator(new FreezeViewPager.SwipeValidator() {
 			@Override
 			public boolean isSwipeBlocked() {
-				return isBlocked(true);
+				return GlimpseApp.getFileHandler().size() < SCREEN_PAGE_LIMIT || isBlocked(true);
 			}
 		});
 		pagerAdapter.checkNewPhotos();
 		if (pagerAdapter.hasNewPhotos() && wifi.isConnected()) showSeeNewPhoto();
-		if (pagerAdapter.getCount() >= SCREEN_PAGE_LIMIT) rescheduleImageSwipe();
+		if (GlimpseApp.getFileHandler().size() >= SCREEN_PAGE_LIMIT) rescheduleImageSwipe();
 	}
 
 	private void checkForNoPhotos() {

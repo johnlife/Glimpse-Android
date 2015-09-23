@@ -68,7 +68,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 
 	@Override
 	public int getCount() {
-		return fileHandler.size() < 2 ? 1 : Integer.MAX_VALUE;
+		return Integer.MAX_VALUE;
 //		return Math.max(1, fileHandler.size());	
 	}
 
@@ -119,7 +119,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 	private ImageView createLikeButton(final PictureData pictureData) {
 		ImageView like = new ImageView(context);
 		like.setImageResource(pictureData.getHeartState() ? R.drawable.solid_heart : R.drawable.heart);
-		like.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.BOTTOM|Gravity.RIGHT));
+		like.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.BOTTOM | Gravity.RIGHT));
 		int heartPadding = (int) context.getResources().getDimension(R.dimen.heart_padding);
 		like.setPadding(0, 0, heartPadding, heartPadding);
 		if (!pictureData.getHeartState()) {
