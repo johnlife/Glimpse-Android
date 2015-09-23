@@ -41,7 +41,7 @@
 	<string name="title_new_email_step1">Request new email address</string>
 	<string name="title_new_email_step2">New email address confirmed</string>
 	<string name="new_email_step1">
-		<b>Step 1:</b> Email us at <a href="whatever">info@gkylightframe.com</a> with your desired address. We recommend that it include your last name\n\n
+		<b>Step 1:</b> Email us at <a href="whatever">info@skylightframe.com</a> with your desired address. We recommend that it include your last name\n\n
 		<b>Step 2:</b> We\'ll respond within 24 hours with its availability confirmation. If it is not available, feel free to propose another one\n\n
 		<b>Step 3:</b> If we confirm that your requested address is available, click "Received Confirmation" below</string>
 	<string name="new_email_step2">Enter your new email below. Only do so if you\'ve received confirmation from our team, otherwise your frame may stop working!</string>
