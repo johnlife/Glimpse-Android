@@ -301,7 +301,10 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	}
 
 	private void showSeeNewPhoto() {
-		if (gallery != null && gallery.getVisibility() == View.VISIBLE) return;
+		if (gallery != null && gallery.getVisibility() == View.VISIBLE) {
+			somethingHideSeeNewPhoto = true;
+			return;
+		}
 		somethingHideSeeNewPhoto = false;
 		seeNewPhoto.setVisibility(View.VISIBLE);
 	}
