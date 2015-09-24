@@ -389,6 +389,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 							galleryAdapter = new ImagesGalleryAdapter(PhotoActivity.this);
 							gallery.setAdapter(galleryAdapter);
 							gallery.setVisibility(View.VISIBLE);
+							pager.setVisibility(View.GONE);
 							hideSeeNewPhoto(true);
 							actionBar.setGalleryState(true);
 							getActionBar().show();
@@ -408,6 +409,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	}
 
 	private void closeGallery() {
+		pager.setVisibility(View.VISIBLE);
 		gallery.setVisibility(View.GONE);
 		actionBar.setGalleryState(false);
 		if (somethingHideSeeNewPhoto && !actionBar.isFreeze()) showSeeNewPhoto();

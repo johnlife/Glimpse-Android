@@ -19,14 +19,18 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public class ImagesGalleryAdapter extends BaseAdapter implements Constants {
 
 	private Context context;
 	private FileHandler fileHandler;
 	private final int SMALL_BITMAP_SIZE = 500;
 	private int horizontalSpacing;
+	private ExecutorService service;
 
-	private static final int cacheSize = (int)(Runtime.getRuntime().maxMemory() / 1024) / 8;
+	private static final int cacheSize = (int)(Runtime.getRuntime().maxMemory() / 1024) / 4;
 
 	private static LruCache<String, Bitmap> mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
 		@Override
@@ -49,6 +53,7 @@ public class ImagesGalleryAdapter extends BaseAdapter implements Constants {
 		this.context = context;
 		this.fileHandler = GlimpseApp.getFileHandler();
 		this.horizontalSpacing = dpToPx(16);
+		this.service = Executors.newFixedThreadPool(20);
 	}
 
 	@Override
@@ -73,14 +78,14 @@ public class ImagesGalleryAdapter extends BaseAdapter implements Constants {
 		Bitmap bitmap = getBitmapFromMemCache(path);
 		if (null == bitmap) {
 			view.setVisibility(view.INVISIBLE);
-			new Thread(new Runnable() {
+			service.submit(new Runnable() {
 				@Override
 				public void run() {
 					Bitmap bitmap = resizeToSmall(BitmapFactory.decodeFile(path));
 					addBitmapToMemoryCache(path, bitmap);
 					setBitmap(view, bitmap);
 				}
-			}).start();
+			});
 		} else {
 			view.setImageBitmap(bitmap);
 		}
