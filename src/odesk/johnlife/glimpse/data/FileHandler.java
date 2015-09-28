@@ -19,10 +19,14 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeBodyPart;
+
+import odesk.johnlife.glimpse.Constants;
 import odesk.johnlife.glimpse.app.GlimpseApp;
 import ru.johnlife.lifetools.reporter.UpmobileExceptionReporter;
 
-public class FileHandler {
+public class FileHandler implements Constants {
 
 	private final UpmobileExceptionReporter logger;
 	private boolean locked;
@@ -93,6 +97,13 @@ public class FileHandler {
 		this.files.addAll(addedFiles);
 		Collections.sort(this.files, comparator);
 		resetCurrentPicture();
+	}
+
+	public synchronized File addToCache(MimeBodyPart bodyPart) throws IOException, MessagingException {
+		File f = new File(GlimpseApp.getTempDir(), bodyPart.getFileName());
+		cleanup(bodyPart.getSize() * MEMORY_COEFFICIENT);
+		bodyPart.saveFile(f);
+		return f;
 	}
 
 	private Bitmap scaleAndRotate(Bitmap bmp, File file) {

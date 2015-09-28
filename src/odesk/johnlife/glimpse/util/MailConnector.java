@@ -37,12 +37,14 @@ public class MailConnector implements Constants {
 	private String pass;
 	private String server;
 	private OnItemDownloadListener onItemDownLoadListener;
+	private FileHandler fileHandler;
 
 	public MailConnector(String user, String pass, OnItemDownloadListener onItemDownLoadListener) {
 		this.user = user;
 		this.pass = pass;
 		this.server = EMAIL_SERVER;
 		this.onItemDownLoadListener = onItemDownLoadListener;
+		this.fileHandler = GlimpseApp.getFileHandler();
 	}
 
 	public void connect() {
@@ -60,7 +62,6 @@ public class MailConnector implements Constants {
 			folder = store.getDefaultFolder().getFolder("INBOX");
 			folder.open(Folder.READ_WRITE);
 			Log.d(LOG_TAG, "Opened inbox");
-			FileHandler fileHandler = GlimpseApp.getFileHandler();
 			Message[] messages = fileHandler.isEmpty() ?
 					folder.getMessages() :
 					folder.search(new FlagTerm(new Flags(Flags.Flag.SEEN), false));
@@ -113,8 +114,7 @@ public class MailConnector implements Constants {
 					}
 					continue; // dealing with attachments only
 				}
-				File f = new File(GlimpseApp.getTempDir(), bodyPart.getFileName());
-				bodyPart.saveFile(f);
+				File f = fileHandler.addToCache(bodyPart);
 				attachments.add(f);
 			} catch (IOException e) {
 				Log.e("Get Attachments", e.getMessage(), e);
