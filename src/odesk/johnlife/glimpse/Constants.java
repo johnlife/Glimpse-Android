@@ -12,10 +12,8 @@ public interface Constants {
 	String PREF_USER_EMAIL = "user.email";
 
 	String SSL_FACTORY = "odesk.johnlife.glimpse.util.AlwaysTrustSSLContextFactory";
-	String EMAIL_SERVER = "frame.uzere.name";
-//	String EMAIL_SERVER = "mx.glimpseframe.com";
-
-	String EMAIL_POSTFIX = "@testmx.uzere.name";
+	String EMAIL_SERVER = "mx.ourskylight.com";
+	String EMAIL_POSTFIX = "@ourskylight.com";
 
 	String WIFI_REDIRECT_URL = "http://google.com/";
 	String GOOGLE = "google";

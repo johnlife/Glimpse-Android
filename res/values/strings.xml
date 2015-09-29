@@ -3,9 +3,9 @@
 
     <string name="app_name">Skylight</string>
 	<string name="app_name_version">%1$s v %2$s</string>
-	<string name="domain">\@skylightframe.com</string>
-	<string name="server_url">http://frame.uzere.name:1337/api/v1/bind/%1$s</string>
-	<string name="like_url">http://frame.uzere.name:1337/api/v1/like</string>
+	<string name="domain">\@ourskylight.com</string>
+	<string name="server_url">http://ourskylight.com/api/v1/bind/%1$s</string>
+	<string name="like_url">http://ourskylight.com/api/v1/like</string>
 
 	<string name="connect">Connect</string>
 	<string name="cancel">Cancel</string>
