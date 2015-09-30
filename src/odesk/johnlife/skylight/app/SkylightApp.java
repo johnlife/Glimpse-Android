@@ -41,7 +41,7 @@ public class SkylightApp extends Application implements Constants {
 		picturesDir.mkdirs();
 		tempDir = getCacheDir();
 		screen = new DeviceScreen(this);
-		fileHandler = new FileHandler(this);
+		fileHandler = new FileHandler(this, screen);
 		directoryObserver = new FileObserver(SkylightApp.getPicturesDir().getAbsolutePath()) {
 			@Override
 			public void onEvent(int event, String path) {

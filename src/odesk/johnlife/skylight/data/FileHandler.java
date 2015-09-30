@@ -24,6 +24,7 @@ import javax.mail.internet.MimeBodyPart;
 
 import odesk.johnlife.skylight.Constants;
 import odesk.johnlife.skylight.app.SkylightApp;
+import odesk.johnlife.skylight.util.DeviceScreen;
 import ru.johnlife.lifetools.reporter.UpmobileExceptionReporter;
 
 public class FileHandler implements Constants {
@@ -35,19 +36,35 @@ public class FileHandler implements Constants {
 	private DataSetObserver datasetObserver;
 	private Comparator<PictureData> comparator;
 	private int currentPosition;
+	private int width, height;
 
-	public FileHandler(Context context) {
+	public FileHandler(Context context, DeviceScreen screen) {
 		logger = UpmobileExceptionReporter.getInstance(context);
 		databaseHelper = DatabaseHelper.getInstance(context);
 		files = databaseHelper.getPictures();
+		width = screen.getSmallestWidth();
+		height = screen.getLargestWidth();
 		comparator = PictureData.TIME_COMPARATOR;
 		Collections.sort(files, comparator);
+	}
+
+	private Bitmap decodeFile(File file) {
+		BitmapFactory.Options o = new BitmapFactory.Options();
+		o.inJustDecodeBounds = true;
+		BitmapFactory.decodeFile(file.getAbsolutePath(), o);
+		int scale = 1;
+		while (o.outWidth / width / scale >= 2 && o.outHeight / height / scale >= 2) {
+			scale *= 2;
+		}
+		BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inSampleSize = scale;
+		return BitmapFactory.decodeFile(file.getAbsolutePath(), options);
 	}
 
 	private synchronized PictureData addFile(File file, String from) {
 		cleanup(file.length());
 		try {
-			Bitmap bmp = BitmapFactory.decodeFile(file.getAbsolutePath());
+			Bitmap bmp = decodeFile(file);
 			if (null == bmp) return null; //not an image
 			Bitmap scaled = scaleAndRotate(bmp, file);
 			String path = new File(SkylightApp.getPicturesDir(), "pic"+System.currentTimeMillis()+".jpg").getAbsolutePath();
