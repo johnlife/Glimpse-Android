@@ -17,29 +17,25 @@ dependencies {
         exclude module: 'httpclient'
     }
     compile 'org.apache.httpcomponents:httpclient-android:4.3.5'
-
 }
 
 android {
     compileSdkVersion 19
     buildToolsVersion "22.0.1"
-
     defaultConfig {
         renderscriptTargetApi 19
         renderscriptSupportModeEnabled true
+        applicationId 'odesk.johnlife.skylight'
     }
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7
     }
-
     packagingOptions {
         exclude 'META-INF/DEPENDENCIES'
         exclude 'META-INF/NOTICE'
         exclude 'META-INF/LICENSE'
     }
-
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
@@ -62,5 +58,7 @@ android {
         // by a similar customization.
         debug.setRoot('build-types/debug')
         release.setRoot('build-types/release')
+    }
+    productFlavors {
     }
 }
