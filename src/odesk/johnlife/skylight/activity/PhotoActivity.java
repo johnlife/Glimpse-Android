@@ -92,6 +92,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 								if (gallery.getVisibility() == View.VISIBLE) {
 									galleryAdapter.notifyDataSetChanged();
 								}
+								error.hide();
 								showSeeNewPhoto();
 								rescheduleImageSwipe();
 							}
