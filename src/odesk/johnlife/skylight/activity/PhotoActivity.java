@@ -226,6 +226,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 			public void onClick(View v) {
 				pagerAdapter.deleteCurrentItem(pager);
 				deletingDialog.hide();
+				rescheduleImageSwipe();
 				checkForNoPhotos();
 			}
 		});

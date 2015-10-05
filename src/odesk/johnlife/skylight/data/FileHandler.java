@@ -99,6 +99,7 @@ public class FileHandler implements Constants {
 			return picture;
 		} catch (IllegalStateException e) {
 			Log.e("Adding file", e.getMessage(), e);
+			locked = false;
 			return null;
 //			PushLink.sendAsyncException(e);
 		}
@@ -165,7 +166,10 @@ public class FileHandler implements Constants {
 		locked = true;
 		databaseHelper.delete(picture);
 		File file = new File(picture.getPath());
-		if (!file.exists()) return;
+		if (!file.exists()) {
+			locked = false;
+			return;
+		}
 		file.delete();
 		currentPosition = files.indexOf(picture);
 		files.remove(picture);
