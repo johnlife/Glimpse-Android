@@ -37,6 +37,7 @@ import odesk.johnlife.skylight.adapter.ImagePagerAdapter;
 import odesk.johnlife.skylight.adapter.ImagesGalleryAdapter;
 import odesk.johnlife.skylight.app.SkylightApp;
 import odesk.johnlife.skylight.data.DatabaseHelper;
+import odesk.johnlife.skylight.data.FileHandler;
 import odesk.johnlife.skylight.data.PictureData;
 import odesk.johnlife.skylight.dialog.BlurDialog;
 import odesk.johnlife.skylight.dialog.DeletingDialog;
@@ -131,7 +132,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	private ImagesGalleryAdapter galleryAdapter;
 	private Timer mailTimer = new Timer();
 	private boolean isFreeze = false;
-	private boolean somethingHideSeeNewPhoto;
+	private boolean isNewPhotosHidden;
 	private List<BlurDialog> dialogs = new ArrayList<>();
 	private UpmobileExceptionReporter logger;
 	private SharedPreferences prefs;
@@ -190,8 +191,12 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 			@Override
 			public void onClick(View v) {
 				hideSeeNewPhoto();
+				actionBar.unFreeze();
+				getActionBar().hide();
+				FileHandler handler = SkylightApp.getFileHandler();
+				handler.setPause(false);
 				pagerAdapter.setHasNewPhotos(false);
-				SkylightApp.getFileHandler().resetCurrentPicture();
+				handler.resetCurrentPicture();
 				rescheduleImageSwipe();
 			}
 		});
@@ -201,19 +206,19 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 				closeGallery();
 				SkylightApp.getFileHandler().rewind((PictureData) gallery.getItemAtPosition(position));
 				rescheduleImageSwipe();
-				if (somethingHideSeeNewPhoto && !actionBar.isFreeze()) showSeeNewPhoto();
+				if (isNewPhotosHidden && !actionBar.isFreeze()) showSeeNewPhoto();
 			}
 		});
 		helpDialog.setOnCloseListener(new DeletingDialog.OnCloseListener() {
 			@Override
 			public void onClose() {
-				if (somethingHideSeeNewPhoto && !actionBar.isFreeze()) showSeeNewPhoto();
+				if (isNewPhotosHidden && !actionBar.isFreeze()) showSeeNewPhoto();
 			}
 		});
 		deletingDialog.setOnCloseListener(new DeletingDialog.OnCloseListener() {
 			@Override
 			public void onClose() {
-				if (somethingHideSeeNewPhoto && !actionBar.isFreeze()) showSeeNewPhoto();
+				if (isNewPhotosHidden && !actionBar.isFreeze()) showSeeNewPhoto();
 			}
 		});
 		deletingDialog.setPositiveButtonListener(new View.OnClickListener() {
@@ -299,10 +304,10 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 
 	private void showSeeNewPhoto() {
 		if (gallery != null && gallery.getVisibility() == View.VISIBLE) {
-			somethingHideSeeNewPhoto = true;
+			isNewPhotosHidden = true;
 			return;
 		}
-		somethingHideSeeNewPhoto = false;
+		isNewPhotosHidden = false;
 		seeNewPhoto.setVisibility(View.VISIBLE);
 	}
 
@@ -374,10 +379,13 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 						showPopupMenu(v);
 						break;
 					case R.id.action_freeze:
+						FileHandler handler = SkylightApp.getFileHandler();
 						if (actionBar.isFreeze()) {
 							hideSeeNewPhoto(true);
+							handler.setPause(true);
 						} else {
-							if (somethingHideSeeNewPhoto) showSeeNewPhoto();
+							handler.setPause(false);
+							if (isNewPhotosHidden) showSeeNewPhoto();
 						}
 						break;
 					case R.id.action_gallery:
@@ -404,7 +412,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	}
 
 	private void hideSeeNewPhoto(boolean withCheck) {
-		if (withCheck && !somethingHideSeeNewPhoto) somethingHideSeeNewPhoto = seeNewPhoto.getVisibility() == View.VISIBLE;
+		if (withCheck && !isNewPhotosHidden) isNewPhotosHidden = seeNewPhoto.getVisibility() == View.VISIBLE;
 		seeNewPhoto.setVisibility(View.GONE);
 	}
 
@@ -412,7 +420,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 		pager.setVisibility(View.VISIBLE);
 		gallery.setVisibility(View.GONE);
 		actionBar.setGalleryState(false);
-		if (somethingHideSeeNewPhoto && !actionBar.isFreeze()) showSeeNewPhoto();
+		if (isNewPhotosHidden && !actionBar.isFreeze()) showSeeNewPhoto();
 		getActionBar().hide();
 	}
 

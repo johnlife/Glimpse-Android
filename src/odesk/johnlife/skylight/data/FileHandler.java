@@ -37,6 +37,7 @@ public class FileHandler implements Constants {
 	private Comparator<PictureData> comparator;
 	private int currentPosition;
 	private int width, height;
+	private boolean pause;
 
 	public FileHandler(Context context, DeviceScreen screen) {
 		logger = UpmobileExceptionReporter.getInstance(context);
@@ -177,6 +178,7 @@ public class FileHandler implements Constants {
 	}
 
 	public void resetCurrentPicture() {
+		if (pause) return;
 		currentPosition = 0;
 		notifyObserver();
 	}
@@ -198,6 +200,10 @@ public class FileHandler implements Constants {
 
 	public synchronized boolean isEmpty() {
 		return files == null || files.isEmpty();
+	}
+
+	public void setPause(boolean pause) {
+		this.pause = pause;
 	}
 
 	public synchronized int size() {
