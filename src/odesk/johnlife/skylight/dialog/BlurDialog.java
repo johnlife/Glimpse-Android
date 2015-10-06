@@ -12,6 +12,7 @@ import android.widget.TextView;
 import odesk.johnlife.skylight.Constants;
 import odesk.johnlife.skylight.R;
 import odesk.johnlife.skylight.activity.PhotoActivity;
+import odesk.johnlife.skylight.app.SkylightApp;
 
 public abstract class BlurDialog extends FrameLayout implements Constants {
 
@@ -97,11 +98,13 @@ public abstract class BlurDialog extends FrameLayout implements Constants {
     public void show() {
         setVisibility(View.VISIBLE);
         content.setVisibility(View.VISIBLE);
+        SkylightApp.getFileHandler().setPause(true);
     }
 
     public void hide() {
         setVisibility(View.GONE);
         content.setVisibility(View.GONE);
+        SkylightApp.getFileHandler().setPause(false);
     }
 
     public void setOnCloseListener(OnCloseListener onCloseListener) {
@@ -110,8 +113,8 @@ public abstract class BlurDialog extends FrameLayout implements Constants {
 
     public boolean cancel() {
         if (getVisibility() == View.VISIBLE) {
-            if (onCloseListener != null) onCloseListener.onClose();
             hide();
+            if (onCloseListener != null) onCloseListener.onClose();
             return true;
         }
         return false;

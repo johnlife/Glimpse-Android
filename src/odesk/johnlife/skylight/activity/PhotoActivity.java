@@ -224,7 +224,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 			@Override
 			public void onClick(View v) {
 				pagerAdapter.deleteCurrentItem(pager);
-				deletingDialog.hide();
+				deletingDialog.cancel();
 				rescheduleImageSwipe();
 				checkForNoPhotos();
 			}
@@ -303,7 +303,9 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	}
 
 	private void showSeeNewPhoto() {
-		if (gallery != null && gallery.getVisibility() == View.VISIBLE) {
+		if (gallery != null && gallery.getVisibility() == View.VISIBLE ||
+				helpDialog.getVisibility() == View.VISIBLE ||
+				deletingDialog.getVisibility() == View.VISIBLE) {
 			isNewPhotosHidden = true;
 			return;
 		}
@@ -456,13 +458,13 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 			layout.findViewById(R.id.how_it_works).setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					hideSeeNewPhoto(true);
-					popupWindow.dismiss();
-					getActionBar().hide();
 					if (null != gallery && gallery.getVisibility() == View.VISIBLE) {
 						closeGallery();
 						rescheduleImageSwipe();
 					}
+					hideSeeNewPhoto(true);
+					popupWindow.dismiss();
+					getActionBar().hide();
 					helpDialog.show();
 				}
 			});
@@ -546,7 +548,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 		deletingDialog.hide();
 		helpDialog.hide();
 		recognizeDialog.hide();
-		gallery.setVisibility(View.GONE);
+		closeGallery();
 		hideSeeNewPhoto();
 		error.hide();
 	}
