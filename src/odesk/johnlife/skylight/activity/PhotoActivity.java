@@ -206,19 +206,18 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 				closeGallery();
 				SkylightApp.getFileHandler().rewind((PictureData) gallery.getItemAtPosition(position));
 				rescheduleImageSwipe();
-				if (isNewPhotosHidden && !actionBar.isFreeze()) showSeeNewPhoto();
 			}
 		});
 		helpDialog.setOnCloseListener(new DeletingDialog.OnCloseListener() {
 			@Override
 			public void onClose() {
-				if (isNewPhotosHidden && !actionBar.isFreeze()) showSeeNewPhoto();
+				if (isNewPhotosHidden) showSeeNewPhoto();
 			}
 		});
 		deletingDialog.setOnCloseListener(new DeletingDialog.OnCloseListener() {
 			@Override
 			public void onClose() {
-				if (isNewPhotosHidden && !actionBar.isFreeze()) showSeeNewPhoto();
+				if (isNewPhotosHidden) showSeeNewPhoto();
 			}
 		});
 		deletingDialog.setPositiveButtonListener(new View.OnClickListener() {
@@ -421,7 +420,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 		pager.setVisibility(View.VISIBLE);
 		gallery.setVisibility(View.GONE);
 		actionBar.setGalleryState(false);
-		if (isNewPhotosHidden && !actionBar.isFreeze()) showSeeNewPhoto();
+		if (isNewPhotosHidden) showSeeNewPhoto();
 		getActionBar().hide();
 	}
 
