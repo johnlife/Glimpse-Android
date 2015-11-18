@@ -158,6 +158,12 @@ public class WifiReceiver implements Constants {
                                 unregisterScanReceiver();
                                 stopRefresher();
                                 listener.onConnected();
+                                if (null != selectedNetwork) {
+                                    prefs.edit()
+                                            .putString(PREF_WIFI_BSSID, selectedNetwork.BSSID)
+                                            .putString(selectedNetwork.BSSID, selectedNetworkPass)
+                                            .apply();
+                                }
                             } else {
                                 resetCurrentWifi();
                             }
@@ -268,10 +274,10 @@ public class WifiReceiver implements Constants {
 
     private void checkConnectionResult() {
         if (selectedNetworkId != -1) {
-            prefs.edit()
-                .putString(PREF_WIFI_BSSID, selectedNetwork.BSSID)
-                .putString(selectedNetwork.BSSID, selectedNetworkPass)
-                .apply();
+//            prefs.edit()
+//                .putString(PREF_WIFI_BSSID, selectedNetwork.BSSID)
+//                .putString(selectedNetwork.BSSID, selectedNetworkPass)
+//                .apply();
         } else {
             isConnecting = false;
             listener.onDisconnected(WifiError.UNKNOWN_ERROR);

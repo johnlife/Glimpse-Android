@@ -95,6 +95,8 @@ public class FileHandler implements Constants {
 			PictureData picture = new PictureData(path, from);
 			picture = databaseHelper.addOrUpdate(picture);
 			file.delete();
+			scaled.recycle();
+			bmp.recycle();
 			locked = false;
 			return picture;
 		} catch (IllegalStateException e) {

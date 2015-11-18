@@ -22,6 +22,7 @@
 	<string name="show_pass_checkbox">Show password</string>
 	<string name="delete_photo">Delete current photo forever?</string>
 	<string name="title_wifi_list">Select your wi-fi network below</string>
+	<string name="forget_wifi">Forget all networks and rescan</string>
 		
 	<string name="hint_password">password</string>
 	<string name="hint_new_email">new email</string>

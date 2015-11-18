@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -20,7 +21,6 @@ import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 
 import java.io.File;
-import java.util.HashMap;
 
 import odesk.johnlife.skylight.R;
 import odesk.johnlife.skylight.activity.PhotoActivity;
@@ -36,7 +36,8 @@ public class ImagePagerAdapter extends PagerAdapter {
 	private final UpmobileExceptionReporter logger;
 	private Context context;
 	private FileHandler fileHandler;
-	private HashMap<Integer, PictureData> pictures;
+	private SparseArray<PictureData> pictures = new SparseArray<>();
+	private SparseArray<Bitmap> bitmaps = new SparseArray<>();
 	private OnClickListener onClickListener;
 	private DatabaseHelper dbHelper;
 	private boolean hasNewPhotos = false;
@@ -63,7 +64,6 @@ public class ImagePagerAdapter extends PagerAdapter {
 
 			}
 		});
-		this.pictures = new HashMap<>();
 	}
 
 	@Override
@@ -112,6 +112,7 @@ public class ImagePagerAdapter extends PagerAdapter {
 		image.setImageBitmap(bitmap);
 		image.setOnClickListener(onClickListener);
 		setScaleType(image, bitmap);
+		bitmaps.put(position, bitmap);
 		pager.addView(frame);
 		return frame;
 	}
@@ -157,6 +158,11 @@ public class ImagePagerAdapter extends PagerAdapter {
 	@Override
 	public void destroyItem(View collection, int position, Object view) {
 		((ViewPager) collection).removeView((View) view);
+		Bitmap bmp = bitmaps.get(position);
+		if (null != bmp) {
+			bmp.recycle();
+			bitmaps.remove(position);
+		}
 	}
 
 	@Override

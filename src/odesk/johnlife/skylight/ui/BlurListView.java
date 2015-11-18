@@ -3,23 +3,32 @@ package odesk.johnlife.skylight.ui;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
+import android.preference.PreferenceManager;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
 
 import odesk.johnlife.skylight.R;
 import odesk.johnlife.skylight.adapter.ScanResultAdapter;
 import odesk.johnlife.skylight.util.WifiReceiver;
 
 public class BlurListView extends BlurLayout {
+    private static final Pattern bsidPattern = Pattern.compile("([a-z0-9A-Z]{2}:){5}[a-z0-9A-Z]{2}");
+
 
     private ScanResultAdapter adapter;
     private ListView list;
@@ -43,6 +52,27 @@ public class BlurListView extends BlurLayout {
         inflate(context, R.layout.list_view, this);
         list = (ListView) findViewById(R.id.list);
         adapter = new ScanResultAdapter(context);
+        Button reset = new Button(context);
+        reset.setLayoutParams(new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        reset.setText(R.string.forget_wifi);
+        reset.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                WifiReceiver.getInstance().resetCurrentWifi();
+                adapter.clear();
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(v.getContext());
+                SharedPreferences.Editor editor = prefs.edit();
+                Set<String> keys = prefs.getAll().keySet();
+                for (String key : keys) {
+                    if (bsidPattern.matcher(key).matches()) {
+                        editor.remove(key);
+                    }
+                }
+                editor.apply();
+                WifiReceiver.getInstance().scanWifi();
+            }
+        });
+        list.addFooterView(reset);
         list.setAdapter(adapter);
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
