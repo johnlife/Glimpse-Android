@@ -69,7 +69,6 @@ public class ImagePagerAdapter extends PagerAdapter {
 	@Override
 	public int getCount() {
 		return Integer.MAX_VALUE;
-//		return Math.max(1, fileHandler.size());	
 	}
 
 	private PictureData getItem(int position) {
@@ -122,8 +121,9 @@ public class ImagePagerAdapter extends PagerAdapter {
 		like.setImageResource(pictureData.getHeartState() ? R.drawable.solid_heart : R.drawable.heart);
 		like.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.BOTTOM | Gravity.RIGHT));
 		int heartPadding = (int) context.getResources().getDimension(R.dimen.heart_padding);
-		like.setPadding(0, 0, heartPadding, heartPadding);
+		like.setPadding(heartPadding, heartPadding, heartPadding, heartPadding);
 		if (!pictureData.getHeartState()) {
+			like.setBackgroundResource(R.drawable.clear_clickable);
 			like.setOnClickListener(new OnClickListener() {
 				// only//only for first click
 				@Override

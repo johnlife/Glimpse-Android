@@ -45,6 +45,7 @@ import odesk.johnlife.skylight.dialog.EmailChangeDialog;
 import odesk.johnlife.skylight.dialog.HelpDialog;
 import odesk.johnlife.skylight.dialog.RecognizeDialog;
 import odesk.johnlife.skylight.dialog.WifiDialog;
+import odesk.johnlife.skylight.task.ResetCheckTask;
 import odesk.johnlife.skylight.ui.BlurActionBar;
 import odesk.johnlife.skylight.ui.BlurActionBar.OnActionClick;
 import odesk.johnlife.skylight.ui.BlurListView;
@@ -136,6 +137,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	private List<BlurDialog> dialogs = new ArrayList<>();
 	private UpmobileExceptionReporter logger;
 	private SharedPreferences prefs;
+	private Timer resetTimer;
 
 	public void addDialogToList(BlurDialog dialog) {
 		if (dialog != null) {
@@ -179,6 +181,8 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 			recognizeDialog.show();
 		}
 		wifi.register();
+		resetTimer = new Timer();
+		resetTimer.scheduleAtFixedRate(new ResetCheckTask(this), 15000, 30000);
 	}
 
 	private void init() {
@@ -321,6 +325,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	protected void onDestroy() {
 		wifi.unregister();
 		mailTimer.cancel();
+		resetTimer.cancel();
 		super.onDestroy();
 	}
 

@@ -3,6 +3,8 @@ package odesk.johnlife.skylight.dialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.StyleSpan;
@@ -58,6 +60,14 @@ public class HelpDialog extends BlurDialog {
             Log.e("Get app version", e.getMessage(), e);
         }
         ((TextView) findViewById(R.id.app_version)).setText(context.getString(R.string.app_name_version, context.getString(R.string.app_name), version));
+        try {
+            WifiManager manager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+            WifiInfo info = manager.getConnectionInfo();
+            String address = info.getMacAddress();
+            ((TextView)findViewById(R.id.mac)).setText(address);
+        } catch (Exception e) {
+            Log.e("Mac-address", "Error while getting mac-address", e);
+        }
     }
 
     public void setEmail(String email) {

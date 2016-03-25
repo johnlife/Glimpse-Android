@@ -21,6 +21,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import odesk.johnlife.skylight.Constants;
+import odesk.johnlife.skylight.task.WifiRedirectionTask;
 
 public class WifiReceiver implements Constants {
 

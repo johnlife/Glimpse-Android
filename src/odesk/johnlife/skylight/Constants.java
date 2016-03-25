@@ -12,10 +12,8 @@ public interface Constants {
 	String EMAIL_SERVER = "mx.ourskylight.com";
 	String EMAIL_POSTFIX = "@ourskylight.com";
 
-	String WIFI_REDIRECT_URL = "http://google.com/";
-	String GOOGLE = "google";
-//	List<String> REDIRECTION_STRINGS = Arrays.asList("authorization", "redirect", "wifi", "wi-fi", "sms", "mobnum", "mobpass");
-
+	String WIFI_REDIRECT_URL = "http://ourskylight.com/check.json";
+	String RESET_CHECK_URL = "http://ourskylight.com/api/v1/resetStatus";
 	String JSON_ERROR = "error";
 	String JSON_EMAIL = "name";
 
