@@ -83,7 +83,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 		public void run() {
 			String user = getUser();
 			if (wifi.isConnected() && null != user) {
-				String pass = getString(R.string.mail_sender_pass);
+				String pass = "HPgqL2658P";
 				MailConnector mailer = new MailConnector(user, pass, new OnItemDownloadListener() {
 					@Override
 					public void onItemDownload() {

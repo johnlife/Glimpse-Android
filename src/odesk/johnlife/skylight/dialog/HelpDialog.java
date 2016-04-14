@@ -63,7 +63,7 @@ public class HelpDialog extends BlurDialog {
         try {
             WifiManager manager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
             WifiInfo info = manager.getConnectionInfo();
-            String address = info.getMacAddress();
+            String address = context.getString(R.string.mac, info.getMacAddress());
             ((TextView)findViewById(R.id.mac)).setText(address);
         } catch (Exception e) {
             Log.e("Mac-address", "Error while getting mac-address", e);
