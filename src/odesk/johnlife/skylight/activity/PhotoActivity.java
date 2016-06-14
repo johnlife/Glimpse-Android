@@ -24,8 +24,6 @@ import android.widget.GridView;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 
-import com.crashlytics.android.Crashlytics;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -161,7 +159,6 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Crashlytics.start(this);
 		prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		setContentView(R.layout.activity_photo);
 		logger = UpmobileExceptionReporter.getInstance(this);
@@ -473,7 +470,7 @@ public class PhotoActivity extends Activity implements Constants, WifiConnection
 					helpDialog.show();
 				}
 			});
-			popupWindow.showAsDropDown(view, 5, 5);
+			popupWindow.showAsDropDown(view, 0, 0);
 		} catch (Exception e) {
 			Log.e("Show popup menu", e.getMessage(), e);
 		}

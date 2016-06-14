@@ -1,16 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools" tools:ignore="NewApi">
 
-    <!--
-        Base application theme, dependent on API level. This theme is replaced
-        by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
-    -->
-    <style name="AppBaseTheme" parent="android:Theme.Holo">
-        <!-- API 14 theme customizations can go here. -->
-    </style>
-
     <!-- Application theme. -->
-    <style name="AppTheme" parent="AppBaseTheme">
+    <style name="AppTheme" parent="android:Theme.Holo">
         <item name="android:editTextBackground">@drawable/photo_edit_text_holo_light</item>
     	<item name="android:windowActionBarOverlay">true</item>
     </style>
@@ -31,7 +23,10 @@
         <item name="android:focusable">true</item>
         <item name="android:singleLine">true</item>
         <item name="android:ellipsize">none</item>
-        <item name="android:padding">@dimen/custom_action_button_padding</item>
+        <item name="android:paddingTop">@dimen/custom_action_button_padding</item>
+        <item name="android:paddingBottom">@dimen/custom_action_button_padding</item>
+        <item name="android:paddingLeft">@dimen/custom_action_button_padding_horizontal</item>
+        <item name="android:paddingRight">@dimen/custom_action_button_padding_horizontal</item>
         <item name="android:textColor">@color/text</item>
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:gravity">center_vertical</item>

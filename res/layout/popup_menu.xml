@@ -24,26 +24,22 @@
             android:textAppearance="?android:attr/textAppearanceListItemSmall" />
 -->
         <TextView
+            style="@style/CustomActionButton"
             android:id="@+id/reset_wifi"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:minHeight="?android:attr/listPreferredItemHeightLarge"
-            android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
-            android:paddingStart="?android:attr/listPreferredItemPaddingStart"
-            android:text="@string/reset_wifi"
-            android:textAppearance="?android:attr/textAppearanceListItemSmall" />
+            android:text="@string/reset_wifi"/>
 
         <TextView
+            style="@style/CustomActionButton"
             android:id="@+id/how_it_works"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:minHeight="?android:attr/listPreferredItemHeightLarge"
-            android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
-            android:paddingStart="?android:attr/listPreferredItemPaddingStart"
-            android:text="@string/how_it_works"
-            android:textAppearance="?android:attr/textAppearanceListItemSmall" />
+            android:text="@string/how_it_works"/>
     </LinearLayout>
 
 </odesk.johnlife.skylight.ui.BlurLayout>

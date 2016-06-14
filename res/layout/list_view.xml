@@ -13,11 +13,22 @@
         style="@style/title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/title_wifi_list" />
+        android:text="@string/title_wifi_list"
+        android:gravity="left"/>
 
     <ListView
         android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:divider="@drawable/list_divider" />
+
+    <Button
+        android:id="@+id/forget"
+        style="@style/btnStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/forget_wifi"
+        android:gravity="left|center_vertical"/>
+
 </LinearLayout>

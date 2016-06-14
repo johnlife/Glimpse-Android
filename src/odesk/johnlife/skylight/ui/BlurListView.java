@@ -9,8 +9,6 @@ import android.net.wifi.WifiManager;
 import android.preference.PreferenceManager;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
@@ -52,9 +50,7 @@ public class BlurListView extends BlurLayout {
         inflate(context, R.layout.list_view, this);
         list = (ListView) findViewById(R.id.list);
         adapter = new ScanResultAdapter(context);
-        Button reset = new Button(context);
-        reset.setLayoutParams(new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        reset.setText(R.string.forget_wifi);
+        Button reset = (Button) findViewById(R.id.forget);
         reset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -72,7 +68,6 @@ public class BlurListView extends BlurLayout {
                 WifiReceiver.getInstance().scanWifi();
             }
         });
-        list.addFooterView(reset);
         list.setAdapter(adapter);
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
