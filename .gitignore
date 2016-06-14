@@ -2,6 +2,7 @@ autcommit-apk.cmd
 .settings/
 # Build
 build/
+*.apk
 # Local configuration file (sdk path, etc)
 local.properties
 # AndroidStudio files

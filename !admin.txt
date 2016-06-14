@@ -1,2 +1,3 @@
+http://ourskylight.com/admin
 username:"admin"
 password:"bih7drptby"
