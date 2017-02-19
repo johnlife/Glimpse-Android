@@ -1,0 +1,102 @@
+extends layout
+
+block content
+
+  script(type='text/javascript')
+    | var sessionUsername = "#{username}"
+
+  #loginform.container
+    form.form-signin
+      h2.form-signin-heading Please log in
+      label.sr-only(for='inputEmail') Username
+      input#inputEmail.form-control(type='text', placeholder='Username', required='', autofocus='')
+      label.sr-only(for='inputPassword') Password
+      input#inputPassword.form-control(type='password', placeholder='Password', required='')
+      button#login-button.btn.btn-lg.btn-primary.btn-block(type='submit') Sign in
+
+
+  #dashboard.container
+    .row
+      .col-sm-6.main
+        h2(style="height:40px") 
+          |  Users
+      .col-sm-6.main
+        .pull-right 
+          <form class="form-inline" method="POST" enctype="multipart/form-data" action="/api/v1/import">
+          <div class="form-group">
+          <label for="exampleInputFile">File to import</label>
+          <input name="file" type="file" id="exampleInputFile">
+          </div>
+          <button type="submit" class="btn btn-primary">Import</button>
+          <a href="/api/v1/export" target="_blank" class="btn btn-default">Export</a>
+          |  
+          a(href="/logout") [Logout]
+          | 
+          a(href="/reset", target="_blank") [Reset]
+          </form>
+
+    .row
+      .col-sm-12.main
+        .input-group
+          span.input-group-addon
+            span.glyphicon.glyphicon-filter
+          input#users-filter.form-control(type='text', placeholder='Type here...')
+
+        .table-responsive
+          table.table.table-striped
+            thead
+              tr
+                th E-mail
+                th Whitelist/blacklist
+                th Frames
+                th(style="width:50px;")
+            tbody#users-table
+
+        form.form-inline
+          .form-group
+            .input-group
+              .input-group-addon Email:
+              input#addUserEmail.form-control(type='text', placeholder='@')
+            |  
+            button#addUserButton.btn.btn-primary(type='button') Add user
+  
+
+  #edit-user-page.container
+    .row
+      .col-sm-12
+        h2 
+          button#back-to-users.btn.btn-default.btn-lg
+            span.glyphicon.glyphicon-menu-left
+          |  User 
+          span#edit-user-page-email
+    .row
+      .col-sm-4
+        h2.sub-header Frames
+        table.table.table-striped
+          tbody#frameslist
+        form
+          .form-group
+            .input-group
+              .input-group-addon Name:
+              input#addFrameName.form-control(type='text', placeholder='name, without @...')
+          button#addFrameButton.btn.btn-primary(type='button') Add frame
+      .col-sm-4
+        h2.sub-header Whitelist
+        table.table.table-striped
+          tbody#whitelist
+        form
+          .form-group
+            .input-group
+              .input-group-addon Email:
+              input#addWhitelistEmail.form-control(type='text', placeholder='@')
+          button#addWhitelistButton.btn.btn-success(type='button') Add to whitelist
+      .col-sm-4
+        h2.sub-header Blacklist
+        table.table.table-striped
+          tbody#blacklist
+        form
+          .form-group
+            .input-group
+              .input-group-addon Email:
+              input#addBlacklistEmail.form-control(type='text', placeholder='@')
+          button#addBlacklistButton.btn.btn-danger(type='button') Add to blacklist

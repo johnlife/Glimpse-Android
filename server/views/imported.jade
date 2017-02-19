@@ -1,0 +1,22 @@
+doctype html(lang='en')
+head
+  meta(charset='utf-8')
+  meta(http-equiv='X-UA-Compatible', content='IE=edge')
+  meta(name='viewport', content='width=device-width, initial-scale=1')
+  title= 'Skylight admin panel'
+
+body
+  a(href="/admin") Back
+  br
+  br
+  ul
+    li framesIgnored: #{framesIgnored}
+    li framesAdded: #{framesAdded}
+    li usersCreated: #{usersCreated}
+
+  br
+  br
+  | Ignored frames:
+  ul
+    each el in framesIgnoredArr
+      li= el

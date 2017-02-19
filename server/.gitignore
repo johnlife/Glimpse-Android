@@ -1,0 +1,22 @@
+# IDE files
+.idea
+
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+
+node_modules
+
+.tmp
+data
+
+*.sublime-workspace
+
+
+config.json
+dist

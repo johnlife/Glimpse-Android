@@ -1,0 +1,90 @@
+extends layout
+
+block content
+
+  .container
+    .row
+      .col-md-8.col-md-offset-2(style="font-size: 16px;")
+        img(src="http://res.cloudinary.com/hrscywv4p/image/upload/c_limit,f_auto,h_1440,q_80,w_720/v1/145733/http_s3.amazonaws.com_feather-files-aviary-prod-us-east-1_f5da8ea5e_2015-03-03_5fa296611e8c419f806f8a3f2a4dbb43_nttk57.png")
+
+        h2 You’re not finished yet! Please create your unique Skylight email addresses.
+
+        form(method="POST" action="/orderconfirmed")
+          p
+            | To send a photo to Skylight, you’ll just email the photo to its unique email address, which is always in the format 
+            b _____@ourskylight.com. 
+            | We recommend you create the email based on your recipient’s name, e.g. John Smith’s Skylight would be at 
+            b jsmith@ourskylight.com.
+          p(style="color: #337ab7; font-weight: 600;")
+            | If you do not make this selection now, you’ll have to email us after you get your Skylights to get your Skylight email address(es).  
+
+
+          #toclone(style="display: none")
+            .form-group
+              label(for="inputEmail0") Choose an email for Skylight 
+                span.count 0
+              .input-group
+                input.form-control(type="text" id="inputEmail0" name="inputEmail0" placeholder="Email")
+                span.input-group-addon @ourskylight.com
+
+          #errors(style="color: red;")
+            each err in errors
+              br
+              | #{err}
+            
+          if noEmailInUrl
+            .form-group
+              label(for="mainEmail") First, tell us your personal email address.
+              input.form-control(style="width: 31%" type="text" id="mainEmail" name="mainEmail" placeholder="Your email" value=email)
+              input(type="hidden" value="true" id="noEmailInUrl" name="noEmailInUrl")
+
+          div(style="width: 50%")
+            input(type="hidden" value=email id="email" name="email")
+            input(type="hidden" value=number id="number" name="number")
+            
+            #emails
+
+            .form-group
+              button.btn.btn-link#addMore(type="button", style="padding: 0px 0px 15px;") Bought more Skylights? Add more emails.
+              br
+              button.btn.btn-primary.btn-lg(type="submit") Submit
+
+
+
+        p(style="font-size: 8px; float: right") #{email} #{number}
+
+
+block footer
+  script.
+    var nxt = 1
+    var emails = !{emails};
+
+    function addField() {
+      var newField = $( "#toclone" ).children().clone()
+      newField.find('label').attr("for", "inputEmail"+nxt)
+      newField.find('input').attr("id", "inputEmail"+nxt)
+      newField.find('input').attr("name", "inputEmail"+nxt)
+      newField.find('.count').text(nxt+(nxt>1 ? " (if applicable)" : ""))
+
+      if(emails && emails[nxt]) {
+        newField.find('input').val(emails[nxt])
+      }
+
+      newField.appendTo( "#emails" )
+
+      nxt++
+    }
+
+
+    $(function() {
+      addField()
+
+      $("#addMore").click(function() {
+        addField()
+      })
+    })
+
+
+
+
+

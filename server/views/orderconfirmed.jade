@@ -1,0 +1,29 @@
+extends layout
+
+block content
+
+  .container
+    .row
+      .col-md-8.col-md-offset-2(style="font-size: 16px;")
+        img(src="http://res.cloudinary.com/hrscywv4p/image/upload/c_limit,f_auto,h_1440,q_80,w_720/v1/145733/http_s3.amazonaws.com_feather-files-aviary-prod-us-east-1_f5da8ea5e_2015-03-03_5fa296611e8c419f806f8a3f2a4dbb43_nttk57.png")
+
+        if !noEmailInUrl
+          h2 Success! Your Skylights will be shipping soon. 
+        if noEmailInUrl
+          h2 Success!
+          p Your personal Skylight activation codes are:
+          each frame in frames
+            p 
+              a(href="mailto:#{frame.name}@ourskylight.com") #{frame.name}@ourskylight.com
+              |  | #{frame.code}
+          p  To activate your Skylight with its custom Skylight email address, just plug the device in and enter the appropriate 6 digit code above.
+
+        if !noEmailInUrl
+          p
+            | Keep an eye on your email for details! If you have any questions, 
+            | email us any time at 
+            a(href="mailto:info@skylightframe.com") info@skylightframe.com
+            | .
+        p
+          | Thanks so much for your business, we can’t wait for you to experience Skylight!
+        p &mdash; Michael, Ricardo, and the whole Skylight team

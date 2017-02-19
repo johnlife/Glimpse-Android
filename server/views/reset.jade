@@ -1,0 +1,35 @@
+doctype html(lang='en')
+head
+  meta(charset='utf-8')
+  meta(http-equiv='X-UA-Compatible', content='IE=edge')
+  meta(name='viewport', content='width=device-width, initial-scale=1')
+  title= 'Skylight admin panel'
+
+body
+  a(href="/admin") Back
+  br
+  br
+  | Reset frame: 
+  input#name(placeholder="name")
+  | 
+  input#add(type="submit", value="Add (or cancel)")
+
+  br
+  br
+  | Frames to reset:
+  ul
+    each el in frames
+      li= el.name
+
+script(src='https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js')
+script(type="text/javascript").
+    $("#add").click(function() {
+        $.post("/api/v1/setResetStatus", {name: $("#name").val() }, function(e) {
+            if(e && e.error) alert(JSON.stringify(e))
+            window.location.href = "/reset"
+            
+        }).fail(function(e) {
+            if(e && e.error) alert(JSON.stringify(e))
+            window.location.href = "/reset"
+        })
+    })
